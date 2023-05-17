@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2022-12-13T08:22:39Z</date>
+    <groups>
+        <group>
+            <name>Templates/Server hardware</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template YADRO Vegman SNMPv2</template>
+            <name>Template YADRO Vegman SNMPv2</name>
+            <templates>
+                <template>
+                    <name>Template Module Generic SNMPv2</name>
+                </template>
+            </templates>
+            <groups>
+                <group>
+                    <name>Templates/Server hardware</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Sensors state</name>
+                </application>
+                <application>
+                    <name>Sensors value</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Current strength (A) Sensors</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#YADROCURRSENSORNAME},1.3.6.1.4.1.49769.1.5.1.1,{#YADROCURRSENSORVALUE},1.3.6.1.4.1.49769.1.5.1.2,{#YADROCURRSENSORSTATE},1.3.6.1.4.1.49769.1.5.1.7]</snmp_oid>
+                    <key>YADRO-MIB.yadroCurrSensorsEntry</key>
+                    <delay>1h</delay>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Current Amperage from {#YADROCURRSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.5.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.current.sensor.amperage[yadroCurrSensorValue.{#SNMPINDEX}]</key>
+                            <delay>5m</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>A</units>
+                            <description>MIB: YADRO-MIB The current amperage from sensor.</description>
+                            <applications>
+                                <application>
+                                    <name>Sensors value</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>0.001</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Current strength State for {#YADROCURRSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.5.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.current.sensor.state[yadroCurrSensorState.{#SNMPINDEX}]</key>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <description>MIB: YADRO-MIB Current strength state of sensor.</description>
+                            <applications>
+                                <application>
+                                    <name>Sensors state</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>yadroSensorState</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1</expression>
+                                    <name>Senor {#YADROCURRSENSORNAME} is out of NORMAL</name>
+                                    <priority>WARNING</priority>
+                                    <description>Please check the device for faults.</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Current Sensor for {#YADROCURRSENSORNAME}</name>
+                            <show_triggers>NO</show_triggers>
+                            <graph_items>
+                                <graph_item>
+                                    <color>199C0D</color>
+                                    <item>
+                                        <host>Template YADRO Vegman SNMPv2</host>
+                                        <key>vegman.server.current.sensor.amperage[yadroCurrSensorValue.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Hardware Inventory</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#YADROINVENTORYPATH},1.3.6.1.4.1.49769.4.1.1,{#YADROINVENTORYNAME},1.3.6.1.4.1.49769.4.1.2,{#YADROINVENTORYMANUFACTURER},1.3.6.1.4.1.49769.4.1.3,{#YADROINVENTORYBUILDDATE},1.3.6.1.4.1.49769.4.1.4,{#YADROINVENTORYMODEL},1.3.6.1.4.1.49769.4.1.5,{#YADROINVENTORYPARTNUMBER},1.3.6.1.4.1.49769.4.1.6,{#YADROINVENTORYSERIALNUMBER},1.3.6.1.4.1.49769.4.1.7,{#YADROINVENTORYVERSION},1.3.6.1.4.1.49769.4.1.8,{#YADROINVENTORYPRESENT},1.3.6.1.4.1.49769.4.1.9,{#YADROINVENTORYFUNCTIONAL},1.3.6.1.4.1.49769.4.1.10]</snmp_oid>
+                    <key>YADRO-MIB.yadroInventoryEntry</key>
+                    <delay>3h</delay>
+                    <filter>
+                        <evaltype>OR</evaltype>
+                    </filter>
+                    <lifetime>3d</lifetime>
+                    <description>discovery[{#YADROINVENTORYPATH},1.3.6.1.4.1.49769.4.1.1,{#YADROINVENTORYNAME},1.3.6.1.4.1.49769.4.1.2,{#YADROINVENTORYMANUFACTURER},1.3.6.1.4.1.49769.4.1.3,{#YADROINVENTORYBUILDDATE},1.3.6.1.4.1.49769.4.1.4,{#YADROINVENTORYMODEL},1.3.6.1.4.1.49769.4.1.5,{#YADROINVENTORYPARTNUMBER},1.3.6.1.4.1.49769.4.1.6,{#YADROINVENTORYSERIALNUMBER},1.3.6.1.4.1.49769.4.1.7,{#YADROINVENTORYVERSION},1.3.6.1.4.1.49769.4.1.8,{#YADROINVENTORYPRESENT},1.3.6.1.4.1.49769.4.1.9,{#YADROINVENTORYFUNCTIONAL},1.3.6.1.4.1.49769.4.1.10]</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Item is Functional {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.10.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.functional[yadroInventoryFunctional{#SNMPINDEX}]</key>
+                            <delay>10m</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <value_type>FLOAT</value_type>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>TruthValue</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Item is Present {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.9.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.item.present[yadroInventoryPresent{#SNMPINDEX}]</key>
+                            <delay>10m</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <value_type>FLOAT</value_type>
+                            <description>MIB: YADRO-MIB Whether or not the inventory item is present.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>TruthValue</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Manufacturer for {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.3.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.manufacturer[yadroInventoryManufacturer{#SNMPINDEX}]</key>
+                            <delay>12h</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>MIB: YADRO-MIB The inventory item manufacturer.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Model for {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.5.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.model[yadroInventoryModel{#SNMPINDEX}]</key>
+                            <delay>12h</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>MIB: YADRO-MIB The model of the inventory item.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Name for {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.name[yadroInventoryName{#SNMPINDEX}]</key>
+                            <delay>12h</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>MIB: YADRO-MIB Name</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Part Number for {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.6.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.part.number[yadroInventoryPartNumber{#SNMPINDEX}]</key>
+                            <delay>12h</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>MIB: YADRO-MIB The inventory item part number, typically a stocking number.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Serial Number for {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.serial.number[yadroInventorySerialNumber{#SNMPINDEX}]</key>
+                            <delay>12h</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>MIB: YADRO-MIB The inventory item serial number.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Version for {#YADROINVENTORYPATH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.4.1.8.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.hw.inventory.version[yadroInventoryVersion{#SNMPINDEX}]</key>
+                            <delay>12h</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>MIB: YADRO-MIB The version of the inventory item.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Hardware</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>NOT_MATCHES_REGEX</type>
+                                    <params>^$</params>
+                                    <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Power (W) Sensors</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#YADROPOWERSENSORNAME},1.3.6.1.4.1.49769.1.6.1.1,{#YADROPOWERSENSORVALUE},1.3.6.1.4.1.49769.1.6.1.2,{#YADROPOWERSENSORSTATE},1.3.6.1.4.1.49769.1.6.1.7]</snmp_oid>
+                    <key>YADRO-MIB.yadroPowerSensorsEntry</key>
+                    <delay>1h</delay>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Power Sensor State for {#YADROPOWERSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.6.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.power.sensor.state[yadroPowerSensorState.{#SNMPINDEX}]</key>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <description>MIB: YADRO-MIB Current state of sensor</description>
+                            <applications>
+                                <application>
+                                    <name>Sensors state</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>yadroSensorState</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1</expression>
+                                    <name>Power Sensor is not NORMAL for {#YADROPOWERSENSORNAME}</name>
+                                    <opdata>Please check the device for faults</opdata>
+                                    <priority>WARNING</priority>
+                                    <description>Please check the device for faults.</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Power Sensor Value for {#YADROPOWERSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.6.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.power.sensor.value[yadroPowerSensorValue.{#SNMPINDEX}]</key>
+                            <delay>5m</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>Ватт</units>
+                            <description>MIB: YADRO-MIB The wattage from sensor.</description>
+                            <applications>
+                                <application>
+                                    <name>Sensors value</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>0.001</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Power Sensor for {#YADROPOWERSENSORNAME}</name>
+                            <show_triggers>NO</show_triggers>
+                            <ymin_type_1>FIXED</ymin_type_1>
+                            <graph_items>
+                                <graph_item>
+                                    <color>199C0D</color>
+                                    <item>
+                                        <host>Template YADRO Vegman SNMPv2</host>
+                                        <key>vegman.server.power.sensor.value[yadroPowerSensorValue.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Firmware Inventory</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#YADROSOFTWAREHASH},1.3.6.1.4.1.49769.5.1.1,{#YADROSOFTWAREVERSION},1.3.6.1.4.1.49769.5.1.2,{#YADROSOFTWAREPURPOSE},1.3.6.1.4.1.49769.5.1.3,{#YADROSOFTWAREACTIVATION},1.3.6.1.4.1.49769.5.1.4,{#YADROSOFTWAREPRIORITY},1.3.6.1.4.1.49769.5.1.5]</snmp_oid>
+                    <key>YADRO-MIB.yadroSoftwareEntry</key>
+                    <delay>3h</delay>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Software Activation State for {#YADROSOFTWAREHASH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.5.1.4.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.firmware.inventory.activation.state[yadroSoftwareActivation{#SNMPINDEX}]</key>
+                            <delay>1h</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Software</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>yadroSoftwareActivation</name>
+                            </valuemap>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Software Priority for {#YADROSOFTWAREHASH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.5.1.5.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.firmware.inventory.priority[yadroSoftwarePriority{#SNMPINDEX}]</key>
+                            <delay>1h</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Software</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Software Version Purpose for {#YADROSOFTWAREHASH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.5.1.3.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.firmware.inventory.purpose[yadroSoftwarePurpose{#SNMPINDEX}]</key>
+                            <delay>1h</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Software</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>yadroSoftwarePurpose</name>
+                            </valuemap>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Software Version for {#YADROSOFTWAREHASH}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.5.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.firmware.inventory.version[yadroSoftwareVersion{#SNMPINDEX}]</key>
+                            <delay>12h</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Software</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Tachometer Sensors</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#YADROTACHSENSORNAME},1.3.6.1.4.1.49769.1.4.1.1,{#YADROTACHSENSORVALUE},1.3.6.1.4.1.49769.1.4.1.2,{#YADROTACHSENSORSTATE},1.3.6.1.4.1.49769.1.4.1.7]</snmp_oid>
+                    <key>YADRO-MIB.yadroTachSensorsEntry</key>
+                    <delay>1h</delay>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Tachometer Sensor State for {#YADROTACHSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.4.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.tach.sensor.state[yadroTachSensorState.{#SNMPINDEX}]</key>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <description>MIB: YADRO-MIB Current state of TachSensor</description>
+                            <applications>
+                                <application>
+                                    <name>Sensors state</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>yadroSensorState</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1</expression>
+                                    <name>Check Fan {#YADROTACHSENSORNAME}</name>
+                                    <priority>WARNING</priority>
+                                    <description>Please check the device for faults</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Tachometer Sensor Value for {#YADROTACHSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.4.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.tach.sensor.value[yadroTachSensorValue.{#SNMPINDEX}]</key>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>RPM</units>
+                            <description>MIB: YADRO-MIB The current tachometer from sensor.</description>
+                            <applications>
+                                <application>
+                                    <name>Sensors value</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Temperature Sensors</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#YADROTEMPSENSORNAME},1.3.6.1.4.1.49769.1.2.1.1,{#YADROTEMPSENSORVALUE},1.3.6.1.4.1.49769.1.2.1.2,{#YADROTEMPSENSORSTATE},1.3.6.1.4.1.49769.1.2.1.7]</snmp_oid>
+                    <key>YADRO-MIB.yadroTempSensorsEntry</key>
+                    <delay>1h</delay>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Temperature Sensors State for {#YADROTEMPSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.2.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.temp.sensor.state[yadroTempSensorState.{#SNMPINDEX}]</key>
+                            <delay>2m</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <applications>
+                                <application>
+                                    <name>Sensors state</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>yadroSensorState</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1</expression>
+                                    <name>Temperature Sensors {#YADROTEMPSENSORNAME} is not NORMAL</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Temperature Sensors Value for {#YADROTEMPSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.2.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.temp.sensor.value[yadroTempSensorValue.{#SNMPINDEX}]</key>
+                            <delay>2m</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>C`</units>
+                            <applications>
+                                <application>
+                                    <name>Sensors value</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>0.001</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Temperature Sensor for {#YADROTEMPSENSORNAME}</name>
+                            <yaxismin>10.0000</yaxismin>
+                            <ymin_type_1>FIXED</ymin_type_1>
+                            <graph_items>
+                                <graph_item>
+                                    <color>199C0D</color>
+                                    <item>
+                                        <host>Template YADRO Vegman SNMPv2</host>
+                                        <key>vegman.server.temp.sensor.value[yadroTempSensorValue.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Voltage Sensors</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#YADROVOLTSENSORNAME},1.3.6.1.4.1.49769.1.3.1.1,{#YADROVOLTSENSORVALUE},1.3.6.1.4.1.49769.1.3.1.2,{#YADROVOLTSENSORSTATE},1.3.6.1.4.1.49769.1.3.1.7]</snmp_oid>
+                    <key>YADRO-MIB.yadroVoltSensorsEntry</key>
+                    <delay>1h</delay>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Voltage Sensors State for {#YADROVOLTSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.3.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.volt.sensor.state[yadroVoltSensorState.{#SNMPINDEX}]</key>
+                            <delay>2m</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <applications>
+                                <application>
+                                    <name>Sensors state</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>yadroSensorState</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1</expression>
+                                    <name>Voltage Sensors {#YADROVOLTSENSORNAME} is not NORMAL</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Voltage Sensors Value for {#YADROVOLTSENSORNAME}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.49769.1.3.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>vegman.server.volt.sensor.value[yadroVoltSensorValue.{#SNMPINDEX}]</key>
+                            <delay>2m</delay>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>V</units>
+                            <applications>
+                                <application>
+                                    <name>Sensors value</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>0.001</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Voltage Sensor for {#YADROVOLTSENSORNAME}</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>199C0D</color>
+                                    <item>
+                                        <host>Template YADRO Vegman SNMPv2</host>
+                                        <key>vegman.server.volt.sensor.value[yadroVoltSensorValue.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>TruthValue</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>true</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>false</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>yadroSensorState</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>disabled</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>normal</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>warningLow</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>warningHigh</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>criticalLow</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>criticalHigh</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>yadroSoftwareActivation</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>notReady</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>invalid</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>ready</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>activating</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>active</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>failed</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>yadroSoftwarePurpose</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>other</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>system</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>bmc</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>host</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

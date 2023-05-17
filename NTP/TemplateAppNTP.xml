@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2023-05-17T11:02:29Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template App NTP</template>
+            <name>Template App NTP</name>
+            <description>Мониторинг состояния пира, выбранного ntpd как источник синхронизации, из списка всех остальных источников.</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>NTP</name>
+                </application>
+                <application>
+                    <name>Zabbix raw items</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>NTP delay</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.delay</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>3w</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <description>(delay) вычисленная задержка ответов от сервера (RTT) в миллисекундах</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\6</params>
+                        </step>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>^\d+\.\d+$</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(#3)}&gt;{$NTP_DELAY}</expression>
+                            <name>NTP: delay is gt {$NTP_DELAY} ms</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Is we have remote for sync selected?</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.isremote4syncselected</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <description>&quot;*&quot; - есть?&#13;
+Да - 1&#13;
+Нет - 0</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>yes1no0</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*
+\0</params>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
+                        </step>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var result = value.replace('*','1');
+return result;</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}=0</expression>
+                            <name>NTP: Can`t select time source from &quot;remote&quot; list</name>
+                            <priority>WARNING</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>NTP jitter</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.jitter</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>3w</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <description>(jitter) дисперсия отклонения удаленных часов относительно локальных, вычисленная по нескольким последним запросам, мс.</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\8</params>
+                        </step>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>^\d+\.\d+$</params>
+                            <error_handler>DISCARD_VALUE</error_handler>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(#3)}&gt;{$NTP_JITTER}</expression>
+                            <name>NTP: jitter gt {$NTP_JITTER}</name>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>NTP offset</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.offset</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>3w</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <description>(offset) разница во времени между локальным и удаленным сервером, мс. Одно из наиболее важных значений. Чем оно меньше тем точнее время.</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\7</params>
+                        </step>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>^.\d+\.\d+$</params>
+                            <error_handler>DISCARD_VALUE</error_handler>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>10m</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$NTP_OFFSET} or {last()}&lt;-{$NTP_OFFSET}</expression>
+                            <name>NTP: offset is gt {$NTP_OFFSET}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>NTP poll</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.poll</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>3w</trends>
+                    <status>DISABLED</status>
+                    <value_type>FLOAT</value_type>
+                    <units>sec</units>
+                    <description>&quot;poll&quot; - период опроса сервера, секунд</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\4</params>
+                        </step>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>^\d+$</params>
+                            <error_handler>DISCARD_VALUE</error_handler>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>NTP reach</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.reach</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>3w</trends>
+                    <value_type>FLOAT</value_type>
+                    <description>&quot;reach&quot; - восьмеричное представление массива из 8-ми бит, в котором фиксируется 8 последних попыток синхронизации. Если попытка была успешной, то устанавливается 1. Значение 377 говорит о том, что все 8 последних попыток были удачными.</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\5</params>
+                        </step>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>^\d+$</params>
+                            <error_handler>DISCARD_VALUE</error_handler>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>NTP refid</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.refid</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>&quot;refid&quot; Time source for &quot;remote&quot;</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\2</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>NTP remote</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.remote</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>&quot;remote&quot; Selected source</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\1</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>NTP when</name>
+                    <type>DEPENDENT</type>
+                    <key>ntp.sync.when</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>3w</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>sec</units>
+                    <description>&quot;when&quot; - сколько секунд назад был получен последний пакет от данного сервера</description>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>^\*(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)
+\3</params>
+                        </step>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>^\d+$</params>
+                            <error_handler>DISCARD_VALUE</error_handler>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Number os NTPD process</name>
+                    <key>proc.num[ntpd]</key>
+                    <history>5d</history>
+                    <trends>0</trends>
+                    <applications>
+                        <application>
+                            <name>NTP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(#3)}&lt;1</expression>
+                            <name>NTP: ntpd is not running</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>NTP: Get NTP data</name>
+                    <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    <delay>10m</delay>
+                    <history>1h</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Zabbix raw items</name>
+                        </application>
+                    </applications>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$NTP_DELAY}</macro>
+                    <value>30</value>
+                </macro>
+                <macro>
+                    <macro>{$NTP_JITTER}</macro>
+                    <value>20</value>
+                </macro>
+                <macro>
+                    <macro>{$NTP_OFFSET}</macro>
+                    <value>10</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>yes1no0</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>No</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Yes</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
