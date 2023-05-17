@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2023-05-02T13:21:23Z</date>
+    <groups>
+        <group>
+            <name>Templates/Other Hardware</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template_DeltaSTS_Static_Transfer_Switch</template>
+            <name>Template_DeltaSTS_Static_Transfer_Switch</name>
+            <description>email&#13;
+Tested on STS30002SR10035 v.01.12.15j&#13;
+прим. В OID'ах АВРа очепятки..</description>
+            <templates>
+                <template>
+                    <name>Template Module Generic SNMPv1</name>
+                </template>
+            </templates>
+            <groups>
+                <group>
+                    <name>Templates/Other Hardware</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>STS Failure status</name>
+                </application>
+                <application>
+                    <name>STS General</name>
+                </application>
+                <application>
+                    <name>STS Input status</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>stsAgentManufacturer</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsAgentManufacturer.0</snmp_oid>
+                    <key>stsAgentManufacturer</key>
+                    <delay>1h</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <inventory_link>VENDOR</inventory_link>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>stsAgentVersion</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsAgentVersion.0</snmp_oid>
+                    <key>stsAgentVersion</key>
+                    <delay>1h</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>stsFailureIndicator</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsFailureIndicator.0</snmp_oid>
+                    <key>stsFailureIndicator</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <applications>
+                        <application>
+                            <name>STS Failure status</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>stsFailureNoOutput</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsFailureNoOutput.0</snmp_oid>
+                    <key>stsFailureNoOutput</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <applications>
+                        <application>
+                            <name>STS Failure status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>stsStatus</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;2</expression>
+                            <name>No output on {HOST.NAME}</name>
+                            <opdata>Нет напряжения на выходе</opdata>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>stsFailureOutputOC</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsFailureOutputOC.0</snmp_oid>
+                    <key>stsFailureOutputOC</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <applications>
+                        <application>
+                            <name>STS Failure status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>stsStatus</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;2</expression>
+                            <name>Overcurrent on {HOST.NAME}</name>
+                            <opdata>Превышение по току</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>stsFailureOverTemperature</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsFailureOverTemperature.0</snmp_oid>
+                    <key>stsFailureOverTemperature</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <applications>
+                        <application>
+                            <name>STS Failure status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>stsStatus</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;2</expression>
+                            <name>Overheat on {HOST.NAME}</name>
+                            <opdata>Превышение по температуре</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>stsFailureSwitchFault</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsFailureSwitchFault.0</snmp_oid>
+                    <key>stsFailureSwitchFault</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <applications>
+                        <application>
+                            <name>STS Failure status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>stsStatus</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;2</expression>
+                            <name>General fault on {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                            <description>Сбой какого либо реле, тиристора или перегрев</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>stsIdentFWVersion</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsIdentFWVersion.0</snmp_oid>
+                    <key>stsIdentFWVersion</key>
+                    <delay>1h</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <inventory_link>SOFTWARE</inventory_link>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>stsIdentModel</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsIdentModel.0</snmp_oid>
+                    <key>stsIdentModel</key>
+                    <delay>1h</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <inventory_link>MODEL</inventory_link>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>stsIdentSerialNumber</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsIdentSerialNumber.0</snmp_oid>
+                    <key>stsIdentSerialNumber</key>
+                    <delay>1h</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <inventory_link>SERIALNO_A</inventory_link>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>stsMeasureTemperatureC</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsMeasureTemperatureC.0</snmp_oid>
+                    <key>stsMeasureTemperatureC</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <units>`C</units>
+                    <description>Температура</description>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$STSMAXTEMP}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{last()}&lt;{$STSMAXTEMP}-3</recovery_expression>
+                            <name>High temperature {HOST.NAME}</name>
+                            <opdata>Высокая температура в шкафу, проверь климат!</opdata>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;{$STSMINTEMP}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{last()}&gt;{$STSMINTEMP}+3</recovery_expression>
+                            <name>Low temperature {HOST.NAME}</name>
+                            <opdata>Низкая температура в шкафу, проверь климат!</opdata>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>stsMessureOperationMode</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsMessureOperationMode.0</snmp_oid>
+                    <key>stsMessureOperationMode</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>stsOperationMode</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;4 and {last()}&lt;&gt;5</expression>
+                            <name>Check operation mode {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{abschange()}=1</expression>
+                            <name>Source was changed on {HOST.NAME}</name>
+                            <opdata>Источник изменился</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Check operation mode {HOST.NAME}</name>
+                                    <expression>{Template_DeltaSTS_Static_Transfer_Switch:stsMessureOperationMode.last()}&lt;&gt;4 and {Template_DeltaSTS_Static_Transfer_Switch:stsMessureOperationMode.last()}&lt;&gt;5</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>stsMessureTransferedTimes</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsMessureTransferedTimes.0</snmp_oid>
+                    <key>stsMessureTransferedTimes</key>
+                    <delay>5m</delay>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <units>Times</units>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>stsOutputCurrent</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsOutputCurrent.0</snmp_oid>
+                    <key>stsOutputCurrent</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>A</units>
+                    <description>Ток на выходе</description>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>0.1</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;={$STSMAXOUTPUTCURRENT}</expression>
+                            <name>Output current is gt {$STSMAXOUTPUTCURRENT} on {HOST.NAME}</name>
+                            <opdata>Ток={ITEM.LASTVALUE1}</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;={$STSWARNINGOUTPUTCURRENT}</expression>
+                            <name>Output current is gt {$STSWARNINGOUTPUTCURRENT} on {HOST.NAME}</name>
+                            <opdata>Ток={ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Output current is gt {$STSMAXOUTPUTCURRENT} on {HOST.NAME}</name>
+                                    <expression>{Template_DeltaSTS_Static_Transfer_Switch:stsOutputCurrent.last()}&gt;={$STSMAXOUTPUTCURRENT}</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>stsOutputVoltage</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>DeltaSTS-MIB::stsOutputVoltage.0</snmp_oid>
+                    <key>stsOutputVoltage</key>
+                    <history>20d</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>V</units>
+                    <description>Напряжение на выходе</description>
+                    <applications>
+                        <application>
+                            <name>STS General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>0.1</params>
+                        </step>
+                    </preprocessing>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>InputFailure</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#SNMPVALUE},DeltaSTS-MIB::stsInputFailureIndex]</snmp_oid>
+                    <key>stsInputFailureIndex</key>
+                    <delay>1h</delay>
+                    <lifetime>10d</lifetime>
+                    <description>Input discovery</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Input Aux Power state source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureAuxPower.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureAuxPower[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>Состояние внутреннего источника питания</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Check internal power source-{#SNMPVALUE} on {HOST.NAME}</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input voltage brownout state source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureBrownout.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureBrownout[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>Обнаружено отключение напряжения</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Voltage brownout on source-{#SNMPVALUE} on {HOST.NAME}</name>
+                                    <opdata>Обнаружено превышение напряжения</opdata>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Check input source-{#SNMPVALUE} on {HOST.NAME}</name>
+                                            <expression>{Template_DeltaSTS_Static_Transfer_Switch:stsInputFailureNotOperable[{#SNMPVALUE}].last()}&lt;&gt;2</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input voltage drop state source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureDrop.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureDrop[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>Обнаружено падение напряжения</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Voltage drop on source-{#SNMPVALUE} on {HOST.NAME}</name>
+                                    <opdata>Обнаружено падение напряжения</opdata>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Check input source-{#SNMPVALUE} on {HOST.NAME}</name>
+                                            <expression>{Template_DeltaSTS_Static_Transfer_Switch:stsInputFailureNotOperable[{#SNMPVALUE}].last()}&lt;&gt;2</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input Frequency state source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureFrequency.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureFrequency[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>Обнаружено отклонение частоты от нормы</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Source-{#SNMPVALUE} frequency is out of range on {HOST.NAME}</name>
+                                    <opdata>Частота не норма</opdata>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input state not operable source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureNotOperable.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureNotOperable[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>Ввод отключён</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Check input source-{#SNMPVALUE} on {HOST.NAME}</name>
+                                    <opdata>Нет напряжения на входе</opdata>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input Open Relay status source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureRelayOpen.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureRelayOpen[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>The status of input relay is OPEN</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Check open relay status source-{#SNMPVALUE} on {HOSTNAME}</name>
+                                    <priority>WARNING</priority>
+                                    <description>Состояние реле &quot;RelayOpen&quot;</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input Short Relay status source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureRelayShort.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureRelayShort[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>The status of input relay is SHORT</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Check short relay status source-{#SNMPVALUE} on {HOSTNAME}</name>
+                                    <priority>WARNING</priority>
+                                    <description>Состояние реле &quot;RelayShort&quot;</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input Open SCR status source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureSCROpen.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureSCROpen[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>The status of input SCR is OPEN</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Check open SCR status source-{#SNMPVALUE} on {HOSTNAME}</name>
+                                    <priority>WARNING</priority>
+                                    <description>Состояние тиристора &quot;SCROpen&quot;</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input Short SCR status source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureSCRShort.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureSCRShort[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>The status of input SCR is SHORT</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>Check short SCR status source-{#SNMPVALUE} on {HOSTNAME}</name>
+                                    <priority>WARNING</priority>
+                                    <description>Состояние тиристора &quot;SCRShort&quot;</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input SCR Thermal status source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFailureSCRThermal.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFailureSCRThermal[{#SNMPVALUE}]</key>
+                            <history>10d</history>
+                            <trends>60d</trends>
+                            <description>Статус температуры тиристора SCR</description>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>stsStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;2</expression>
+                                    <name>SCR source-{#SNMPVALUE } temperature warning on {HOST.NAME}</name>
+                                    <opdata>Перегрев тиристора SCR</opdata>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Input</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#SNMPVALUE},DeltaSTS-MIB::stsInputIndex]</snmp_oid>
+                    <key>stsInputIndex</key>
+                    <delay>1h</delay>
+                    <lifetime>10d</lifetime>
+                    <description>Input discovery</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Input Frequency source-$1</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputFrequency.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputFrequency[{#SNMPVALUE}]</key>
+                            <history>30d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>Hz</units>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>0.1</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Input voltage source-{#SNMPVALUE}</name>
+                            <type>SNMPV1</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>DeltaSTS-MIB::stsInputVoltage.{#SNMPVALUE}</snmp_oid>
+                            <key>stsInputVoltage[{#SNMPVALUE}]</key>
+                            <history>30d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>V</units>
+                            <applications>
+                                <application>
+                                    <name>STS Input status</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>0.1</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$STSMAXINPUTVOLTAGE}</macro>
+                    <value>260</value>
+                    <description>Максимальное напряжение на входе</description>
+                </macro>
+                <macro>
+                    <macro>{$STSMAXOUTPUTCURRENT}</macro>
+                    <value>30</value>
+                    <description>Максимальный ток фатальный</description>
+                </macro>
+                <macro>
+                    <macro>{$STSMAXTEMP}</macro>
+                    <value>35</value>
+                    <description>Максимальная температура устройства</description>
+                </macro>
+                <macro>
+                    <macro>{$STSMININPUTVOLTAGE}</macro>
+                    <value>190</value>
+                    <description>Минимальное напряжение на входе</description>
+                </macro>
+                <macro>
+                    <macro>{$STSMINTEMP}</macro>
+                    <value>16</value>
+                    <description>Минимальная температура устройства</description>
+                </macro>
+                <macro>
+                    <macro>{$STSWARNINGOUTPUTCURRENT}</macro>
+                    <value>24</value>
+                    <description>Максимальный ток для предупреждения</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>stsOperationMode</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Initialization</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>Diagnosis</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>Off</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>source-1</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>source-2</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>Safe</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>Fault</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>stsStatus</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Abnormal</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>Normal</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
