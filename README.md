@@ -17,7 +17,7 @@ Templates for Zabbix
 
 
 ## Server_hardware
-**YADRO_Vegman_V4-4.xml** for zabbix 4.4 version. YADRO Vegman server via SNMP.
+**YADRO_Vegman_V4-4.xml** for zabbix 4-6 version. Monitoring YADRO Vegman servers via SNMP.
 
 
 
