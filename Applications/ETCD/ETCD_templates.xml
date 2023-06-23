@@ -1,0 +1,816 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2023-06-23T11:36:25Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template App ETCD v2</template>
+            <name>Template App ETCD v2</name>
+            <description>https://github.com/AndAndr/Zabbix-templates</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>ETCD</name>
+                </application>
+                <application>
+                    <name>Zabbix raw items</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Is node has leader?</name>
+                    <type>DEPENDENT</type>
+                    <key>etc.leader.exist</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>0</trends>
+                    <description>Indicates whether the member has a leader. If a member does not have a leader, it is totally unavailable. If all the members in the cluster do not have any leader, the entire cluster is totally unavailable</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Данетка</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_server_has_leader
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;1</expression>
+                            <name>ETCD: Node {HOST.NAME} has lost cluster leader!</name>
+                            <opdata>У ноды нет лидера</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ETCD Cluster version</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.cluster.version</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.etcdcluster</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.version</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(#1)}&lt;&gt;{last(#2)} and {strlen(#1)}&gt;0</expression>
+                            <name>ETCD: Cluster version has changed (new version: {ITEM.VALUE})</name>
+                            <priority>INFO</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ETCD database size</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.db</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>B</units>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_mvcc_db_total_size_in_bytes
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$ETCD.CRITICAL.DBSIZE}</expression>
+                            <name>ETCD: DB size gt {$ETCD.CRITICAL.DBSIZE}</name>
+                            <opdata>DB size={ITEM.VALUE}</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;{$ETCD.WARNING.DBSIZE}</expression>
+                            <name>ETCD: DB size gt {$ETCD.WARNING.DBSIZE}</name>
+                            <opdata>DB size={ITEM.VALUE}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>ETCD: DB size gt {$ETCD.CRITICAL.DBSIZE}</name>
+                                    <expression>{Template App ETCD v2:etcd.db.last()}&gt;{$ETCD.CRITICAL.DBSIZE}</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ETCD database size in use</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.db.used</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>B</units>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_mvcc_db_total_size_in_use_in_bytes
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Network grpc receive</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.grpc.receive</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>bps</units>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_network_client_grpc_received_bytes_total
+</params>
+                        </step>
+                        <step>
+                            <type>CHANGE_PER_SECOND</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Network grpc transmit</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.grpc.transmit</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>bps</units>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_network_client_grpc_sent_bytes_total
+</params>
+                        </step>
+                        <step>
+                            <type>CHANGE_PER_SECOND</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>ETCD node health</name>
+                    <type>HTTP_AGENT</type>
+                    <key>etcd.health</key>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.health</params>
+                        </step>
+                        <step>
+                            <type>BOOL_TO_DECIMAL</type>
+                            <params/>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>10m</params>
+                        </step>
+                    </preprocessing>
+                    <timeout>5s</timeout>
+                    <url>{$ETCD.SCHEME}://{HOST.CONN}:{$ETCD.PORT}/health</url>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}=0</expression>
+                            <name>ETCD: Check node health</name>
+                            <opdata>Проверь ETCD: {$ETCD.SCHEME}://{HOST.NAME}:{$ETCD.PORT}/health</opdata>
+                            <priority>AVERAGE</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>ETCD: Service is unavailable</name>
+                                    <expression>{Template App ETCD v2:net.tcp.service[{$ETCD.SCHEME},{HOST.CONN},{$ETCD.PORT}].last()}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Is node a leader?</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.leader</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>0</trends>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Данетка</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_server_is_leader
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{change()}=1</expression>
+                            <name>ETCD: Node cluster leader role has changed</name>
+                            <opdata>Произошла смена лидера</opdata>
+                            <priority>INFO</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Leader changes</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.leader.changes</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>Times</units>
+                    <description>Counts the number of leader changes the member has seen since its start. Rapid leadership changes impact the performance of etcd significantly. It also signals that the leader is unstable, perhaps due to network connectivity issues or excessive load hitting the etcd cluster</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_server_leader_changes_seen_total
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{max(15m)}-{min(15m)}&gt;{$ETCD.LEADER.CHANGES.MAX.WARN} and {last()}&lt;&gt;1</expression>
+                            <name>ETCD: Too many leader changes</name>
+                            <opdata>Слишком частая смена лидера ETCD</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ETCD master item</name>
+                    <type>HTTP_AGENT</type>
+                    <key>etcd.master</key>
+                    <history>0</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Zabbix raw items</name>
+                        </application>
+                    </applications>
+                    <timeout>5s</timeout>
+                    <url>{$ETCD.SCHEME}://{HOST.CONN}:{$ETCD.PORT}/metrics</url>
+                </item>
+                <item>
+                    <name>Proposals applied total</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.server.proposals.applied.total</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <description>Records the total number of consensus proposals applied. The etcd server applies every committed proposal asynchronously. The difference between proposals_committed_total and proposals_applied_total should usually be small (within a few thousands even under high load). If the difference between them continues to rise, it indicates that the etcd server is overloaded. This might happen when applying expensive queries like heavy range queries or large txn operations.</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_server_proposals_applied_total
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Proposals committed total</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.server.proposals.committed.total</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <description>Records the total number of consensus proposals committed. This gauge should increase over time if the cluster is healthy. Several healthy members of an etcd cluster may have different total committed proposals at once. This discrepancy may be due to recovering from peers after starting, lagging behind the leader, or being the leader and therefore having the most commits. It is important to monitor this metric across all the members in the cluster; a consistently large lag between a single member and its leader indicates that member is slow or unhealthy.</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_server_proposals_committed_total
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Proposals failed total</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.server.proposals.failed_total</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <description>Are normally related to two issues: temporary failures related to a leader election or longer downtime caused by a loss of quorum in the cluster.</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_server_proposals_failed_total
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{max(10m)}-{min(10m)}&gt;{$ETCD.PROPOSALS.FAILED.RISE.MAX}</expression>
+                            <name>ETCD: rising &quot;failed proposals&quot;</name>
+                            <opdata>Рост &quot;failed proposals&quot;</opdata>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Proposals pending</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.server.proposals.pending</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <description>Indicates how many proposals are queued to commit. Rising pending proposals suggests there is a high client load or the member cannot commit proposals.</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>etcd_server_proposals_pending
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(10m)}&gt;{$ETCD.PROPOSALS.QUEUE.MAX}</expression>
+                            <name>ETCD: rising &quot;proposals in queue&quot;</name>
+                            <opdata>Норма - 0, Макс - {$ETCD.PROPOSALS.QUEUE.MAX}, сейчас - {ITEM.VALUE}</opdata>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ETCD Server version</name>
+                    <type>DEPENDENT</type>
+                    <key>etcd.server.version</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.etcdserver</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.version</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(#1)}&lt;&gt;{last(#2)} and {strlen(#1)}&gt;0</expression>
+                            <name>ETCD: Server version was  changed (new version: {ITEM.VALUE})</name>
+                            <priority>INFO</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ETCD version master item</name>
+                    <type>HTTP_AGENT</type>
+                    <key>etcd.version</key>
+                    <history>0</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Zabbix raw items</name>
+                        </application>
+                    </applications>
+                    <timeout>5s</timeout>
+                    <url>{$ETCD.SCHEME}://{HOST.CONN}:{$ETCD.PORT}/version</url>
+                </item>
+                <item>
+                    <name>ETCD service TCP port state</name>
+                    <type>SIMPLE</type>
+                    <key>net.tcp.service[{$ETCD.SCHEME},{HOST.CONN},{$ETCD.PORT}]</key>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>10m</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}=0</expression>
+                            <name>ETCD: Service is unavailable</name>
+                            <opdata>Порт TCP{$ETCD.PORT} ETCD не отвечает</opdata>
+                            <priority>WARNING</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ETCD process CPU time</name>
+                    <type>DEPENDENT</type>
+                    <key>process.cpu.seconds.total</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>process_cpu_seconds_total
+</params>
+                        </step>
+                        <step>
+                            <type>CHANGE_PER_SECOND</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Maximum number of open file descriptors</name>
+                    <type>DEPENDENT</type>
+                    <key>process.max.fds</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>pcs</units>
+                    <description>Maximum number of open file descriptors</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>process_max_fds
+</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Number of open file descriptors</name>
+                    <type>DEPENDENT</type>
+                    <key>process.open.fds</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>pcs</units>
+                    <description>Number of open file descriptors.&#13;
+&#13;
+Heavy file descriptor (process_open_fds) usage (i.e., near the process’s file descriptor limit, process_max_fds) indicates a potential file descriptor exhaustion issue. If the file descriptors are exhausted, etcd may panic because it cannot create new WAL files.</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>process_open_fds
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>ETCD resident memory</name>
+                    <type>DEPENDENT</type>
+                    <key>process.resident.memory.bytes</key>
+                    <delay>0</delay>
+                    <history>1w</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>B</units>
+                    <description>The size of resident memory expressed in bytes.</description>
+                    <applications>
+                        <application>
+                            <name>ETCD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>process_resident_memory_bytes
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>etcd.master</key>
+                    </master_item>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$ETCD.COMMITED.APPLIED.ABSDIFF}</macro>
+                    <value>300</value>
+                    <description>abs(commited-applied)</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.CRITICAL.DBSIZE}</macro>
+                    <value>1000000000</value>
+                    <description>1000000000-----1Гб</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.LEADER.CHANGES.MAX.WARN}</macro>
+                    <value>5</value>
+                    <description>Кол-во смен лидера за 15 минут.</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.OPEN.FDS.MAX.WARN}</macro>
+                    <value>20</value>
+                    <description>Процент используемых файловых дескрипторов!</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.PORT}</macro>
+                    <value>2379</value>
+                    <description>Порт ETCD.</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.PROPOSALS.FAILED.RISE.MAX}</macro>
+                    <value>10</value>
+                    <description>Макс рост &quot;failed proposals&quot;</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.PROPOSALS.QUEUE.MAX}</macro>
+                    <value>5</value>
+                    <description>Макс длина очереди proposals</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.SCHEME}</macro>
+                    <value>http</value>
+                    <description>http|https</description>
+                </macro>
+                <macro>
+                    <macro>{$ETCD.WARNING.DBSIZE}</macro>
+                    <value>600000000</value>
+                    <description>600000000-----600Мб</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <triggers>
+        <trigger>
+            <expression>{Template App ETCD v2:process.open.fds.min(5m)}/{Template App ETCD v2:process.max.fds.last()}*100&gt;{$ETCD.OPEN.FDS.MAX.WARN}</expression>
+            <name>ETCD: Current number of open files is too high</name>
+            <opdata>Возможно кончаются файловые дискрипторы</opdata>
+            <priority>HIGH</priority>
+            <description>Heavy usage of a file descriptor (i.e., near the limit of the process's file descriptor) indicates a potential file descriptor exhaustion issue. If the file descriptors are exhausted, `etcd` may panic because it cannot create new WAL files.</description>
+        </trigger>
+        <trigger>
+            <expression>{Template App ETCD v2:etcd.server.proposals.committed.total.last()}-{Template App ETCD v2:etcd.server.proposals.applied.total.last()}&gt;{$ETCD.COMMITED.APPLIED.ABSDIFF}</expression>
+            <name>ETCD: Difference (proposals_committed - proposals_applied) is too high</name>
+            <opdata>Норма=~0; Максимум={$ETCD.COMMITED.APPLIED.ABSDIFF}</opdata>
+            <priority>WARNING</priority>
+        </trigger>
+    </triggers>
+    <graphs>
+        <graph>
+            <name>ETCD: gRPC IO</name>
+            <ymin_type_1>FIXED</ymin_type_1>
+            <graph_items>
+                <graph_item>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template App ETCD v2</host>
+                        <key>etcd.grpc.receive</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>F63100</color>
+                    <item>
+                        <host>Template App ETCD v2</host>
+                        <key>etcd.grpc.transmit</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>ETCD: Proposals</name>
+            <graph_items>
+                <graph_item>
+                    <color>0080FF</color>
+                    <item>
+                        <host>Template App ETCD v2</host>
+                        <key>etcd.server.proposals.committed.total</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>00FF00</color>
+                    <item>
+                        <host>Template App ETCD v2</host>
+                        <key>etcd.server.proposals.applied.total</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <color>FFFF00</color>
+                    <item>
+                        <host>Template App ETCD v2</host>
+                        <key>etcd.server.proposals.pending</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>3</sortorder>
+                    <color>F63100</color>
+                    <item>
+                        <host>Template App ETCD v2</host>
+                        <key>etcd.server.proposals.failed_total</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+    <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>Данетка</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Нет</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Да</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
