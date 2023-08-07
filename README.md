@@ -17,6 +17,8 @@ Templates for Zabbix
 
 **ELEMY_ATS-1203** Мониторинг по SNMP для версий Zabbix 4.4 и выше. Тестировалось на прошивке h2_b2_m1.1.8.
 
+**EatonPowerware9390** Мониторинг по SNMP для версий Zabbix 4.4 и выше.
+
 **LGe_webos** SNMP monitoring for 24/7 LG commercial display.
 
 **APC_ATS** For Zabbix 4.4 version. Tested on APC AP7721
