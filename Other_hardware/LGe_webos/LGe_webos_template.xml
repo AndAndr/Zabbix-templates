@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-06-22T13:44:19Z</date>
+    <date>2023-08-22T10:19:03Z</date>
     <groups>
         <group>
             <name>Templates/Other Hardware</name>
@@ -11,7 +11,8 @@
         <template>
             <template>Template_LGe_webos</template>
             <name>Template_LGe_webos</name>
-            <description>https://github.com/AndAndr/Zabbix-templates</description>
+            <description>LGe webos SNMP monitoring for 24/7 commercial display&#13;
+https://github.com/AndAndr/Zabbix-templates</description>
             <templates>
                 <template>
                     <name>Template Module Generic SNMPv2</name>
@@ -96,7 +97,7 @@
                             <recovery_expression>{avg(5m)}&lt;{$LGCPUMAXTEMP}-2</recovery_expression>
                             <name>CPU temperature is too high on {HOST.NAME}</name>
                             <opdata>CPUTemperature: {ITEM.LASTVALUE1}</opdata>
-                            <priority>WARNING</priority>
+                            <priority>AVERAGE</priority>
                         </trigger>
                     </triggers>
                 </item>
@@ -124,9 +125,9 @@
                     </preprocessing>
                     <triggers>
                         <trigger>
-                            <expression>{avg(5m)}&gt;{$LGCPUMAXUTIL}</expression>
+                            <expression>{avg(10m)}&gt;{$LGCPUMAXUTIL}</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{avg(5m)}&lt;{$LGCPUMAXUTIL}-10</recovery_expression>
+                            <recovery_expression>{avg(10m)}&lt;{$LGCPUMAXUTIL}-10</recovery_expression>
                             <name>High CPU usage on {HOST.NAME}</name>
                             <priority>WARNING</priority>
                         </trigger>
@@ -348,7 +349,7 @@
                 </macro>
                 <macro>
                     <macro>{$LGCPUMAXUTIL}</macro>
-                    <value>80</value>
+                    <value>95</value>
                     <description>CPU MAX Util in Percent</description>
                 </macro>
                 <macro>
