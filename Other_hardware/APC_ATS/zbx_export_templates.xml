@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-06-19T12:03:11Z</date>
+    <date>2023-09-20T12:31:40Z</date>
     <groups>
         <group>
             <name>Templates/Other Hardware</name>
@@ -52,8 +52,8 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>1.3.6.1.4.1.318.1.1.8.1.3.0</snmp_oid>
                     <key>atsIdentFirmwareDate</key>
-                    <delay>1d</delay>
-                    <history>0</history>
+                    <delay>5m</delay>
+                    <history>30d</history>
                     <trends>0</trends>
                     <value_type>CHAR</value_type>
                     <port>161</port>
@@ -62,6 +62,12 @@
                             <name>Ident</name>
                         </application>
                     </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
                 </item>
                 <item>
                     <name>atsIdentFirmwareRev</name>
@@ -69,8 +75,8 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>1.3.6.1.4.1.318.1.1.8.1.2.0</snmp_oid>
                     <key>atsIdentFirmwareRev</key>
-                    <delay>1d</delay>
-                    <history>0</history>
+                    <delay>5m</delay>
+                    <history>30d</history>
                     <trends>0</trends>
                     <value_type>CHAR</value_type>
                     <port>161</port>
@@ -80,6 +86,12 @@
                             <name>Ident</name>
                         </application>
                     </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
                 </item>
                 <item>
                     <name>atsIdentHardwareRev</name>
@@ -87,8 +99,8 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>1.3.6.1.4.1.318.1.1.8.1.1.0</snmp_oid>
                     <key>atsIdentHardwareRev</key>
-                    <delay>1d</delay>
-                    <history>0</history>
+                    <delay>5m</delay>
+                    <history>30d</history>
                     <trends>0</trends>
                     <value_type>CHAR</value_type>
                     <port>161</port>
@@ -98,6 +110,12 @@
                             <name>Ident</name>
                         </application>
                     </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
                 </item>
                 <item>
                     <name>atsIdentModelNumber</name>
@@ -105,8 +123,8 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>1.3.6.1.4.1.318.1.1.8.1.5.0</snmp_oid>
                     <key>atsIdentModelNumber</key>
-                    <delay>1d</delay>
-                    <history>0</history>
+                    <delay>5m</delay>
+                    <history>30d</history>
                     <trends>0</trends>
                     <value_type>CHAR</value_type>
                     <port>161</port>
@@ -116,6 +134,12 @@
                             <name>Ident</name>
                         </application>
                     </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
                 </item>
                 <item>
                     <name>atsIdentSerialNumber</name>
@@ -123,8 +147,8 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>1.3.6.1.4.1.318.1.1.8.1.6.0</snmp_oid>
                     <key>atsIdentSerialNumber</key>
-                    <delay>1d</delay>
-                    <history>0</history>
+                    <delay>5m</delay>
+                    <history>30d</history>
                     <trends>0</trends>
                     <value_type>CHAR</value_type>
                     <port>161</port>
@@ -134,6 +158,12 @@
                             <name>Ident</name>
                         </application>
                     </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
                 </item>
                 <item>
                     <name>atsInputFrequency1</name>
@@ -370,14 +400,14 @@
                     </valuemap>
                     <triggers>
                         <trigger>
-                            <expression>{last()}&gt;5</expression>
-                            <name>OverCurrent gt 5Amps on {HOST.NAME}</name>
-                            <priority>INFO</priority>
+                            <expression>{last()}&gt;{$APCCRITICALCURRENT}</expression>
+                            <name>OverCurrent gt {$APCCRITICALCURRENT} Amps on {HOST.NAME}</name>
+                            <priority>HIGH</priority>
                         </trigger>
                         <trigger>
-                            <expression>{last()}&gt;8</expression>
-                            <name>OverCurrent gt 8Amps on {HOST.NAME}</name>
-                            <priority>HIGH</priority>
+                            <expression>{last()}&gt;{$APCWARNINGCURRENT}</expression>
+                            <name>OverCurrent gt {$APCWARNINGCURRENT} Amps on {HOST.NAME}</name>
+                            <priority>INFO</priority>
                         </trigger>
                     </triggers>
                 </item>
@@ -661,6 +691,16 @@
                     </item_prototypes>
                 </discovery_rule>
             </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$APCCRITICALCURRENT}</macro>
+                    <value>9</value>
+                </macro>
+                <macro>
+                    <macro>{$APCWARNINGCURRENT}</macro>
+                    <value>7</value>
+                </macro>
+            </macros>
         </template>
     </templates>
     <triggers>
