@@ -1,0 +1,1601 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2023-09-29T10:28:24Z</date>
+    <groups>
+        <group>
+            <name>Templates/Network devices</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template UserGateUTM</template>
+            <name>Template UserGateUTM</name>
+            <description>https://github.com/AndAndr</description>
+            <templates>
+                <template>
+                    <name>Template Module ICMP Ping</name>
+                </template>
+            </templates>
+            <groups>
+                <group>
+                    <name>Templates/Network devices</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Interface(s)</name>
+                </application>
+                <application>
+                    <name>System</name>
+                </application>
+                <application>
+                    <name>Traps</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>CPU load percentage</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>UTM-MIB::cpuLoad.0</snmp_oid>
+                    <key>cpuLoad</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>%</units>
+                    <description>Утилизация CPU</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{min(5m)}&gt;{$CPU_USED_MAX}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{max(5m)}&lt;{$CPU_USED_MAX}-5</recovery_expression>
+                            <name>CPU load is too high!</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Used space on log disk percentage</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>UTM-MIB::logDiskSpace.0</snmp_oid>
+                    <key>logDiskSpace</key>
+                    <delay>30m</delay>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>%</units>
+                    <description>Утилизация раздела журналов</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>6h</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$LOG_USED_MAX}</expression>
+                            <name>Check used space on log disk</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Memory used percentage</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>UTM-MIB::memoryUsed.0</snmp_oid>
+                    <key>memoryUsed</key>
+                    <history>10d</history>
+                    <trends>60d</trends>
+                    <units>%</units>
+                    <description>Утилизация памяти</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{min(5m)}&gt;{$MEM_LOAD_MAX}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{max(5m)}&lt;{$MEM_LOAD_MAX}-5</recovery_expression>
+                            <name>Memory utilization  is too high!</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>UnknownTRAP</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap.fallback</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Unknown event on {HOST.NAME}</name>
+                            <opdata>SNMPTrap: Неизвестное событие</opdata>
+                            <priority>AVERAGE</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapAttackDetected</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapAttackDetected|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.3\.1]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Notification about IDPS attack</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Notification about IDPS attack on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>WARNING</priority>
+                            <description>Notification about IDPS attack</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapCableStatus</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapCableStatus|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.7]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Cable was plugged/unplugged from interface</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Cable was plugged/unplugged on {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                            <description>Cable was plugged/unplugged from interface</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapChecksumFailed</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapChecksumFailed|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.1]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Some files checksum failed</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Files checksum failed on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Some files checksum failed</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapCoreBootstrapEnd</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapCoreBootstrapEnd|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.3]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Notification about utm-core boot finished</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: Utm-core boot finished on {HOST.NAME}</name>
+                            <priority>INFO</priority>
+                            <description>Notification about utm-core boot finished</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapCoreCrush</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapCoreCrush|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.1]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Notification about core crushing</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Core crushing on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>HIGH</priority>
+                            <description>Notification about core crushing</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapDefaultGatewayChanged</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapDefaultGatewayChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.4]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Default gateway IP changed</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: Default gateway IP changed on {HOST.NAME}</name>
+                            <priority>INFO</priority>
+                            <description>Default gateway IP changed</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapHighCPUUsage</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapHighCPUUsage|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.2]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>High CPU usage notification</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: High CPU usage notification on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                            <description>High CPU usage notification</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapHighSessionsCounter</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapHighSessionsCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.5]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Active sessions number are near the limit</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: Active sessions number are near the limit on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                            <description>Active sessions number are near the limit</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapHighUsersCounter</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapHighUsersCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.6]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Active users number are near the limit</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: Active users number are near the limit on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                            <description>Active users number are near the limit</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapLDAPServerDown</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapLDAPServerDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.6\.1]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>LDAP Server is not responding</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: LDAP Server is not responding on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>WARNING</priority>
+                            <description>LDAP Server is not responding</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapLowLogdiskSpace</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapLowLogdiskSpace|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.4]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Low log disk space notification</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Low log disk space on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Low log disk space notification</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapLowMemory</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapLowMemory|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.3]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Low memory notification</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Low memory on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Low memory notification</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapMemberDown</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapMemberDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.3]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>HA cluster node offline</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: HA cluster node offline on {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                            <description>HA cluster node offline</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapMemberUp</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapMemberUp|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.2]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>HA cluster node online</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: HA cluster node online on {HOST.NAME}</name>
+                            <priority>INFO</priority>
+                            <description>HA cluster node online</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapPowerSupply</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapPowerSupply|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.6]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Power supply unit 1 switched off</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Power supply unit switched off on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Power supply unit switched off</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapRaidStatus</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapRaidStatus|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.5]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Raid status is changed</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Raid status is changed on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Raid status is changed</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapStatDown</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapStatDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.2]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Notification about statistics server shutting down</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Notification about statistics server shutting down on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Notification about statistics server shutting down</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapStatusChanged</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapStatusChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.1]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>HA cluster node status changed notification</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: HA cluster node status changed on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>HA cluster node status changed notification</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>trapTrafficDrop</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[UTM-TRAPS-MIB::trapTrafficDrop|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.5\.1]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Firewall DENY rule triggered</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMPTrap: Firewall DENY rule triggered on {HOST.NAME}</name>
+                            <priority>INFO</priority>
+                            <description>Сработало запрещающее правило межсетевого экрана.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Uptime</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>RFC1213-MIB::sysUpTime.0</snmp_oid>
+                    <key>system.uptime[sysUpTime.0]</key>
+                    <delay>5m</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <units>uptime</units>
+                    <description>Время работы</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>0.01</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata(10m)}=1</expression>
+                            <name>{HOST.NAME} does not respond to SNMP requests!</name>
+                            <priority>HIGH</priority>
+                            <description>Устройство перестало отвечать на SNMP-запросы.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{last(0)}&lt;10m</expression>
+                            <name>{HOST.NAME} has been restarted!</name>
+                            <priority>WARNING</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>The number of active current users</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>UTM-MIB::usersCounter.0</snmp_oid>
+                    <key>usersCounter</key>
+                    <history>10d</history>
+                    <trends>60d</trends>
+                    <units>Users</units>
+                    <description>Количество активных пользователей</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>10m</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>vCPU percentage</name>
+                    <type>CALCULATED</type>
+                    <key>vCPU.percentage</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <params>100*last(&quot;vcpuUsage&quot;)/(last(&quot;vcpuCount&quot;)*100)</params>
+                    <description>Процент утилизации vCPU</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$VCPU_USED_MAX}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{avg(10m)}&lt;{$VCPU_USED_MAX}-10</recovery_expression>
+                            <name>vCPU load is too high!</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>vCPU count</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>UTM-MIB::vcpuCount.0</snmp_oid>
+                    <key>vcpuCount</key>
+                    <delay>10m</delay>
+                    <history>2d</history>
+                    <trends>0</trends>
+                    <units>vCPU</units>
+                    <description>Количество vCPU</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>vCPU used</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>UTM-MIB::vcpuUsage.0</snmp_oid>
+                    <key>vcpuUsage</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>%</units>
+                    <description>Утилизация vCPU</description>
+                    <applications>
+                        <application>
+                            <name>System</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>10m</params>
+                        </step>
+                    </preprocessing>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Network Interfaces</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#SNMPVALUE},UTM-INTERFACES-MIB::ifDescr]</snmp_oid>
+                    <key>ifDescr</key>
+                    <delay>1h</delay>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Admin status of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifAdminStatus.{#SNMPINDEX}</snmp_oid>
+                            <key>ifAdminStatus[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>SNMP interface status (ifAdminStatus)</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Description of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifDescr.{#SNMPINDEX}</snmp_oid>
+                            <key>ifDescr[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Incoming discarded packets on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifInDiscards.{#SNMPINDEX}</snmp_oid>
+                            <key>ifInDiscards[{#SNMPVALUE}]</key>
+                            <delay>10m</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Inbound errors on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifInErrors.{#SNMPINDEX}</snmp_oid>
+                            <key>ifInErrors[{#SNMPVALUE}]</key>
+                            <delay>15m</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{change(0)}&gt;0 and&#13;
+{nodata(1m)}=0</expression>
+                                    <name>Errors on interface {#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Incoming non-unicast packets on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifInNUcastPkts.{#SNMPINDEX}</snmp_oid>
+                            <key>ifInNUcastPkts[{#SNMPVALUE}]</key>
+                            <delay>30</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <description>Количество принятых многоадресных/широковещательных пакетов</description>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Incoming traffic on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifInOctets.{#SNMPINDEX}</snmp_oid>
+                            <key>ifInOctets[{#SNMPVALUE}]</key>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <units>bps</units>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>8</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Incoming Unicast packets on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifInUcastPkts.{#SNMPINDEX}</snmp_oid>
+                            <key>ifInUcastPkts[{#SNMPVALUE}]</key>
+                            <delay>30</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <description>Количество принятых одноадресных пакетов</description>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Incoming discarded unknown or unsupported protocol packets on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifInUnknownProtos.{#SNMPINDEX}</snmp_oid>
+                            <key>ifInUnknownProtos[{#SNMPVALUE}]</key>
+                            <delay>10m</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Last change of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifLastChange.{#SNMPINDEX}</snmp_oid>
+                            <key>ifLastChange[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <value_type>TEXT</value_type>
+                            <description>Значение sysUpTime на момент перехода интерфейса&#13;
+в его текущее рабочее состояние.</description>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MTU size of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifMtu.{#SNMPINDEX}</snmp_oid>
+                            <key>ifMtu[{#SNMPVALUE}]</key>
+                            <delay>12h</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <units>octets</units>
+                            <description>Размер самой большой дейтаграммы, которая может быть&#13;
+отправлена/получена по интерфейсу, указывается в&#13;
+октетах.</description>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>24h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Operational status of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifOperStatus.{#SNMPINDEX}</snmp_oid>
+                            <key>ifOperStatus[{#SNMPVALUE}]</key>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>SNMP interface status (ifOperStatus)</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff(0)}&gt;0 and {nodata(1m)}=0</expression>
+                                    <name>Operational status was changed on interface {#SNMPVALUE}</name>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Outgoing discarded packets on interface  $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifOutDiscards.{#SNMPINDEX}</snmp_oid>
+                            <key>ifOutDiscards[{#SNMPVALUE}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Outbound errors on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifOutErrors.{#SNMPINDEX}</snmp_oid>
+                            <key>ifOutErrors[{#SNMPVALUE}]</key>
+                            <delay>15m</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Outgoing non-unicast packets on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifOutNUcastPkts.{#SNMPINDEX}</snmp_oid>
+                            <key>ifOutNUcastPkts[{#SNMPVALUE}]</key>
+                            <delay>30</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <description>Количество отправленных многоадресных/широковещательных пакетов</description>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Outgoing traffic on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifOutOctets.{#SNMPINDEX}</snmp_oid>
+                            <key>ifOutOctets[{#SNMPVALUE}]</key>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <units>bps</units>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>8</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Length of the output packet queue for interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifOutQLen{#SNMPINDEX}</snmp_oid>
+                            <key>ifOutQLen[{#SNMPVALUE}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <units>Packets</units>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last(0)}&gt;0 and&#13;
+{nodata(1m)}=0</expression>
+                                    <name>Ouput packets queue for {#SNMPVALUE} is not empty</name>
+                                    <status>DISABLED</status>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Outgoing Unicast packets on interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifOutUcastPkts.{#SNMPINDEX}</snmp_oid>
+                            <key>ifOutUcastPkts[{#SNMPVALUE}]</key>
+                            <delay>30</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <status>DISABLED</status>
+                            <description>Количество отправленных одноадресных пакетов</description>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>6h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Physic address of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifPhysAddress.{#SNMPINDEX}</snmp_oid>
+                            <key>ifPhysAddress[{#SNMPVALUE}]</key>
+                            <delay>12h</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <value_type>TEXT</value_type>
+                            <description>Физический адрес интерфейса</description>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Speed of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifSpeed.{#SNMPINDEX}</snmp_oid>
+                            <key>ifSpeed[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <trends>60d</trends>
+                            <units>bps</units>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Type of interface $1</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>UTM-INTERFACES-MIB::ifType.{#SNMPINDEX}</snmp_oid>
+                            <key>ifType[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <value_type>CHAR</value_type>
+                            <applications>
+                                <application>
+                                    <name>Interface(s)</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>Type of interface</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template UserGateUTM:ifSpeed[{#SNMPVALUE}].last(0)}&gt;0 and ({Template UserGateUTM:ifInOctets[{#SNMPVALUE}].avg(300)})&gt;({Template UserGateUTM:ifSpeed[{#SNMPVALUE}].last(0)})*0.8</expression>
+                            <name>Incoming use on interface {#SNMPVALUE} exceed 80% for the last 5 minutes</name>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template UserGateUTM:ifAdminStatus[{#SNMPVALUE}].last(0)}=1 and {Template UserGateUTM:ifOperStatus[{#SNMPVALUE}].last(0)}=2</expression>
+                            <name>Operational status of interface {#SNMPVALUE} is DOWN!</name>
+                            <priority>HIGH</priority>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template UserGateUTM:ifSpeed[{#SNMPVALUE}].last(0)}&gt;0 and ({Template UserGateUTM:ifOutOctets[{#SNMPVALUE}].avg(300)})&gt;({Template UserGateUTM:ifSpeed[{#SNMPVALUE}].last(0)})*0.8</expression>
+                            <name>Outgoing use on interface {#SNMPVALUE} exceed 80% for the last 5 minutes</name>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Interface {#SNMPVALUE} - Errors</name>
+                            <graph_items>
+                                <graph_item>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>FFAB00</color>
+                                    <item>
+                                        <host>Template UserGateUTM</host>
+                                        <key>ifInDiscards[{#SNMPVALUE}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>F51D30</color>
+                                    <item>
+                                        <host>Template UserGateUTM</host>
+                                        <key>ifInErrors[{#SNMPVALUE}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>2</sortorder>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>C4FD3D</color>
+                                    <item>
+                                        <host>Template UserGateUTM</host>
+                                        <key>ifOutDiscards[{#SNMPVALUE}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>3</sortorder>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>00694A</color>
+                                    <item>
+                                        <host>Template UserGateUTM</host>
+                                        <key>ifOutErrors[{#SNMPVALUE}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>9</sortorder>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>FFC3C0</color>
+                                    <item>
+                                        <host>Template UserGateUTM</host>
+                                        <key>ifInUcastPkts[{#SNMPVALUE}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <name>Interface {#SNMPVALUE} - Traffic (bits/sec, 95th Percentile)</name>
+                            <percent_left>0.9500</percent_left>
+                            <graph_items>
+                                <graph_item>
+                                    <drawtype>BOLD_LINE</drawtype>
+                                    <color>00CF00</color>
+                                    <item>
+                                        <host>Template UserGateUTM</host>
+                                        <key>ifInOctets[{#SNMPVALUE}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <drawtype>BOLD_LINE</drawtype>
+                                    <color>002A97</color>
+                                    <item>
+                                        <host>Template UserGateUTM</host>
+                                        <key>ifOutOctets[{#SNMPVALUE}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$CPU_USED_MAX}</macro>
+                    <value>70</value>
+                    <description>%</description>
+                </macro>
+                <macro>
+                    <macro>{$LOG_USED_MAX}</macro>
+                    <value>80</value>
+                    <description>%</description>
+                </macro>
+                <macro>
+                    <macro>{$MEM_LOAD_MAX}</macro>
+                    <value>80</value>
+                    <description>%</description>
+                </macro>
+                <macro>
+                    <macro>{$TRAPPEDTRIGGER_TTL}</macro>
+                    <value>5m</value>
+                    <description>Время показа триггера.</description>
+                </macro>
+                <macro>
+                    <macro>{$VCPU_USED_MAX}</macro>
+                    <value>80</value>
+                    <description>%</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>Usergate Perf</name>
+            <ymin_type_1>FIXED</ymin_type_1>
+            <graph_items>
+                <graph_item>
+                    <color>0040FF</color>
+                    <item>
+                        <host>Template UserGateUTM</host>
+                        <key>cpuLoad</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>80FF00</color>
+                    <item>
+                        <host>Template UserGateUTM</host>
+                        <key>memoryUsed</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <color>FF8000</color>
+                    <item>
+                        <host>Template UserGateUTM</host>
+                        <key>usersCounter</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>3</sortorder>
+                    <color>A54F10</color>
+                    <item>
+                        <host>Template UserGateUTM</host>
+                        <key>logDiskSpace</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>4</sortorder>
+                    <color>81D4FA</color>
+                    <item>
+                        <host>Template UserGateUTM</host>
+                        <key>vCPU.percentage</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+    <value_maps>
+        <value_map>
+            <name>SNMP interface status (ifAdminStatus)</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>up</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>testing</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>SNMP interface status (ifOperStatus)</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>up</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>testing</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>dormant</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>notPresent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>lowerLayerDown</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>Type of interface</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>other</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>regular1822</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>hdh1822</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>ddn-x25</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>rfc877-x25</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>ethernet-csmacd</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>iso88023-csmacd</newvalue>
+                </mapping>
+                <mapping>
+                    <value>8</value>
+                    <newvalue>iso88024-tokenBus</newvalue>
+                </mapping>
+                <mapping>
+                    <value>9</value>
+                    <newvalue>iso88025-tokenRing</newvalue>
+                </mapping>
+                <mapping>
+                    <value>10</value>
+                    <newvalue>iso88026-man</newvalue>
+                </mapping>
+                <mapping>
+                    <value>11</value>
+                    <newvalue>starLan</newvalue>
+                </mapping>
+                <mapping>
+                    <value>12</value>
+                    <newvalue>proteon-10Mbit</newvalue>
+                </mapping>
+                <mapping>
+                    <value>13</value>
+                    <newvalue>proteon-80Mbit</newvalue>
+                </mapping>
+                <mapping>
+                    <value>14</value>
+                    <newvalue>hyperchannel</newvalue>
+                </mapping>
+                <mapping>
+                    <value>15</value>
+                    <newvalue>fddi</newvalue>
+                </mapping>
+                <mapping>
+                    <value>16</value>
+                    <newvalue>lapb</newvalue>
+                </mapping>
+                <mapping>
+                    <value>17</value>
+                    <newvalue>sdlc</newvalue>
+                </mapping>
+                <mapping>
+                    <value>18</value>
+                    <newvalue>ds1</newvalue>
+                </mapping>
+                <mapping>
+                    <value>19</value>
+                    <newvalue>e1</newvalue>
+                </mapping>
+                <mapping>
+                    <value>20</value>
+                    <newvalue>basicISDN</newvalue>
+                </mapping>
+                <mapping>
+                    <value>21</value>
+                    <newvalue>primaryISDN</newvalue>
+                </mapping>
+                <mapping>
+                    <value>22</value>
+                    <newvalue>propPointToPointSerial</newvalue>
+                </mapping>
+                <mapping>
+                    <value>23</value>
+                    <newvalue>ppp</newvalue>
+                </mapping>
+                <mapping>
+                    <value>24</value>
+                    <newvalue>softwareLoopback</newvalue>
+                </mapping>
+                <mapping>
+                    <value>25</value>
+                    <newvalue>eon</newvalue>
+                </mapping>
+                <mapping>
+                    <value>26</value>
+                    <newvalue>ethernet-3Mbit</newvalue>
+                </mapping>
+                <mapping>
+                    <value>27</value>
+                    <newvalue>nsip</newvalue>
+                </mapping>
+                <mapping>
+                    <value>28</value>
+                    <newvalue>slip</newvalue>
+                </mapping>
+                <mapping>
+                    <value>29</value>
+                    <newvalue>ultra</newvalue>
+                </mapping>
+                <mapping>
+                    <value>30</value>
+                    <newvalue>ds3</newvalue>
+                </mapping>
+                <mapping>
+                    <value>31</value>
+                    <newvalue>sip</newvalue>
+                </mapping>
+                <mapping>
+                    <value>32</value>
+                    <newvalue>frame-relay</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
