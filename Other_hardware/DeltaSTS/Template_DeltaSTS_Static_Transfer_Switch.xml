@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-05-02T13:21:23Z</date>
+    <date>2023-10-03T06:54:48Z</date>
     <groups>
         <group>
             <name>Templates/Other Hardware</name>
@@ -11,7 +11,7 @@
         <template>
             <template>Template_DeltaSTS_Static_Transfer_Switch</template>
             <name>Template_DeltaSTS_Static_Transfer_Switch</name>
-            <description>email&#13;
+            <description>https://github.com/AndAndr/Zabbix-templates/&#13;
 Tested on STS30002SR10035 v.01.12.15j&#13;
 прим. В OID'ах АВРа очепятки..</description>
             <templates>
