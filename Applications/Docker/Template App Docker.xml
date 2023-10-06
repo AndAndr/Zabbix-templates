@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2023-10-06T10:55:34Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template App Docker</template>
+            <name>Template App Docker</name>
+            <description>https://github.com/AndAndr/Zabbix-templates&#13;
+&#13;
+Getting container status via docker socket by zabbix_agent.&#13;
+Requirements:&#13;
+1. Curl, jq packages installed.&#13;
+2. Added zabbix-agent user to the docker group.&#13;
+3. Enabled remote command in zabbix_agentd.conf:&#13;
+AllowKey=system.run[*]           # For zabbix_agent version&gt;=5&#13;
+EnableRemoteCommands=1   #For zabbix_agent version&lt;=4</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Zabbix raw items</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Docker containers discovery</name>
+                    <key>system.run[echo &quot;{ \&quot;data\&quot;: `curl -s --unix-socket /var/run/docker.sock http:/localhost/containers/json| {$JQ_DOCKER_NAMES}` }&quot;]</key>
+                    <delay>5m</delay>
+                    <filter>
+                        <conditions>
+                            <condition>
+                                <macro>{#NAMES}</macro>
+                                <value>{$DOCKER.CONTAINER.LLD.FILTER.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#NAMES}</macro>
+                                <value>{$DOCKER.CONTAINER.LLD.FILTER.MATCHES}</value>
+                                <formulaid>B</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>5d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Container: {#NAMES} - ID</name>
+                            <key>system.run[echo &quot;{ \&quot;data\&quot;: `curl -s --unix-socket /var/run/docker.sock http:/localhost/containers{#NAMES}/json| jq .Config.Hostname` }&quot;]</key>
+                            <delay>10m</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>LOG</value_type>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Docker</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.data</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Container: {#NAMES} - IMAGE</name>
+                            <key>system.run[echo &quot;{ \&quot;data\&quot;: `curl -s --unix-socket /var/run/docker.sock http:/localhost/containers{#NAMES}/json| jq .Config.Image` }&quot;]</key>
+                            <delay>10m</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>LOG</value_type>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Docker</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.data</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Container: {#NAMES} - Status</name>
+                            <key>system.run[echo &quot;{ \&quot;data\&quot;: `curl -s --unix-socket /var/run/docker.sock http:/localhost/containers{#NAMES}/json| jq .State.Status` }&quot;]</key>
+                            <history>10d</history>
+                            <trends>30d</trends>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Docker</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>Docker container status</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.data</params>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <params>if (value == &quot;created&quot;) {
+return 1;
+}
+if (value == &quot;restarting&quot;) {
+return 2;
+}
+if (value == &quot;running&quot;) {
+return 3;
+}
+if (value == &quot;removing&quot;) {
+return 4;
+}
+if (value == &quot;paused&quot;) {
+return 5;
+}
+if (value == &quot;exited&quot;) {
+return 6;
+}
+if (value == &quot;dead&quot;) {
+return 7;
+}
+if (value == &quot;null&quot;) {
+return 0;
+}
+else {
+return 8;
+}
+</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;3</expression>
+                                    <name>Docker: Check container {#NAMES} status</name>
+                                    <priority>WARNING</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$DOCKER.CONTAINER.LLD.FILTER.MATCHES}</macro>
+                    <value>^\/.+$</value>
+                    <description>Discover any containers name like &quot;/somecontainer&quot;</description>
+                </macro>
+                <macro>
+                    <macro>{$DOCKER.CONTAINER.LLD.FILTER.NOT_MATCHES}</macro>
+                    <value>^\/NOTNEEDEDCONTAINER$</value>
+                    <description>Do not discover containers name like &quot;/NOTNEEDEDCONTAINER&quot;</description>
+                </macro>
+                <macro>
+                    <macro>{$JQ_DOCKER_NAMES}</macro>
+                    <value>jq '[ .[].Names[0]|{ &quot;{#NAMES}&quot;: .} ]'</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>Docker container status</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>created</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>restarting</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>running</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>removing</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>paused</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>exited</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>dead</newvalue>
+                </mapping>
+                <mapping>
+                    <value>8</value>
+                    <newvalue>Unknown state!</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
