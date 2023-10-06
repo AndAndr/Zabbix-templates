@@ -1,9 +1,15 @@
 # Zabbix-templates
 Templates for Zabbix
 
+## Applications
+**Docker**
+Auto-discovering docker containers and getting containers status via docker socket.
 
-## NTP
-**TemplateAppNTP.xml** for zabbix 4.4 version. Collecting data from **"selected source"** of `ntpq -p` output:
+**ETCD**
+For Zabbix 4.4. All Linux and Windows versions
+
+**NTP**
+Collecting data from **"selected source"** of `ntpq -p` output:
 
 ```     remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
