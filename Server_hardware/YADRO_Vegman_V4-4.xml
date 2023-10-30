@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2022-12-13T08:22:39Z</date>
+    <date>2023-10-30T06:22:15Z</date>
     <groups>
         <group>
             <name>Templates/Server hardware</name>
@@ -36,7 +36,7 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>discovery[{#YADROCURRSENSORNAME},1.3.6.1.4.1.49769.1.5.1.1,{#YADROCURRSENSORVALUE},1.3.6.1.4.1.49769.1.5.1.2,{#YADROCURRSENSORSTATE},1.3.6.1.4.1.49769.1.5.1.7]</snmp_oid>
                     <key>YADRO-MIB.yadroCurrSensorsEntry</key>
-                    <delay>1h</delay>
+                    <delay>3h</delay>
                     <lifetime>3d</lifetime>
                     <item_prototypes>
                         <item_prototype>
@@ -69,6 +69,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.1.5.1.7.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.current.sensor.state[yadroCurrSensorState.{#SNMPINDEX}]</key>
+                            <delay>2m</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <description>MIB: YADRO-MIB Current strength state of sensor.</description>
@@ -196,6 +197,10 @@
                                     <params>^$</params>
                                     <error_handler>DISCARD_VALUE</error_handler>
                                 </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
                             </preprocessing>
                         </item_prototype>
                         <item_prototype>
@@ -219,6 +224,10 @@
                                     <type>NOT_MATCHES_REGEX</type>
                                     <params>^$</params>
                                     <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
                                 </step>
                             </preprocessing>
                         </item_prototype>
@@ -244,6 +253,10 @@
                                     <params>^$</params>
                                     <error_handler>DISCARD_VALUE</error_handler>
                                 </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
                             </preprocessing>
                         </item_prototype>
                         <item_prototype>
@@ -267,6 +280,10 @@
                                     <type>NOT_MATCHES_REGEX</type>
                                     <params>^$</params>
                                     <error_handler>DISCARD_VALUE</error_handler>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
                                 </step>
                             </preprocessing>
                         </item_prototype>
@@ -292,6 +309,10 @@
                                     <params>^$</params>
                                     <error_handler>DISCARD_VALUE</error_handler>
                                 </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
                             </preprocessing>
                         </item_prototype>
                         <item_prototype>
@@ -316,6 +337,10 @@
                                     <params>^$</params>
                                     <error_handler>DISCARD_VALUE</error_handler>
                                 </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
                             </preprocessing>
                         </item_prototype>
                     </item_prototypes>
@@ -326,7 +351,7 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>discovery[{#YADROPOWERSENSORNAME},1.3.6.1.4.1.49769.1.6.1.1,{#YADROPOWERSENSORVALUE},1.3.6.1.4.1.49769.1.6.1.2,{#YADROPOWERSENSORSTATE},1.3.6.1.4.1.49769.1.6.1.7]</snmp_oid>
                     <key>YADRO-MIB.yadroPowerSensorsEntry</key>
-                    <delay>1h</delay>
+                    <delay>3h</delay>
                     <lifetime>3d</lifetime>
                     <item_prototypes>
                         <item_prototype>
@@ -335,6 +360,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.1.6.1.7.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.power.sensor.state[yadroPowerSensorState.{#SNMPINDEX}]</key>
+                            <delay>2m</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <description>MIB: YADRO-MIB Current state of sensor</description>
@@ -413,7 +439,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.5.1.4.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.firmware.inventory.activation.state[yadroSoftwareActivation{#SNMPINDEX}]</key>
-                            <delay>1h</delay>
+                            <delay>3h</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <value_type>FLOAT</value_type>
@@ -432,7 +458,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.5.1.5.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.firmware.inventory.priority[yadroSoftwarePriority{#SNMPINDEX}]</key>
-                            <delay>1h</delay>
+                            <delay>3h</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <value_type>FLOAT</value_type>
@@ -448,7 +474,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.5.1.3.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.firmware.inventory.purpose[yadroSoftwarePurpose{#SNMPINDEX}]</key>
-                            <delay>1h</delay>
+                            <delay>3h</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <value_type>FLOAT</value_type>
@@ -476,6 +502,12 @@
                                     <name>Software</name>
                                 </application_prototype>
                             </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
                         </item_prototype>
                     </item_prototypes>
                 </discovery_rule>
@@ -485,7 +517,7 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>discovery[{#YADROTACHSENSORNAME},1.3.6.1.4.1.49769.1.4.1.1,{#YADROTACHSENSORVALUE},1.3.6.1.4.1.49769.1.4.1.2,{#YADROTACHSENSORSTATE},1.3.6.1.4.1.49769.1.4.1.7]</snmp_oid>
                     <key>YADRO-MIB.yadroTachSensorsEntry</key>
-                    <delay>1h</delay>
+                    <delay>3h</delay>
                     <lifetime>3d</lifetime>
                     <item_prototypes>
                         <item_prototype>
@@ -494,6 +526,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.1.4.1.7.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.tach.sensor.state[yadroTachSensorState.{#SNMPINDEX}]</key>
+                            <delay>2m</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <description>MIB: YADRO-MIB Current state of TachSensor</description>
@@ -520,6 +553,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.1.4.1.2.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.tach.sensor.value[yadroTachSensorValue.{#SNMPINDEX}]</key>
+                            <delay>5m</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <value_type>FLOAT</value_type>
@@ -539,7 +573,7 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>discovery[{#YADROTEMPSENSORNAME},1.3.6.1.4.1.49769.1.2.1.1,{#YADROTEMPSENSORVALUE},1.3.6.1.4.1.49769.1.2.1.2,{#YADROTEMPSENSORSTATE},1.3.6.1.4.1.49769.1.2.1.7]</snmp_oid>
                     <key>YADRO-MIB.yadroTempSensorsEntry</key>
-                    <delay>1h</delay>
+                    <delay>3h</delay>
                     <lifetime>3d</lifetime>
                     <item_prototypes>
                         <item_prototype>
@@ -573,7 +607,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.1.2.1.2.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.temp.sensor.value[yadroTempSensorValue.{#SNMPINDEX}]</key>
-                            <delay>2m</delay>
+                            <delay>5m</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <value_type>FLOAT</value_type>
@@ -614,7 +648,7 @@
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                     <snmp_oid>discovery[{#YADROVOLTSENSORNAME},1.3.6.1.4.1.49769.1.3.1.1,{#YADROVOLTSENSORVALUE},1.3.6.1.4.1.49769.1.3.1.2,{#YADROVOLTSENSORSTATE},1.3.6.1.4.1.49769.1.3.1.7]</snmp_oid>
                     <key>YADRO-MIB.yadroVoltSensorsEntry</key>
-                    <delay>1h</delay>
+                    <delay>3h</delay>
                     <lifetime>3d</lifetime>
                     <item_prototypes>
                         <item_prototype>
@@ -648,7 +682,7 @@
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <snmp_oid>1.3.6.1.4.1.49769.1.3.1.2.{#SNMPINDEX}</snmp_oid>
                             <key>vegman.server.volt.sensor.value[yadroVoltSensorValue.{#SNMPINDEX}]</key>
-                            <delay>2m</delay>
+                            <delay>5m</delay>
                             <history>10d</history>
                             <trends>30d</trends>
                             <value_type>FLOAT</value_type>
