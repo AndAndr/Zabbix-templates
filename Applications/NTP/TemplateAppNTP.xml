@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-05-17T11:02:29Z</date>
+    <date>2023-11-01T08:35:12Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -57,7 +57,7 @@
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                     <triggers>
                         <trigger>
@@ -104,7 +104,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                     <triggers>
                         <trigger>
@@ -143,7 +143,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                     <triggers>
                         <trigger>
@@ -185,7 +185,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                     <triggers>
                         <trigger>
@@ -224,7 +224,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                 </item>
                 <item>
@@ -254,7 +254,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                 </item>
                 <item>
@@ -283,7 +283,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                 </item>
                 <item>
@@ -312,7 +312,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                 </item>
                 <item>
@@ -343,7 +343,7 @@ return result;</params>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                        <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     </master_item>
                 </item>
                 <item>
@@ -372,7 +372,7 @@ return result;</params>
                 </item>
                 <item>
                     <name>NTP: Get NTP data</name>
-                    <key>system.run[/usr/bin/ntpq -p | /bin/grep  ^\*.*$]</key>
+                    <key>system.run[{$NTPQ_LOCATION} -p | /bin/grep  ^\*.*$]</key>
                     <delay>10m</delay>
                     <history>1h</history>
                     <trends>0</trends>
@@ -385,6 +385,10 @@ return result;</params>
                 </item>
             </items>
             <macros>
+                <macro>
+                    <macro>{$NTPQ_LOCATION}</macro>
+                    <value>/usr/bin/ntpq</value>
+                </macro>
                 <macro>
                     <macro>{$NTP_DELAY}</macro>
                     <value>30</value>
