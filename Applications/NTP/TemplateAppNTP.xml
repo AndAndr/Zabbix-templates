@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-11-01T08:35:12Z</date>
+    <date>2023-11-07T07:39:24Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -11,7 +11,8 @@
         <template>
             <template>Template App NTP</template>
             <name>Template App NTP</name>
-            <description>Мониторинг состояния пира, выбранного ntpd как источник синхронизации, из списка всех остальных источников.</description>
+            <description>https://github.com/AndAndr/&#13;
+Мониторинг состояния пира, выбранного ntpd как источник синхронизации, из списка всех остальных источников.</description>
             <groups>
                 <group>
                     <name>Templates/Applications</name>
@@ -52,8 +53,8 @@
                             <params>^\d+\.\d+$</params>
                         </step>
                         <step>
-                            <type>DISCARD_UNCHANGED</type>
-                            <params/>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -278,8 +279,8 @@ return result;</params>
 \2</params>
                         </step>
                         <step>
-                            <type>DISCARD_UNCHANGED</type>
-                            <params/>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -307,8 +308,8 @@ return result;</params>
 \1</params>
                         </step>
                         <step>
-                            <type>DISCARD_UNCHANGED</type>
-                            <params/>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
                         </step>
                     </preprocessing>
                     <master_item>
