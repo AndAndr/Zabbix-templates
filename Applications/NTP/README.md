@@ -1,5 +1,5 @@
-# Zabbix-templates/NTP
-NTP/TemplateAppNTP.xml for zabbix 4.4 version in general. 
+# Zabbix-templates/Applications/NTP
+TemplateAppNTP.xml for zabbix 4.4 version in general.
 Collecting data from selected source of "ntpq -p" output:
 
 For agent version lt 5.0 you must enable remote command: 
