@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-10-06T10:55:34Z</date>
+    <date>2023-11-15T13:15:57Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -50,7 +50,7 @@ EnableRemoteCommands=1   #For zabbix_agent version&lt;=4</description>
                             </condition>
                         </conditions>
                     </filter>
-                    <lifetime>5d</lifetime>
+                    <lifetime>1d</lifetime>
                     <item_prototypes>
                         <item_prototype>
                             <name>Container: {#NAMES} - ID</name>
@@ -138,14 +138,7 @@ return 6;
 }
 if (value == &quot;dead&quot;) {
 return 7;
-}
-if (value == &quot;null&quot;) {
-return 0;
-}
-else {
-return 8;
-}
-</params>
+}</params>
                                 </step>
                                 <step>
                                     <type>DISCARD_UNCHANGED_HEARTBEAT</type>
@@ -213,10 +206,6 @@ return 8;
                 <mapping>
                     <value>7</value>
                     <newvalue>dead</newvalue>
-                </mapping>
-                <mapping>
-                    <value>8</value>
-                    <newvalue>Unknown state!</newvalue>
                 </mapping>
             </mappings>
         </value_map>
