@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-06-23T11:36:25Z</date>
+    <date>2023-11-27T05:52:48Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -331,7 +331,7 @@
                     </master_item>
                     <triggers>
                         <trigger>
-                            <expression>{max(15m)}-{min(15m)}&gt;{$ETCD.LEADER.CHANGES.MAX.WARN} and {last()}&lt;&gt;1</expression>
+                            <expression>{max(10m)}-{min(10m)}&gt;{$ETCD.LEADER.CHANGES.MAX.WARN} and {last()}&gt;{max(10m)}</expression>
                             <name>ETCD: Too many leader changes</name>
                             <opdata>Слишком частая смена лидера ETCD</opdata>
                             <priority>AVERAGE</priority>
@@ -664,9 +664,9 @@ Heavy file descriptor (process_open_fds) usage (i.e., near the process’s file 
             </items>
             <macros>
                 <macro>
-                    <macro>{$ETCD.COMMITED.APPLIED.ABSDIFF}</macro>
+                    <macro>{$ETCD.COMMITED.APPLIED.DIFF}</macro>
                     <value>300</value>
-                    <description>abs(commited-applied)</description>
+                    <description>commited-applied</description>
                 </macro>
                 <macro>
                     <macro>{$ETCD.CRITICAL.DBSIZE}</macro>
@@ -720,71 +720,12 @@ Heavy file descriptor (process_open_fds) usage (i.e., near the process’s file 
             <description>Heavy usage of a file descriptor (i.e., near the limit of the process's file descriptor) indicates a potential file descriptor exhaustion issue. If the file descriptors are exhausted, `etcd` may panic because it cannot create new WAL files.</description>
         </trigger>
         <trigger>
-            <expression>{Template App ETCD v2:etcd.server.proposals.committed.total.last()}-{Template App ETCD v2:etcd.server.proposals.applied.total.last()}&gt;{$ETCD.COMMITED.APPLIED.ABSDIFF}</expression>
+            <expression>{Template App ETCD v2:etcd.server.proposals.committed.total.last()}-{Template App ETCD v2:etcd.server.proposals.applied.total.last()}&gt;{$ETCD.COMMITED.APPLIED.DIFF}</expression>
             <name>ETCD: Difference (proposals_committed - proposals_applied) is too high</name>
-            <opdata>Норма=~0; Максимум={$ETCD.COMMITED.APPLIED.ABSDIFF}</opdata>
+            <opdata>Норма=~0; Максимум={$ETCD.COMMITED.APPLIED.DIFF}</opdata>
             <priority>WARNING</priority>
         </trigger>
     </triggers>
-    <graphs>
-        <graph>
-            <name>ETCD: gRPC IO</name>
-            <ymin_type_1>FIXED</ymin_type_1>
-            <graph_items>
-                <graph_item>
-                    <color>1A7C11</color>
-                    <item>
-                        <host>Template App ETCD v2</host>
-                        <key>etcd.grpc.receive</key>
-                    </item>
-                </graph_item>
-                <graph_item>
-                    <sortorder>1</sortorder>
-                    <color>F63100</color>
-                    <item>
-                        <host>Template App ETCD v2</host>
-                        <key>etcd.grpc.transmit</key>
-                    </item>
-                </graph_item>
-            </graph_items>
-        </graph>
-        <graph>
-            <name>ETCD: Proposals</name>
-            <graph_items>
-                <graph_item>
-                    <color>0080FF</color>
-                    <item>
-                        <host>Template App ETCD v2</host>
-                        <key>etcd.server.proposals.committed.total</key>
-                    </item>
-                </graph_item>
-                <graph_item>
-                    <sortorder>1</sortorder>
-                    <color>00FF00</color>
-                    <item>
-                        <host>Template App ETCD v2</host>
-                        <key>etcd.server.proposals.applied.total</key>
-                    </item>
-                </graph_item>
-                <graph_item>
-                    <sortorder>2</sortorder>
-                    <color>FFFF00</color>
-                    <item>
-                        <host>Template App ETCD v2</host>
-                        <key>etcd.server.proposals.pending</key>
-                    </item>
-                </graph_item>
-                <graph_item>
-                    <sortorder>3</sortorder>
-                    <color>F63100</color>
-                    <item>
-                        <host>Template App ETCD v2</host>
-                        <key>etcd.server.proposals.failed_total</key>
-                    </item>
-                </graph_item>
-            </graph_items>
-        </graph>
-    </graphs>
     <value_maps>
         <value_map>
             <name>Service state</name>
