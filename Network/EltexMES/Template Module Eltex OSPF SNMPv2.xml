@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2023-11-29T07:07:11Z</date>
+    <groups>
+        <group>
+            <name>Templates/Modules</name>
+        </group>
+        <group>
+            <name>Templates/Network devices</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Eltex MES SNMPv2 ver.2</template>
+            <name>Template Eltex MES SNMPv2 ver.2</name>
+            <description>https://github.com/AndAndr&#13;
+Шаблон для коммутаторов Eltex серии MES</description>
+            <templates>
+                <template>
+                    <name>Template Module Eltex MES Interfaces SNMPv2</name>
+                </template>
+                <template>
+                    <name>Template Module Eltex OSPF SNMPv2</name>
+                </template>
+                <template>
+                    <name>Template Module Generic SNMPv2</name>
+                </template>
+            </templates>
+            <groups>
+                <group>
+                    <name>Templates/Network devices</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Eltex chassis</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Memory Utilization Free</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.35265.41.1.2.1.1.7.0</snmp_oid>
+                    <key>eltexProcessMemoryFree</key>
+                    <delay>5m</delay>
+                    <history>2w</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <units>b</units>
+                    <port>{$SNMP_PORT}</port>
+                    <description>The overall CPU wide system memory which is currently free in bytes.</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Memory Utilization Free Percent</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.35265.41.1.2.1.1.6.0</snmp_oid>
+                    <key>eltexProcessMemoryFreePercent</key>
+                    <delay>5m</delay>
+                    <history>2w</history>
+                    <trends>30d</trends>
+                    <units>%</units>
+                    <port>{$SNMP_PORT}</port>
+                    <description>The overall CPU wide system memory which is currently free in percents.</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$MEM.MAX.USAGE}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{last()}&lt;{$MEM.MAX.USAGE}-5</recovery_expression>
+                            <name>High memory usage on {HOST.NAME}</name>
+                            <opdata>Memory Usage: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Memory Total</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.35265.41.1.2.1.1.3.0</snmp_oid>
+                    <key>eltexProcessMemoryTotal</key>
+                    <delay>5m</delay>
+                    <history>2w</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <units>b</units>
+                    <port>{$SNMP_PORT}</port>
+                    <description>The overall CPU wide system memory size which is currently in system.</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>CPU Utilization 1min</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.89.1.8.0</snmp_oid>
+                    <key>rlCpuUtilDuringLastMinute</key>
+                    <delay>3m</delay>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>%</units>
+                    <port>{$SNMP_PORT}</port>
+                    <description>Percentage of the device CPU utilization during last minute. The value 101 is a dummy value, indicating that the CPU utilization was not measured (since measurement is disabled or was disabled during last minute).</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$CPU.MAX.USAGE} and {last()}&lt;=100</expression>
+                            <name>High CPU usage on {HOST.NAME}</name>
+                            <opdata>CPU Usage: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Eltex chassis discovery</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#SNMPVALUE},.1.3.6.1.4.1.89.53.15.1.1]</snmp_oid>
+                    <key>StackUnit</key>
+                    <delay>1h</delay>
+                    <port>{$SNMP_PORT}</port>
+                    <lifetime>1w</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} ProductID</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.4.1.6.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdStackProductID.[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Fan1 status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.4.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1 and {diff()}=1</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}=1</recovery_expression>
+                                    <name>Fan1 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Fan2 status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.5.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1 and {diff()}=1</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}=1</recovery_expression>
+                                    <name>Fan2 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Fan3 status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.6.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1 and {diff()}=1</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}=1</recovery_expression>
+                                    <name>Fan3 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Fan4 status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.7.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1 and {diff()}=1</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}=1</recovery_expression>
+                                    <name>Fan4 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Fan5 status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.8.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamFan5Status[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Fan6 status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.9.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1 and {diff()}=1</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}=1</recovery_expression>
+                                    <name>Fan6 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Main PS Status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.2.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamMainPSStatus[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1</expression>
+                                    <name>Main power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Redundant PS Status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.3.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>RlEnvMonState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1 and {last()}&lt;&gt;5</expression>
+                                    <name>Redundant power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Temperature sensor status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.11.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamTempSensorStatus[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>ENTITY-SENSORS-MIB::EntitySensorStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last(#2)}&lt;&gt;1</expression>
+                                    <name>Temperature status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Temperature sensor value</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.10.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <units>C`</units>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} Temperature sensor Warning Threshold Value</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.15.1.12.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>2d</history>
+                            <trends>0</trends>
+                            <units>C`</units>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED</type>
+                                    <params/>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} FirmwareVersion</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.14.1.3.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitGenParamFirmwareVersion[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} HardwareVersion</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.14.1.4.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitGenParamHardwareVersion[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} SerialNum</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.14.1.5.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitGenParamSerialNum[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StackUnit-{#SNMPVALUE} SoftwareVersion</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.53.14.1.2.{#SNMPVALUE}</snmp_oid>
+                            <key>rlPhdUnitGenParamSoftwareVersion[{#SNMPVALUE}]</key>
+                            <delay>1h</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}].last()}&gt;{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}].last()}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}].last()}&lt;{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}].last()}-5</recovery_expression>
+                            <name>Check {HOST.NAME} StackUnit-{#SNMPVALUE} temperature</name>
+                            <priority>HIGH</priority>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$CPU.MAX.USAGE}</macro>
+                    <value>70</value>
+                </macro>
+                <macro>
+                    <macro>{$MEM.MAX.USAGE}</macro>
+                    <value>70</value>
+                </macro>
+            </macros>
+        </template>
+        <template>
+            <template>Template Module Eltex OSPF SNMPv2</template>
+            <name>Template Module Eltex OSPF SNMPv2</name>
+            <description>https://github.com/AndAndr&#13;
+Автообнаружение соседей OSPF для коммутаторов Eltex серии MES.</description>
+            <groups>
+                <group>
+                    <name>Templates/Modules</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Eltex OSPF</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Eltex OSPF nbr discover</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#SNMPVALUE},.1.3.6.1.4.1.89.210.11.1.2.1]</snmp_oid>
+                    <key>rlOspfNbrIpAddr</key>
+                    <delay>1h</delay>
+                    <port>{$SNMP_PORT}</port>
+                    <lifetime>10d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Eltex OSPF neighbor {#SNMPVALUE} state</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.89.210.11.1.7.1.{#SNMPVALUE}.0</snmp_oid>
+                            <key>rlOspfNbrState[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <description>Full (8) - норма. Когда TwoWay (4) тоже норма, то триггер можно закрыть руками.</description>
+                            <applications>
+                                <application>
+                                    <name>Eltex OSPF</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>SNMP OSPF Neighbor State (ospfNbrState)</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;8 and {diff()}=1</expression>
+                                    <name>OSPF: Check neighbor {#SNMPVALUE} state on {HOST.NAME}</name>
+                                    <opdata>NBR State={ITEM.LASTVALUE1}</opdata>
+                                    <priority>WARNING</priority>
+                                    <description>Доступно ручное закрытие, если TwoWay (4) - это норма.&#13;
+Триггер повторно не стреляет.</description>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>ENTITY-SENSORS-MIB::EntitySensorStatus</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>ok</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>unavailable</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>nonoperational</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>RlEnvMonState</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>normal</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>warning</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>critical</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>shutdown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>notPresent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>notFunctioning</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>readingFailed</newvalue>
+                </mapping>
+                <mapping>
+                    <value>8</value>
+                    <newvalue>notAvailable</newvalue>
+                </mapping>
+                <mapping>
+                    <value>9</value>
+                    <newvalue>backingUp</newvalue>
+                </mapping>
+                <mapping>
+                    <value>10</value>
+                    <newvalue>readingFailed</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>SNMP OSPF Neighbor State (ospfNbrState)</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>Attempt</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>Init</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>TwoWay</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>ExchangeStart</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>Exchange</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>Loading</newvalue>
+                </mapping>
+                <mapping>
+                    <value>8</value>
+                    <newvalue>Full</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
