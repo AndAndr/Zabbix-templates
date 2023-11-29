@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-11-29T07:04:18Z</date>
+    <date>2023-11-29T09:01:38Z</date>
     <groups>
         <group>
             <name>Templates/Network devices</name>
@@ -9,21 +9,10 @@
     </groups>
     <templates>
         <template>
-            <template>Template Eltex MES SNMPv2 ver.2</template>
-            <name>Template Eltex MES SNMPv2 ver.2</name>
+            <template>Template Eltex MES SNMPv2-2</template>
+            <name>Template Eltex MES SNMPv2-2</name>
             <description>https://github.com/AndAndr&#13;
 Шаблон для коммутаторов Eltex серии MES</description>
-            <templates>
-                <template>
-                    <name>Template Module Eltex MES Interfaces SNMPv2</name>
-                </template>
-                <template>
-                    <name>Template Module Eltex OSPF SNMPv2</name>
-                </template>
-                <template>
-                    <name>Template Module Generic SNMPv2</name>
-                </template>
-            </templates>
             <groups>
                 <group>
                     <name>Templates/Network devices</name>
@@ -578,9 +567,9 @@
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}].last()}&gt;{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}].last()}</expression>
+                            <expression>{Template Eltex MES SNMPv2-2:rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}].last()}&gt;{Template Eltex MES SNMPv2-2:rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}].last()}</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}].last()}&lt;{Template Eltex MES SNMPv2 ver.2:rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}].last()}-5</recovery_expression>
+                            <recovery_expression>{Template Eltex MES SNMPv2-2:rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}].last()}&lt;{Template Eltex MES SNMPv2-2:rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}].last()}-5</recovery_expression>
                             <name>Check {HOST.NAME} StackUnit-{#SNMPVALUE} temperature</name>
                             <priority>HIGH</priority>
                         </trigger_prototype>
@@ -597,6 +586,13 @@
                     <value>70</value>
                 </macro>
             </macros>
+            <screens>
+                <screen>
+                    <name>Network interfaces</name>
+                    <hsize>1</hsize>
+                    <vsize>1</vsize>
+                </screen>
+            </screens>
         </template>
     </templates>
     <value_maps>
