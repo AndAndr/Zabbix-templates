@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-10-30T06:22:15Z</date>
+    <date>2023-11-30T11:28:08Z</date>
     <groups>
         <group>
             <name>Templates/Server hardware</name>
@@ -11,6 +11,7 @@
         <template>
             <template>Template YADRO Vegman SNMPv2</template>
             <name>Template YADRO Vegman SNMPv2</name>
+            <description>https://github.com/AndAndr</description>
             <templates>
                 <template>
                     <name>Template Module Generic SNMPv2</name>
