@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-11-27T05:52:48Z</date>
+    <date>2023-12-14T08:00:02Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -81,7 +81,7 @@
                         </step>
                         <step>
                             <type>DISCARD_UNCHANGED_HEARTBEAT</type>
-                            <params>1d</params>
+                            <params>2h</params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -429,7 +429,7 @@
                     </master_item>
                     <triggers>
                         <trigger>
-                            <expression>{max(10m)}-{min(10m)}&gt;{$ETCD.PROPOSALS.FAILED.RISE.MAX}</expression>
+                            <expression>{max(10m)}-{min(10m)}&gt;{$ETCD.PROPOSALS.FAILED.RISE.MAX} and {last(0)}&gt;0</expression>
                             <name>ETCD: rising &quot;failed proposals&quot;</name>
                             <opdata>Рост &quot;failed proposals&quot;</opdata>
                             <priority>WARNING</priority>
