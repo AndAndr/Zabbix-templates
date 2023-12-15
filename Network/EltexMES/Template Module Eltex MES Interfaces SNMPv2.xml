@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-11-29T08:59:47Z</date>
+    <date>2023-12-15T09:04:06Z</date>
     <groups>
         <group>
             <name>Templates/Modules</name>
@@ -92,7 +92,7 @@
                             </condition>
                         </conditions>
                     </filter>
-                    <lifetime>2d</lifetime>
+                    <lifetime>1h</lifetime>
                     <description>Discovering copper interfaces.</description>
                     <item_prototypes>
                         <item_prototype>
@@ -481,7 +481,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                             </condition>
                         </conditions>
                     </filter>
-                    <lifetime>2d</lifetime>
+                    <lifetime>1h</lifetime>
                     <description>Discovering LAG interfaces.</description>
                     <item_prototypes>
                         <item_prototype>
@@ -724,7 +724,7 @@ WARNING: if closed manually - won't fire again on next poll, because of .diff.</
                             </condition>
                         </conditions>
                     </filter>
-                    <lifetime>2d</lifetime>
+                    <lifetime>1h</lifetime>
                     <description>Discovering copper interfaces (optic-fiber(2) or combo(3))</description>
                     <item_prototypes>
                         <item_prototype>
