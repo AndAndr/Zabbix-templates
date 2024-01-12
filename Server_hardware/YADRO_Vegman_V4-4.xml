@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-11-30T11:28:08Z</date>
+    <date>2024-01-12T12:00:45Z</date>
     <groups>
         <group>
             <name>Templates/Server hardware</name>
@@ -30,6 +30,38 @@
                     <name>Sensors value</name>
                 </application>
             </applications>
+            <items>
+                <item>
+                    <name>Host Power State</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.49769.1.1</snmp_oid>
+                    <key>vegman.server.Host.Power.State</key>
+                    <history>14d</history>
+                    <trends>30d</trends>
+                    <description>Статус работы хоста</description>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>yadroHostPowerState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;1</expression>
+                            <name>Check {HOST.NAME} power state</name>
+                            <priority>INFO</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{nodata(5m)}=1</expression>
+                            <name>YADRO vendor OIDs is not accessible on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
             <discovery_rules>
                 <discovery_rule>
                     <name>Current strength (A) Sensors</name>
@@ -730,6 +762,23 @@
                 <mapping>
                     <value>2</value>
                     <newvalue>false</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>yadroHostPowerState</name>
+            <mappings>
+                <mapping>
+                    <value>-1</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>off</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>on</newvalue>
                 </mapping>
             </mappings>
         </value_map>
