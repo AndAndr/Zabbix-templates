@@ -36,7 +36,7 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 **ZKTeco** Контроль состояния биометрических считывателей ZKTeco для версий Zabbix 4.4 и выше. Tested on ZKTeco MA300.
 
 ## Server_hardware
-**YADRO_Vegman_V4-4.xml** for zabbix 4-6 version. Monitoring YADRO Vegman servers via SNMP.
+**YADRO_Vegman_V4-4.xml** Мониторинг BMC серверов YADRO Vegman для Zabbix 4.4.
 
 
 
