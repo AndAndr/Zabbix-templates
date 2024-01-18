@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-12-15T09:04:06Z</date>
+    <date>2024-01-18T12:51:19Z</date>
     <groups>
         <group>
             <name>Templates/Modules</name>
@@ -1123,7 +1123,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                             </dependencies>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.rlPhyTestGetResult.InPow[{#SNMPINDEX}].avg(5m)}&lt;({Template Module Eltex MES Interfaces SNMPv2-2:optic.rlPhyTestGetResult.OutPow[{#SNMPINDEX}].avg(5m)}*2)</expression>
+                            <expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.rlPhyTestGetResult.InPow[{#SNMPINDEX}].avg(5m)}&lt;({Template Module Eltex MES Interfaces SNMPv2-2:optic.rlPhyTestGetResult.OutPow[{#SNMPINDEX}].avg(5m)}*{$SFP.INOUTPOW.RATIO})</expression>
                             <name>Interface {#IFNAME}({#IFALIAS}): Затухание на SFP</name>
                             <priority>WARNING</priority>
                             <description>Потери мощности на оптической линии.</description>
@@ -1245,6 +1245,11 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                     <macro>{$NET.IF.IFOPERSTATUS.NOT_MATCHES}</macro>
                     <value>^6$</value>
                     <description>Ignore notPresent(6)</description>
+                </macro>
+                <macro>
+                    <macro>{$SFP.INOUTPOW.RATIO}</macro>
+                    <value>2.5</value>
+                    <description>Во сколько раз различаются InPow и OutPow. Увеличить коэффициент - загрубить триггер.</description>
                 </macro>
                 <macro>
                     <macro>{$SFP.MAX.TEMPERATURE}</macro>
