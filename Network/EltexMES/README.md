@@ -49,3 +49,6 @@
 ## Howto:
 1. Импорт модулей **Template Module Eltex MES Interfaces SNMPv2.xml**, **Template Module Eltex OSPF SNMPv2.xml**.
 2. Импорт шаблона **Template Eltex MES SNMPv2 ver.2.xml**.
+3. Модули можно прилинковать к шаблону в зависимость, плюс можно к шаблону прилинковать стандартный модуль **Template Module Generic SNMPv2** для
+оценки доступности хоста и получения статуса работы SNMP.
+
