@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2024-01-18T12:51:19Z</date>
+    <date>2024-01-19T08:41:48Z</date>
     <groups>
         <group>
             <name>Templates/Modules</name>
@@ -9,8 +9,8 @@
     </groups>
     <templates>
         <template>
-            <template>Template Module Eltex MES Interfaces SNMPv2-2</template>
-            <name>Template Module Eltex MES Interfaces SNMPv2-2</name>
+            <template>Template Module Eltex MES Interfaces SNMPv22</template>
+            <name>Template Module Eltex MES Interfaces SNMPv22</name>
             <description>https://github.com/AndAndr&#13;
 Автообнаружение интерфейсов для коммутаторов Eltex серии MES.</description>
             <groups>
@@ -309,24 +309,25 @@ The current operational state of the interface.&#13;
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
                                     <opdata>Current state: {ITEM.LASTVALUE1}</opdata>
                                     <priority>WARNING</priority>
-                                    <description>This trigger expression works as follows:&#13;
-1. Can be triggered if operations status is down.&#13;
-2. {{$IFCONTROL:&quot;{#IFNAME}&quot;}}=1 - user can redefine Context macro to value - 0. That marks this interface as not important. No new trigger will be fired if this interface is down.&#13;
-3. {TEMPLATE_NAME:METRIC.diff()}=1) - trigger fires only if operational status was up(1) sometime before. (So, do not fire 'ethernal off' interfaces.)&#13;
-&#13;
-WARNING: if closed manually - won't fire again on next poll, because of .diff.</description>
+                                    <description>Триггер работает следующим образом:&#13;
+1. Стреляет, если &quot;Operation status&quot; интерфейса уходит в состояние &quot;Down(0)&quot;.&#13;
+2. Вы можете определять на уровне шаблона или создать на хосте макрос { $IFCONTROL }=1 - для глобального определения всех интерфейсов важными или { $IFCONTROL }=0 - не важными. (Убрать пробелы!)&#13;
+3. Вы можете использовать на хосте макросы с контекстом для определения конкретного интерфейса важным или не важным, в зависимости от Вашего решения в п.2, например:&#13;
+{ $IFCONTROL:{#IFNAME} }=1. (Убрать пробелы!)&#13;
+4. Стреляет, если &quot;Operation status&quot; интерфейса до этого был в состоянии &quot;Up(1)&quot;&#13;
+5. Триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что п.4.</description>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>({Template Module Eltex MES Interfaces SNMPv2-2:net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv2-2:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} or&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv2-2:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}) and&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}&gt;0</expression>
+                            <expression>({Template Module Eltex MES Interfaces SNMPv22:net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv22:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} or&#13;
+{Template Module Eltex MES Interfaces SNMPv22:net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv22:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}) and&#13;
+{Template Module Eltex MES Interfaces SNMPv22:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}&gt;0</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv2-2:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} and&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv2-2:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}</recovery_expression>
+                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv22:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} and&#13;
+{Template Module Eltex MES Interfaces SNMPv22:net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv22:net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}</recovery_expression>
                             <name>Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( &gt; {$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}% )</name>
                             <opdata>In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}</opdata>
                             <priority>INFO</priority>
@@ -334,17 +335,17 @@ WARNING: if closed manually - won't fire again on next poll, because of .diff.</
                             <dependencies>
                                 <dependency>
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
-                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv2-2:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
-                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
+                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv22:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv22:net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
+                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
                                 </dependency>
                             </dependencies>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{Template Module Eltex MES Interfaces SNMPv2-2:net.if.in.errors[ifInErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}&#13;
-or {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}</expression>
+                            <expression>{Template Module Eltex MES Interfaces SNMPv22:net.if.in.errors[ifInErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}&#13;
+or {Template Module Eltex MES Interfaces SNMPv22:net.if.out.errors[ifOutErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:net.if.in.errors[ifInErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8&#13;
-and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8</recovery_expression>
+                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:net.if.in.errors[ifInErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8&#13;
+and {Template Module Eltex MES Interfaces SNMPv22:net.if.out.errors[ifOutErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8</recovery_expression>
                             <name>Interface {#IFNAME}({#IFALIAS}): High error rate ( &gt; {$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;} for 5m)</name>
                             <opdata>errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}</opdata>
                             <priority>WARNING</priority>
@@ -352,8 +353,8 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                             <dependencies>
                                 <dependency>
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
-                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv2-2:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
-                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
+                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv22:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv22:net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
+                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
                                 </dependency>
                             </dependencies>
                         </trigger_prototype>
@@ -366,7 +367,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>1A7C11</color>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>net.if.in[ifHCInOctets.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -375,7 +376,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                                     <drawtype>BOLD_LINE</drawtype>
                                     <color>2774A4</color>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>net.if.out[ifHCOutOctets.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -384,7 +385,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                                     <color>F63100</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>net.if.out.errors[ifOutErrors.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -393,7 +394,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                                     <color>A54F10</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>net.if.in.errors[ifInErrors.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -402,7 +403,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                                     <color>FC6EA3</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>net.if.out.discards[ifOutDiscards.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -411,7 +412,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:net.if.out.errors[ifOutErrors
                                     <color>6C59DC</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>net.if.in.discards[ifInDiscards.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -602,24 +603,25 @@ The current operational state of the interface.&#13;
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
                                     <opdata>Current state: {ITEM.LASTVALUE1}</opdata>
                                     <priority>WARNING</priority>
-                                    <description>This trigger expression works as follows:&#13;
-1. Can be triggered if operations status is down.&#13;
-2. {{$IFCONTROL:&quot;{#IFNAME}&quot;}}=1 - user can redefine Context macro to value - 0. That marks this interface as not important. No new trigger will be fired if this interface is down.&#13;
-3. {TEMPLATE_NAME:METRIC.diff()}=1) - trigger fires only if operational status was up(1) sometime before. (So, do not fire 'ethernal off' interfaces.)&#13;
-&#13;
-WARNING: if closed manually - won't fire again on next poll, because of .diff.</description>
+                                    <description>Триггер работает следующим образом:&#13;
+1. Стреляет, если &quot;Operation status&quot; интерфейса уходит в состояние &quot;Down(0)&quot;.&#13;
+2. Вы можете определять на уровне шаблона или создать на хосте макрос { $IFCONTROL }=1 - для глобального определения всех интерфейсов важными или { $IFCONTROL }=0 - не важными. (Убрать пробелы!)&#13;
+3. Вы можете использовать на хосте макросы с контекстом для определения конкретного интерфейса важным или не важным, в зависимости от Вашего решения в п.2, например:&#13;
+{ $IFCONTROL:{#IFNAME} }=1. (Убрать пробелы!)&#13;
+4. Стреляет, если &quot;Operation status&quot; интерфейса до этого был в состоянии &quot;Up(1)&quot;&#13;
+5. Триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что п.4.</description>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>({Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} or&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}) and&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}&gt;0</expression>
+                            <expression>({Template Module Eltex MES Interfaces SNMPv22:lag.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} or&#13;
+{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}) and&#13;
+{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}&gt;0</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} and&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}</recovery_expression>
+                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} and&#13;
+{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}</recovery_expression>
                             <name>Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( &gt; {$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}% )</name>
                             <opdata>In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}</opdata>
                             <priority>INFO</priority>
@@ -627,8 +629,8 @@ WARNING: if closed manually - won't fire again on next poll, because of .diff.</
                             <dependencies>
                                 <dependency>
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
-                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
-                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:lag.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
+                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv22:lag.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv22:lag.net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
+                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:lag.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
                                 </dependency>
                             </dependencies>
                         </trigger_prototype>
@@ -640,7 +642,7 @@ WARNING: if closed manually - won't fire again on next poll, because of .diff.</
                                 <graph_item>
                                     <color>1A7C11</color>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>lag.net.if.in[ifHCInOctets.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -648,7 +650,7 @@ WARNING: if closed manually - won't fire again on next poll, because of .diff.</
                                     <sortorder>1</sortorder>
                                     <color>2774A4</color>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -945,12 +947,13 @@ The current operational state of the interface.&#13;
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
                                     <opdata>Current state: {ITEM.LASTVALUE1}</opdata>
                                     <priority>WARNING</priority>
-                                    <description>This trigger expression works as follows:&#13;
-1. Can be triggered if operations status is down.&#13;
-2. {{$IFCONTROL:&quot;{#IFNAME}&quot;}}=1 - user can redefine Context macro to value - 0. That marks this interface as not important. No new trigger will be fired if this interface is down.&#13;
-3. {TEMPLATE_NAME:METRIC.diff()}=1) - trigger fires only if operational status was up(1) sometime before. (So, do not fire 'ethernal off' interfaces.)&#13;
-&#13;
-WARNING: if closed manually - won't fire again on next poll, because of .diff.</description>
+                                    <description>Триггер работает следующим образом:&#13;
+1. Стреляет, если &quot;Operation status&quot; интерфейса уходит в состояние &quot;Down(0)&quot;.&#13;
+2. Вы можете определять на уровне шаблона или создать на хосте макрос { $IFCONTROL }=1 - для глобального определения всех интерфейсов важными или { $IFCONTROL }=0 - не важными. (Убрать пробелы!)&#13;
+3. Вы можете использовать на хосте макросы с контекстом для определения конкретного интерфейса важным или не важным, в зависимости от Вашего решения в п.2, например:&#13;
+{ $IFCONTROL:{#IFNAME} }=1. (Убрать пробелы!)&#13;
+4. Стреляет, если &quot;Operation status&quot; интерфейса до этого был в состоянии &quot;Up(1)&quot;&#13;
+5. Триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что п.4.</description>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
@@ -1086,12 +1089,12 @@ WARNING: if closed manually - won't fire again on next poll, because of .diff.</
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>({Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} or&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}) and&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}&gt;0</expression>
+                            <expression>({Template Module Eltex MES Interfaces SNMPv22:optic.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} or&#13;
+{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}) and&#13;
+{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}&gt;0</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} and&#13;
-{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}</recovery_expression>
+                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.in[ifHCInOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()} and&#13;
+{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}].last()}</recovery_expression>
                             <name>Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( &gt; {$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}% )</name>
                             <opdata>In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}</opdata>
                             <priority>INFO</priority>
@@ -1099,17 +1102,17 @@ WARNING: if closed manually - won't fire again on next poll, because of .diff.</
                             <dependencies>
                                 <dependency>
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
-                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
-                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
+                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv22:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv22:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
+                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
                                 </dependency>
                             </dependencies>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}&#13;
-or {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}</expression>
+                            <expression>{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}&#13;
+or {Template Module Eltex MES Interfaces SNMPv22:optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8&#13;
-and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8</recovery_expression>
+                            <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8&#13;
+and {Template Module Eltex MES Interfaces SNMPv22:optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8</recovery_expression>
                             <name>Interface {#IFNAME}({#IFALIAS}): High error rate ( &gt; {$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;} for 5m)</name>
                             <opdata>errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}</opdata>
                             <priority>WARNING</priority>
@@ -1117,16 +1120,18 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                             <dependencies>
                                 <dependency>
                                     <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
-                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
-                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
+                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and ({Template Module Eltex MES Interfaces SNMPv22:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}=2 and {Template Module Eltex MES Interfaces SNMPv22:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].diff()}=1)</expression>
+                                    <recovery_expression>{Template Module Eltex MES Interfaces SNMPv22:optic.net.if.status[ifOperStatus.{#SNMPINDEX}].last()}&lt;&gt;2</recovery_expression>
                                 </dependency>
                             </dependencies>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{Template Module Eltex MES Interfaces SNMPv2-2:optic.rlPhyTestGetResult.InPow[{#SNMPINDEX}].avg(5m)}&lt;({Template Module Eltex MES Interfaces SNMPv2-2:optic.rlPhyTestGetResult.OutPow[{#SNMPINDEX}].avg(5m)}*{$SFP.INOUTPOW.RATIO})</expression>
+                            <expression>{Template Module Eltex MES Interfaces SNMPv22:optic.rlPhyTestGetResult.InPow[{#SNMPINDEX}].avg(5m)}&lt;({Template Module Eltex MES Interfaces SNMPv22:optic.rlPhyTestGetResult.OutPow[{#SNMPINDEX}].avg(5m)}*{$SFP.INOUTPOW.RATIO})</expression>
                             <name>Interface {#IFNAME}({#IFALIAS}): Затухание на SFP</name>
+                            <opdata>InPow: {ITEM.LASTVALUE1}, InPow: {ITEM.LASTVALUE2}</opdata>
                             <priority>WARNING</priority>
-                            <description>Потери мощности на оптической линии.</description>
+                            <description>Потери мощности на оптической линии.&#13;
+Для корректировки чувствительности смотри макрос { $SFP.INOUTPOW.RATIO }</description>
                         </trigger_prototype>
                     </trigger_prototypes>
                     <graph_prototypes>
@@ -1137,7 +1142,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>1A7C11</color>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>optic.net.if.in[ifHCInOctets.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -1146,7 +1151,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                                     <drawtype>BOLD_LINE</drawtype>
                                     <color>2774A4</color>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -1155,7 +1160,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                                     <color>F63100</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -1164,7 +1169,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                                     <color>A54F10</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -1173,7 +1178,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                                     <color>FC6EA3</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>optic.net.if.out.discards[ifOutDiscards.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -1182,7 +1187,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                                     <color>6C59DC</color>
                                     <yaxisside>RIGHT</yaxisside>
                                     <item>
-                                        <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                        <host>Template Module Eltex MES Interfaces SNMPv22</host>
                                         <key>optic.net.if.in.discards[ifInDiscards.{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -1194,7 +1199,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
             <macros>
                 <macro>
                     <macro>{$IF.ERRORS.WARN}</macro>
-                    <value>2</value>
+                    <value>10</value>
                 </macro>
                 <macro>
                     <macro>{$IF.UTIL.MAX}</macro>
@@ -1268,7 +1273,7 @@ and {Template Module Eltex MES Interfaces SNMPv2-2:optic.net.if.out.errors[ifOut
                             <style>0</style>
                             <resource>
                                 <name>Copper Interface {#IFNAME}({#IFALIAS}): Network traffic</name>
-                                <host>Template Module Eltex MES Interfaces SNMPv2-2</host>
+                                <host>Template Module Eltex MES Interfaces SNMPv22</host>
                             </resource>
                             <width>750</width>
                             <height>100</height>
