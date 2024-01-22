@@ -11,5 +11,6 @@ zktaddress = sys.argv[1]
 zkt = zklib.ZKLib("{}".format (zktaddress), 4370)
 if zkt.connect() == True:
   print zkt.serialNumber()
+  zkt.disconnect()
 else:
   print ("~CMD_ACK_OK=0")
