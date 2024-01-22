@@ -8,7 +8,7 @@
 0. С условного сервера **srv1** необходимо обеспечить доступ к порту UDP4370 считывателей
 1. Скопировать `template_zkteco.conf` в каталог `/etc/zabbix/zabbix_agentd.conf.d/` сервера **srv1**
 2. Включить опцию и увеличить таймаут `Timeout=4` в файле `/etc/zabbix/zabbix_agentd.conf`сервера **srv1**
-3. Каталог `zklib` положить в `/var/lib/zabbix/zklib/` сервера **srv1**
+3. Установить библиотеки `zklib` на сервер **srv1** - `sudo python setup.py install`
 4. Скопировать `zktstatus.py` в `/var/lib/zabbix/zklib/` сервера **srv1**
 5. Рестарт агента Заббикса на сервере **srv1**
 6. Импорт шаблона `Template_ZKTeco.xml` и привязка его к **srv1**
