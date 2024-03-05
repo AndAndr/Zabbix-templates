@@ -1,0 +1,729 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-03-05T13:30:18Z'
+  groups:
+    -
+      uuid: 2cb435130e6a483a8b41678605abea1b
+      name: 'Templates/Other Hardware'
+  templates:
+    -
+      uuid: 744279bce50949309b4e7a19ac515a00
+      template: Template_Powerware9390
+      name: Template_Powerware9390
+      description: 'https://github.com/AndAndr'
+      templates:
+        -
+          name: 'ICMP Ping'
+      groups:
+        -
+          name: 'Templates/Other Hardware'
+      items:
+        -
+          uuid: 6fd62dcc52d54040a0d9a4d31575c83d
+          name: 'Батарея. Ток'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.2.3.0
+          key: batcur
+          delay: '30'
+          history: 14d
+          trends: 30d
+          value_type: FLOAT
+          units: A
+          tags:
+            -
+              tag: Application
+              value: Батарея
+        -
+          uuid: 1e3350a527b44ac69daca615ffc553af
+          name: 'Кол-во состояний типа "Тревога"'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.7.1.0
+          key: xupsAlarms
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: Шт.
+          tags:
+            -
+              tag: Application
+              value: 'Состояние ИБП'
+          triggers:
+            -
+              uuid: 8450aaa8fbb640b6855e7ae31b1aa9f8
+              expression: last(/Template_Powerware9390/xupsAlarms)<>0
+              name: '"Alarm" on {HOSTNAME}'
+              status: DISABLED
+              priority: HIGH
+        -
+          uuid: fe46647a29194b6eb00801b77317b5fc
+          name: 'Батарея. Заряд'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.2.4.0
+          key: xupsBatCapacity
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: Батарея
+        -
+          uuid: bfdd5e4be6394725a5c04faed3529afd
+          name: 'Батарея. Время работы от батарей'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.2.1.0
+          key: xupsBatTimeRemaining
+          delay: '30'
+          history: 14d
+          trends: 30d
+          value_type: FLOAT
+          units: минут
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.016666667'
+          tags:
+            -
+              tag: Application
+              value: Батарея
+        -
+          uuid: fa4c0031641e4b2c96bb497641b6d94d
+          name: 'Батарея. Напряжение'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.2.2.0
+          key: xupsBatVoltage
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Батарея
+        -
+          uuid: 8ab4766071194562a873ad4d2a2da1a8
+          name: 'Байпас. Частота'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.5.1.0
+          key: xupsBypassFrequency
+          delay: '30'
+          history: 14d
+          trends: 30d
+          value_type: FLOAT
+          units: Гц
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            -
+              tag: Application
+              value: Байпас
+        -
+          uuid: 8bb45aae96644167ab46924e00ad858d
+          name: 'Байпас. Напряжение A-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.5.3.1.2.1
+          key: xupsBypassVoltagea
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Байпас
+        -
+          uuid: 422a1f93a49048f398a91557a376ddbc
+          name: 'Байпас. Напряжение B-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.5.3.1.2.2
+          key: xupsBypassVoltageb
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Байпас
+        -
+          uuid: 9accfadac40e473590ca92fc56e66fed
+          name: 'Байпас. Напряжение C-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.5.3.1.2.3
+          key: xupsBypassVoltagec
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Байпас
+        -
+          uuid: c746a6e6adbb4bdbb528c0de3d85f5cd
+          name: 'Влажность. Выносной датчик'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.6.6.0
+          key: xupsEnvRemoteHumidity
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Состояние ИБП'
+          triggers:
+            -
+              uuid: e8269b1f69074c7dabe772b5408f4b34
+              expression: last(/Template_Powerware9390/xupsEnvRemoteHumidity)>85
+              name: 'Relative Humidity in UPS room is not normal'
+              priority: HIGH
+        -
+          uuid: ad12df983f0042a1918cab6a121670e7
+          name: 'Температура. Выносной датчик'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.6.5.0
+          key: xupsEnvRemoteTemp
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: C
+          tags:
+            -
+              tag: Application
+              value: 'Состояние ИБП'
+          triggers:
+            -
+              uuid: 17a6e2e0f9514a6183971864ae447a26
+              expression: last(/Template_Powerware9390/xupsEnvRemoteTemp)>24
+              name: 'Temperature in UPS room is not normal'
+              priority: HIGH
+        -
+          uuid: dfe455b97a4d4c7998752d19a5785e6b
+          name: 'Вход. Ток фаза A'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.4.1.3.1
+          key: xupsInputCurrenta
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: А
+          tags:
+            -
+              tag: Application
+              value: Вход
+        -
+          uuid: 3f079ecb785a4a71a8be78b41b440cfd
+          name: 'Вход. Ток фаза B'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.4.1.3.2
+          key: xupsInputCurrentb
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: А
+          tags:
+            -
+              tag: Application
+              value: Вход
+        -
+          uuid: 4c26560276c3495498895c03e0e5915a
+          name: 'Вход. Ток фаза C'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.4.1.3.3
+          key: xupsInputCurrentc
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: А
+          tags:
+            -
+              tag: Application
+              value: Вход
+        -
+          uuid: 14cf481011964e49995333b4dfdce7c0
+          name: 'Вход. Частота'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.1.0
+          key: xupsInputFrequency
+          delay: '30'
+          history: 14d
+          trends: 30d
+          value_type: FLOAT
+          units: Гц
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            -
+              tag: Application
+              value: Вход
+        -
+          uuid: ecf4c2d430d6452d86c08a430695081b
+          name: 'Количество отклонений от нормы частоты или напряжения'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.2.0
+          key: xupsInputLineBads
+          delay: '30'
+          history: 14d
+          trends: 30d
+          tags:
+            -
+              tag: Application
+              value: 'Состояние ИБП'
+        -
+          uuid: 1d22be6bcce9490ca6e310b709b2bfc5
+          name: 'Состояние входов ИБП'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.5.0
+          key: xupsInputSource
+          delay: '30'
+          history: 14d
+          trends: 30d
+          valuemap:
+            name: xupsInputSource
+          tags:
+            -
+              tag: Application
+              value: 'Состояние ИБП'
+          triggers:
+            -
+              uuid: aed780f79a2249b099cdb162762b1a04
+              expression: last(/Template_Powerware9390/xupsInputSource)<3
+              name: '{HOSTNAME} input source Failure'
+              priority: HIGH
+            -
+              uuid: 2af2a82c4ff04f2da6942d27f98b2f7a
+              expression: last(/Template_Powerware9390/xupsInputSource)=4
+              name: '{HOSTNAME} is on Bypass'
+              priority: AVERAGE
+        -
+          uuid: a083c90e02a14451bd886fb5c2bf50dd
+          name: 'Вход. Напряжение A-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.4.1.2.1
+          key: xupsInputVoltage
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Вход
+        -
+          uuid: 3b693d2351634ae9a0f58b19b8a46833
+          name: 'Вход. Напряжение B-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.4.1.2.2
+          key: xupsInputVoltageb
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Вход
+        -
+          uuid: 0762fd8f13bd469eab9f33eb84fa19ba
+          name: 'Вход. Напряжение C-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.3.4.1.2.3
+          key: xupsInputVoltagec
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Вход
+        -
+          uuid: 3c924247f8b9465b92bc97987d291c95
+          name: 'Выход. Ток фаза A'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.3.1
+          key: xupsOutputCurrenta
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: А
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: 3384df95c7c94823b1a184a5fc352f9e
+          name: 'Выход. Ток фаза B'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.3.2
+          key: xupsOutputCurrentb
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: А
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: 3df68d1f46534a2fbfc8586d8a36ed40
+          name: 'Выход. Ток фаза C'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.3.3
+          key: xupsOutputCurrentc
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: А
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: 1dd3ff411e2d4208a5eaa66ebd8705d5
+          name: 'Выход. Частота'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.2.0
+          key: xupsOutputFrequency
+          delay: '30'
+          history: 14d
+          trends: 30d
+          value_type: FLOAT
+          units: Гц
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: df6d1447307245c0bec1e32e8f8d47c0
+          name: 'Состояние ИБП'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.5.0
+          key: xupsOutputSource
+          delay: '30'
+          history: 14d
+          trends: 30d
+          valuemap:
+            name: xupsOutputSource
+          tags:
+            -
+              tag: Application
+              value: 'Состояние ИБП'
+          triggers:
+            -
+              uuid: bca54d5b274e4657a649dd4e93787b17
+              expression: 'last(/Template_Powerware9390/xupsOutputSource)<>{$UPSMODE}'
+              name: 'Check {HOSTNAME} state'
+              priority: AVERAGE
+            -
+              uuid: f9eab83ea2874c9b96376d0d53579709
+              expression: last(/Template_Powerware9390/xupsOutputSource)<4
+              name: '{HOSTNAME} Check UPS Status!'
+              priority: AVERAGE
+            -
+              uuid: feea5e23027f49e098a62298d4b2a8b8
+              expression: last(/Template_Powerware9390/xupsOutputSource)=4
+              name: '{HOSTNAME} is on automatic Bypass'
+              priority: WARNING
+            -
+              uuid: 34ebb8ade39d451ab07f15bf3ad5a0fd
+              expression: last(/Template_Powerware9390/xupsOutputSource)=5
+              name: '{HOSTNAME} on Battery'
+              priority: AVERAGE
+            -
+              uuid: 12fdb4bee9114ca3863d74091e2db9bc
+              expression: last(/Template_Powerware9390/xupsOutputSource)=11
+              name: '{HOSTNAME} on manual Bypass'
+              priority: WARNING
+        -
+          uuid: 208903d825184a2d8fdb899171393e79
+          name: 'Выход. Напряжение A-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.2.1
+          key: xupsOutputVoltagea
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: 8dcf57a498c04aef851192ae13c6cc23
+          name: 'Выход. Напряжение B-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.2.2
+          key: xupsOutputVoltageb
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: ae6f89b7625646e7b9c5eb02031e98ce
+          name: 'Выход. Напряжение C-N'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.2.3
+          key: xupsOutputVoltagec
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: В
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: c2f27321c843402486b9564c1d68b2a6
+          name: 'Выходная мощность фаза A'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.4.1
+          key: xupsOutputWattsa
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: Вт
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: 408869cea2934ea0b2fc506b7e3dfb98
+          name: 'Выходная мощность фаза B'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.4.2
+          key: xupsOutputWattsb
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: Вт
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: 6465e8368c1a4313a34a80be37f1aeb3
+          name: 'Выходная мощность фаза C'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.4.4.1.4.3
+          key: xupsOutputWattsc
+          delay: '30'
+          history: 14d
+          trends: 30d
+          units: Вт
+          tags:
+            -
+              tag: Application
+              value: Выход
+        -
+          uuid: 9ad8ddede7674616a426bbc561cc4159
+          name: 'Статус теста батарей'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.534.1.8.2.0
+          key: xupsTestBatteryStatus
+          delay: '30'
+          history: 14d
+          trends: 30d
+          valuemap:
+            name: 'Battery status'
+          tags:
+            -
+              tag: Application
+              value: 'Состояние ИБП'
+          triggers:
+            -
+              uuid: b81e931c6b0c4e0e99a24d37cceee12c
+              expression: last(/Template_Powerware9390/xupsTestBatteryStatus)=3
+              name: '{HOSTNAME} battery test Failed!'
+              priority: DISASTER
+      macros:
+        -
+          macro: '{$UPSMODE}'
+          value: '9'
+          description: '9 - Parallel Redundant, 3 - Single UPS module output'
+      valuemaps:
+        -
+          uuid: be9f3fcc162c4be1bbd1615bcc7360bd
+          name: 'Battery status'
+          mappings:
+            -
+              value: '1'
+              newvalue: Неизвестно
+            -
+              value: '2'
+              newvalue: Прошел
+            -
+              value: '3'
+              newvalue: Неуспешно
+            -
+              value: '4'
+              newvalue: 'В процессе'
+            -
+              value: '5'
+              newvalue: 'Не поддерживается'
+            -
+              value: '6'
+              newvalue: Запрещен
+            -
+              value: '7'
+              newvalue: Запланирован
+        -
+          uuid: 1d22be6bcce9490ca6e310b709b2bfc5
+          name: xupsInputSource
+          mappings:
+            -
+              value: '2'
+              newvalue: 'Сбой питания'
+            -
+              value: '3'
+              newvalue: Норма
+            -
+              value: '4'
+              newvalue: Байпас
+        -
+          uuid: df6d1447307245c0bec1e32e8f8d47c0
+          name: xupsOutputSource
+          mappings:
+            -
+              value: '1'
+              newvalue: 'Другое???'
+            -
+              value: '2'
+              newvalue: none
+            -
+              value: '3'
+              newvalue: 'Норма (Single UPS module output)'
+            -
+              value: '4'
+              newvalue: 'Автоматический байпас'
+            -
+              value: '5'
+              newvalue: 'На батарее'
+            -
+              value: '6'
+              newvalue: Booster
+            -
+              value: '7'
+              newvalue: Reducer
+            -
+              value: '8'
+              newvalue: 'Норма (Parallel capacity)'
+            -
+              value: '9'
+              newvalue: 'Норма (Parallel redundant)'
+            -
+              value: '10'
+              newvalue: 'Норма (High Efficiency Mode)'
+            -
+              value: '11'
+              newvalue: 'На обслуживании (Ручной байпас)'
+  graphs:
+    -
+      uuid: 0b8a174a7a964f8185a1e1c7cb06b488
+      name: 'Влажность в пом. ИБП'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        -
+          color: '009900'
+          item:
+            host: Template_Powerware9390
+            key: xupsEnvRemoteHumidity
+    -
+      uuid: 2c163b51bdb448ec9aefe2985e1dc31a
+      name: 'Выходная мощность'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        -
+          color: '009900'
+          item:
+            host: Template_Powerware9390
+            key: xupsOutputWattsa
+        -
+          sortorder: '1'
+          color: 3333FF
+          item:
+            host: Template_Powerware9390
+            key: xupsOutputWattsc
+        -
+          sortorder: '2'
+          color: FF3333
+          item:
+            host: Template_Powerware9390
+            key: xupsOutputWattsb
+    -
+      uuid: 8fd3a56f74c544f0ba8eb9d83ed09528
+      name: 'Напряжение на входе'
+      show_triggers: 'NO'
+      graph_items:
+        -
+          color: '009900'
+          item:
+            host: Template_Powerware9390
+            key: xupsInputVoltage
+        -
+          sortorder: '1'
+          color: EE0000
+          item:
+            host: Template_Powerware9390
+            key: xupsInputVoltagec
+        -
+          sortorder: '2'
+          color: 0000EE
+          item:
+            host: Template_Powerware9390
+            key: xupsInputVoltageb
+    -
+      uuid: 6be1ab7dcaae4e879d8b558ae968ef77
+      name: 'Температура в 108 (ИБП)'
+      yaxismin: '10'
+      yaxismax: '30'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        -
+          color: '009900'
+          item:
+            host: Template_Powerware9390
+            key: xupsEnvRemoteTemp
+    -
+      uuid: 2f32709129b5490a8ab785f781291294
+      name: 'Ток на входе'
+      graph_items:
+        -
+          color: '009900'
+          item:
+            host: Template_Powerware9390
+            key: xupsInputCurrenta
+        -
+          sortorder: '1'
+          color: FF3333
+          item:
+            host: Template_Powerware9390
+            key: xupsInputCurrentb
+        -
+          sortorder: '2'
+          color: 3333FF
+          item:
+            host: Template_Powerware9390
+            key: xupsInputCurrentc
