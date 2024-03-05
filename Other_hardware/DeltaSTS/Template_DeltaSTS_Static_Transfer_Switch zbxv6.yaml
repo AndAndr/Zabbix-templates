@@ -1,0 +1,772 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-03-05T13:18:50Z'
+  groups:
+    -
+      uuid: 2cb435130e6a483a8b41678605abea1b
+      name: 'Templates/Other Hardware'
+  templates:
+    -
+      uuid: cc2e1ac3a0464a2085c2264d3d02de74
+      template: Template_DeltaSTS_Static_Transfer_Switch
+      name: Template_DeltaSTS_Static_Transfer_Switch
+      description: |
+        https://github.com/AndAndr/Zabbix-templates/
+        Tested on STS30002SR10035 v.01.12.15j
+        прим. В OID'ах АВРа очепятки..
+      templates:
+        -
+          name: 'Generic by SNMP'
+      groups:
+        -
+          name: 'Templates/Other Hardware'
+      items:
+        -
+          uuid: a26a493cf500452bbca47d43ce7fbe5c
+          name: stsAgentManufacturer
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsAgentManufacturer.0'
+          key: stsAgentManufacturer
+          delay: 1h
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: VENDOR
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+        -
+          uuid: 8f8398a39b5440d382ca394c1f393fba
+          name: stsAgentVersion
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsAgentVersion.0'
+          key: stsAgentVersion
+          delay: 1h
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+        -
+          uuid: c33da24696114e17ae35536f6ff08c25
+          name: stsFailureIndicator
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsFailureIndicator.0'
+          key: stsFailureIndicator
+          history: 20d
+          trends: 60d
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: 'STS Failure status'
+        -
+          uuid: 0247739ed10d422e915bcc9ad4822763
+          name: stsFailureNoOutput
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsFailureNoOutput.0'
+          key: stsFailureNoOutput
+          history: 20d
+          trends: 60d
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: 'STS Failure status'
+          triggers:
+            -
+              uuid: 35af413f61514f39952824e724e08d30
+              expression: last(/Template_DeltaSTS_Static_Transfer_Switch/stsFailureNoOutput)<>2
+              name: 'No output on {HOST.NAME}'
+              opdata: 'Нет напряжения на выходе'
+              priority: WARNING
+        -
+          uuid: 72d998f4f2d4445aa6a1819e9bb61de9
+          name: stsFailureOutputOC
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsFailureOutputOC.0'
+          key: stsFailureOutputOC
+          history: 20d
+          trends: 60d
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: 'STS Failure status'
+          triggers:
+            -
+              uuid: e5b7d73ee9c049528c1dd3e6c5b5c7b6
+              expression: last(/Template_DeltaSTS_Static_Transfer_Switch/stsFailureOutputOC)<>2
+              name: 'Overcurrent on {HOST.NAME}'
+              opdata: 'Превышение по току'
+              priority: AVERAGE
+        -
+          uuid: 0eeb008be7a94076af8cdbb20a6113d7
+          name: stsFailureOverTemperature
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsFailureOverTemperature.0'
+          key: stsFailureOverTemperature
+          history: 20d
+          trends: 60d
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: 'STS Failure status'
+          triggers:
+            -
+              uuid: c168aa78e989472c825ea98939060426
+              expression: last(/Template_DeltaSTS_Static_Transfer_Switch/stsFailureOverTemperature)<>2
+              name: 'Overheat on {HOST.NAME}'
+              opdata: 'Превышение по температуре'
+              priority: AVERAGE
+        -
+          uuid: 2e89c39bac5241dd9e86d9b97f6e7055
+          name: stsFailureSwitchFault
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsFailureSwitchFault.0'
+          key: stsFailureSwitchFault
+          history: 20d
+          trends: 60d
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: 'STS Failure status'
+          triggers:
+            -
+              uuid: 1db1d90598e5429b8c88941d0d8cbf82
+              expression: last(/Template_DeltaSTS_Static_Transfer_Switch/stsFailureSwitchFault)<>2
+              name: 'General fault on {HOST.NAME}'
+              priority: AVERAGE
+              description: 'Сбой какого либо реле, тиристора или перегрев'
+        -
+          uuid: 1de8af0a326e492abfca75b058ef4855
+          name: stsIdentFWVersion
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsIdentFWVersion.0'
+          key: stsIdentFWVersion
+          delay: 1h
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SOFTWARE
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+        -
+          uuid: aa00b73dd390449696768bdb1fe7d6c1
+          name: stsIdentModel
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsIdentModel.0'
+          key: stsIdentModel
+          delay: 1h
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MODEL
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+        -
+          uuid: bcff51538c614216b7c2b53514a62441
+          name: stsIdentSerialNumber
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsIdentSerialNumber.0'
+          key: stsIdentSerialNumber
+          delay: 1h
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+        -
+          uuid: 3842b6c26ba6437692c02ce1c7508219
+          name: stsMeasureTemperatureC
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsMeasureTemperatureC.0'
+          key: stsMeasureTemperatureC
+          history: 20d
+          trends: 60d
+          units: '`C'
+          description: Температура
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+          triggers:
+            -
+              uuid: 69a85cd425d7414e9a3f5a70cd4e45a1
+              expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsMeasureTemperatureC)>{$STSMAXTEMP}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsMeasureTemperatureC)<{$STSMAXTEMP}-3'
+              name: 'High temperature {HOST.NAME}'
+              opdata: 'Высокая температура в шкафу, проверь климат!'
+              priority: WARNING
+            -
+              uuid: 2eeebf5519b34e6f9142dbd3e9248031
+              expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsMeasureTemperatureC)<{$STSMINTEMP}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsMeasureTemperatureC)>{$STSMINTEMP}+3'
+              name: 'Low temperature {HOST.NAME}'
+              opdata: 'Низкая температура в шкафу, проверь климат!'
+              priority: WARNING
+        -
+          uuid: 1653a5a3a0e540b5815c2780da528e4d
+          name: stsMessureOperationMode
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsMessureOperationMode.0'
+          key: stsMessureOperationMode
+          history: 20d
+          trends: 60d
+          valuemap:
+            name: stsOperationMode
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+          triggers:
+            -
+              uuid: 29a73eb3da3b476cb49de838b9ba48e4
+              expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsMessureOperationMode)<>4 and last(/Template_DeltaSTS_Static_Transfer_Switch/stsMessureOperationMode)<>5'
+              name: 'Check operation mode {HOST.NAME}'
+              priority: AVERAGE
+            -
+              uuid: 9eb3a6d53cde4c14b97c3975e9c5b8c9
+              expression: abs(change(/Template_DeltaSTS_Static_Transfer_Switch/stsMessureOperationMode))=1
+              name: 'Source was changed on {HOST.NAME}'
+              opdata: 'Источник изменился'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Check operation mode {HOST.NAME}'
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsMessureOperationMode)<>4 and last(/Template_DeltaSTS_Static_Transfer_Switch/stsMessureOperationMode)<>5'
+        -
+          uuid: 5a4e075d0d574a86a01cef3c4d3d3865
+          name: stsMessureTransferedTimes
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsMessureTransferedTimes.0'
+          key: stsMessureTransferedTimes
+          delay: 5m
+          history: 20d
+          trends: 60d
+          units: Times
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+        -
+          uuid: 01b0d2d131a9440d81e7e3fe27f3f592
+          name: stsOutputCurrent
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsOutputCurrent.0'
+          key: stsOutputCurrent
+          history: 20d
+          trends: 60d
+          value_type: FLOAT
+          units: A
+          description: 'Ток на выходе'
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+          triggers:
+            -
+              uuid: ef7012d285424156ad8e2a09da76a36c
+              expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsOutputCurrent)>={$STSMAXOUTPUTCURRENT}'
+              name: 'Output current is gt {$STSMAXOUTPUTCURRENT} on {HOST.NAME}'
+              opdata: 'Ток={ITEM.LASTVALUE1}'
+              priority: AVERAGE
+            -
+              uuid: 98be18c9a26d4387901dd57a9fe050cb
+              expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsOutputCurrent)>={$STSWARNINGOUTPUTCURRENT}'
+              name: 'Output current is gt {$STSWARNINGOUTPUTCURRENT} on {HOST.NAME}'
+              opdata: 'Ток={ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Output current is gt {$STSMAXOUTPUTCURRENT} on {HOST.NAME}'
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsOutputCurrent)>={$STSMAXOUTPUTCURRENT}'
+        -
+          uuid: 218cfa46f9c547e898167f62e51c5fa4
+          name: stsOutputVoltage
+          type: SNMP_AGENT
+          snmp_oid: 'DeltaSTS-MIB::stsOutputVoltage.0'
+          key: stsOutputVoltage
+          history: 20d
+          trends: 60d
+          value_type: FLOAT
+          units: V
+          description: 'Напряжение на выходе'
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            -
+              tag: Application
+              value: 'STS General'
+      discovery_rules:
+        -
+          uuid: 3945db41b17b41ca9f9d33c75fdd8aa5
+          name: InputFailure
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DeltaSTS-MIB::stsInputFailureIndex]'
+          key: stsInputFailureIndex
+          delay: 1h
+          lifetime: 10d
+          description: 'Input discovery'
+          item_prototypes:
+            -
+              uuid: 23b2b16add7e4818b6c43bffe2665f59
+              name: 'Input Aux Power state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureAuxPower.{#SNMPVALUE}'
+              key: 'stsInputFailureAuxPower[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'Состояние внутреннего источника питания'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: ed77c17ca4384a87ad5d13dadebdec6f
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureAuxPower[{#SNMPVALUE}])<>2'
+                  name: 'Check internal power source-{#SNMPVALUE} on {HOST.NAME}'
+                  priority: AVERAGE
+            -
+              uuid: 4242f90f8f2a4bb3835884c27e0a8721
+              name: 'Input voltage brownout state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureBrownout.{#SNMPVALUE}'
+              key: 'stsInputFailureBrownout[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'Обнаружено отключение напряжения'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: 4af74b03d1d84c64b25b4e0489d21668
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureBrownout[{#SNMPVALUE}])<>2'
+                  name: 'Voltage brownout on source-{#SNMPVALUE} on {HOST.NAME}'
+                  opdata: 'Обнаружено превышение напряжения'
+                  priority: WARNING
+                  dependencies:
+                    -
+                      name: 'Check input source-{#SNMPVALUE} on {HOST.NAME}'
+                      expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureNotOperable[{#SNMPVALUE}])<>2'
+            -
+              uuid: 6310a8c2b7ee44988d8c11cce21b2823
+              name: 'Input voltage drop state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureDrop.{#SNMPVALUE}'
+              key: 'stsInputFailureDrop[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'Обнаружено падение напряжения'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: e3a688bfb595447b949d23530b884a12
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureDrop[{#SNMPVALUE}])<>2'
+                  name: 'Voltage drop on source-{#SNMPVALUE} on {HOST.NAME}'
+                  opdata: 'Обнаружено падение напряжения'
+                  priority: WARNING
+                  dependencies:
+                    -
+                      name: 'Check input source-{#SNMPVALUE} on {HOST.NAME}'
+                      expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureNotOperable[{#SNMPVALUE}])<>2'
+            -
+              uuid: 53667a6c92ee4290976b47ff0a746ed6
+              name: 'Input Frequency state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureFrequency.{#SNMPVALUE}'
+              key: 'stsInputFailureFrequency[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'Обнаружено отклонение частоты от нормы'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: beffa505656d44efaa84a51f5ebeb041
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureFrequency[{#SNMPVALUE}])<>2'
+                  name: 'Source-{#SNMPVALUE} frequency is out of range on {HOST.NAME}'
+                  opdata: 'Частота не норма'
+                  priority: WARNING
+            -
+              uuid: d41472c058e847a489d5632e6e7888d3
+              name: 'Input state not operable source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureNotOperable.{#SNMPVALUE}'
+              key: 'stsInputFailureNotOperable[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'Ввод отключён'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: 2f5eab5841a544b29cc97aecafe9ea0b
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureNotOperable[{#SNMPVALUE}])<>2'
+                  name: 'Check input source-{#SNMPVALUE} on {HOST.NAME}'
+                  opdata: 'Нет напряжения на входе'
+                  priority: AVERAGE
+            -
+              uuid: cf7e245876ad40029b3948949d8eb2f9
+              name: 'Input Open Relay status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureRelayOpen.{#SNMPVALUE}'
+              key: 'stsInputFailureRelayOpen[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'The status of input relay is OPEN'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: f9bc7fa80e8a471d9768422d0d129fb7
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureRelayOpen[{#SNMPVALUE}])<>2'
+                  name: 'Check open relay status source-{#SNMPVALUE} on {HOSTNAME}'
+                  priority: WARNING
+                  description: 'Состояние реле "RelayOpen"'
+            -
+              uuid: b771c4e4ccfc449dba61357ae4f80129
+              name: 'Input Short Relay status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureRelayShort.{#SNMPVALUE}'
+              key: 'stsInputFailureRelayShort[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'The status of input relay is SHORT'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: 3dfb3acaf88c4705b6bf6873ca7080dd
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureRelayShort[{#SNMPVALUE}])<>2'
+                  name: 'Check short relay status source-{#SNMPVALUE} on {HOSTNAME}'
+                  priority: WARNING
+                  description: 'Состояние реле "RelayShort"'
+            -
+              uuid: 3fe882380d4f4d2dab18bacf177d110b
+              name: 'Input Open SCR status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureSCROpen.{#SNMPVALUE}'
+              key: 'stsInputFailureSCROpen[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'The status of input SCR is OPEN'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: bb01830b679c42acaa171b0c1ba07c6e
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureSCROpen[{#SNMPVALUE}])<>2'
+                  name: 'Check open SCR status source-{#SNMPVALUE} on {HOSTNAME}'
+                  priority: WARNING
+                  description: 'Состояние тиристора "SCROpen"'
+            -
+              uuid: cdc3c52ce4bf4cc6bee69b4452875cd3
+              name: 'Input Short SCR status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureSCRShort.{#SNMPVALUE}'
+              key: 'stsInputFailureSCRShort[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'The status of input SCR is SHORT'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: 9c24eeeec2c1496db9ed3efbb56d0e97
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureSCRShort[{#SNMPVALUE}])<>2'
+                  name: 'Check short SCR status source-{#SNMPVALUE} on {HOSTNAME}'
+                  priority: WARNING
+                  description: 'Состояние тиристора "SCRShort"'
+            -
+              uuid: 6b9879e7184e4e94bbeeeeb3df9c75e9
+              name: 'Input SCR Thermal status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFailureSCRThermal.{#SNMPVALUE}'
+              key: 'stsInputFailureSCRThermal[{#SNMPVALUE}]'
+              history: 10d
+              trends: 60d
+              description: 'Статус температуры тиристора SCR'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+              trigger_prototypes:
+                -
+                  uuid: dd46cd7a0bf7454cb2bfe7f8f80111b5
+                  expression: 'last(/Template_DeltaSTS_Static_Transfer_Switch/stsInputFailureSCRThermal[{#SNMPVALUE}])<>2'
+                  name: 'SCR source-{#SNMPVALUE } temperature warning on {HOST.NAME}'
+                  opdata: 'Перегрев тиристора SCR'
+                  priority: WARNING
+        -
+          uuid: 091e24f8cd2f48d0ae4e5829db0730f8
+          name: Input
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DeltaSTS-MIB::stsInputIndex]'
+          key: stsInputIndex
+          delay: 1h
+          lifetime: 10d
+          description: 'Input discovery'
+          item_prototypes:
+            -
+              uuid: 20a6fbac294c48edac5888299996a182
+              name: 'Input Frequency source-$1'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputFrequency.{#SNMPVALUE}'
+              key: 'stsInputFrequency[{#SNMPVALUE}]'
+              history: 30d
+              trends: 60d
+              value_type: FLOAT
+              units: Hz
+              preprocessing:
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+            -
+              uuid: c1979e3e2624436281130576d66b58d4
+              name: 'Input voltage source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: 'DeltaSTS-MIB::stsInputVoltage.{#SNMPVALUE}'
+              key: 'stsInputVoltage[{#SNMPVALUE}]'
+              history: 30d
+              trends: 60d
+              value_type: FLOAT
+              units: V
+              preprocessing:
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                -
+                  tag: Application
+                  value: 'STS Input status'
+      macros:
+        -
+          macro: '{$STSMAXINPUTVOLTAGE}'
+          value: '260'
+          description: 'Максимальное напряжение на входе'
+        -
+          macro: '{$STSMAXOUTPUTCURRENT}'
+          value: '30'
+          description: 'Максимальный ток фатальный'
+        -
+          macro: '{$STSMAXTEMP}'
+          value: '35'
+          description: 'Максимальная температура устройства'
+        -
+          macro: '{$STSMININPUTVOLTAGE}'
+          value: '190'
+          description: 'Минимальное напряжение на входе'
+        -
+          macro: '{$STSMINTEMP}'
+          value: '16'
+          description: 'Минимальная температура устройства'
+        -
+          macro: '{$STSWARNINGOUTPUTCURRENT}'
+          value: '24'
+          description: 'Максимальный ток для предупреждения'
+      valuemaps:
+        -
+          uuid: 20f41a09b2064f7e883a581f8f604c20
+          name: stsOperationMode
+          mappings:
+            -
+              value: '1'
+              newvalue: Initialization
+            -
+              value: '2'
+              newvalue: Diagnosis
+            -
+              value: '3'
+              newvalue: 'Off'
+            -
+              value: '4'
+              newvalue: source-1
+            -
+              value: '5'
+              newvalue: source-2
+            -
+              value: '6'
+              newvalue: Safe
+            -
+              value: '7'
+              newvalue: Fault
+        -
+          uuid: 686c249647554479955a0c1399d44da7
+          name: stsStatus
+          mappings:
+            -
+              value: '1'
+              newvalue: Abnormal
+            -
+              value: '2'
+              newvalue: Normal
