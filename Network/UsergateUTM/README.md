@@ -1,7 +1,9 @@
 # UsergateUTM
 
-Tested on Usergate D200.
+Тестировался на Usergate D200.
+
+Для Zabbix версий 4 и 6.
 
 ## Howto:
-1. Import .mib files.
-2. Import and link template to hosts.
+1. Выполнить импорт файлов .mib.
+2. Импортировать и прикрепить шаблон к хосту.
