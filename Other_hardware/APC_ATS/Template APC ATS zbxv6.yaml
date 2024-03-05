@@ -1,0 +1,659 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-03-05T13:07:45Z'
+  groups:
+    -
+      uuid: 2cb435130e6a483a8b41678605abea1b
+      name: 'Templates/Other Hardware'
+  templates:
+    -
+      uuid: c0c66f1d91e04c368d2a3162cbcd5fd0
+      template: Template_APC_Automatic_Transfer_Switch
+      name: Template_APC_Automatic_Transfer_Switch
+      description: 'https://github.com/AndAndr/'
+      templates:
+        -
+          name: 'ICMP Ping'
+      groups:
+        -
+          name: 'Templates/Other Hardware'
+      items:
+        -
+          uuid: 741e3811b63d4727974514da15ff458f
+          name: atsConfigPreferredSource
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.4.2.0
+          key: atsConfigPreferredSource
+          delay: 10m
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+        -
+          uuid: 4f397cb7daf0488bbe884f5427ac5c05
+          name: atsIdentFirmwareDate
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.3.0
+          key: atsIdentFirmwareDate
+          delay: 5m
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: Ident
+        -
+          uuid: 66fdf0a13b324b5494b76555b4d632f9
+          name: atsIdentFirmwareRev
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.2.0
+          key: atsIdentFirmwareRev
+          delay: 5m
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SOFTWARE_FULL
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: Ident
+        -
+          uuid: 8be54635e3084134a53e200a484ef94d
+          name: atsIdentHardwareRev
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.1.0
+          key: atsIdentHardwareRev
+          delay: 5m
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: HARDWARE_FULL
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: Ident
+        -
+          uuid: b0f282f213fd402fb03f78e69adcb827
+          name: atsIdentModelNumber
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.5.0
+          key: atsIdentModelNumber
+          delay: 5m
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MODEL
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: Ident
+        -
+          uuid: 82501a765f124836b4e54a6afb4a6d20
+          name: atsIdentSerialNumber
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.6.0
+          key: atsIdentSerialNumber
+          delay: 5m
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: Ident
+        -
+          uuid: bc371994c4ed417dbdc68ba775cd6150
+          name: atsInputFrequency1
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.3.2.1.4.1
+          key: atsInputFrequency1
+          history: 7d
+          trends: 30d
+          units: Hz
+          tags:
+            -
+              tag: Application
+              value: Voltage
+        -
+          uuid: 8a4a8c710c4c457896ad67f7b16b43a4
+          name: atsInputFrequency2
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.3.2.1.4.2
+          key: atsInputFrequency2
+          history: 7d
+          trends: 30d
+          units: Hz
+          tags:
+            -
+              tag: Application
+              value: Voltage
+        -
+          uuid: 671134107aa443e1b9bb54d04f906315
+          name: atsInputVoltage1
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.3.3.1.3.1.1.1
+          key: atsInputVoltage1
+          history: 7d
+          trends: 30d
+          units: V
+          tags:
+            -
+              tag: Application
+              value: Voltage
+        -
+          uuid: 70f4a933625346ba97b53b66c0168ae4
+          name: atsInputVoltage2
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.3.3.1.3.2.1.1
+          key: atsInputVoltage2
+          history: 7d
+          trends: 30d
+          units: V
+          tags:
+            -
+              tag: Application
+              value: Voltage
+        -
+          uuid: a7bae4547aae4c2cbc6ce0b161b552ca
+          name: atsOutputCurrent
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.3.1.4.1.1.1
+          key: atsOutputCurrent
+          history: 7d
+          trends: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            -
+              tag: Application
+              value: Voltage
+        -
+          uuid: 6358e8f075534447a7d84d5150f5c7d2
+          name: atsOutputFrequency
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.2.1.4.1
+          key: atsOutputFrequency
+          history: 7d
+          trends: 30d
+          units: Hz
+          tags:
+            -
+              tag: Application
+              value: Voltage
+        -
+          uuid: f1d21bad95584e2bab19556b6d88f00c
+          name: atsOutputVoltage
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.3.1.3.1.1.1
+          key: atsOutputVoltage
+          history: 7d
+          trends: 30d
+          units: V
+          tags:
+            -
+              tag: Application
+              value: Voltage
+        -
+          uuid: b3e6d408a263469182b847c615ca6b2a
+          name: atsStatus5VPowerSupply
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.5.0
+          key: atsStatus5VPowerSupply
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: 3650cc6a1f774c3fb0bbcfb20e91f5f2
+          name: atsStatus24VPowerSupply
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.6.0
+          key: atsStatus24VPowerSupply
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: dd46631ea3644023bad0b85af0311ad8
+          name: atsStatus24VSourceBPowerSupply
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.7.0
+          key: atsStatus24VSourceBPowerSupply
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: a0e32902f60f43e7bf87d11056dd84f1
+          name: atsStatusHardwareStatus
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.16.0
+          key: atsStatusHardwareStatus
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: 3a5341dbb67147fa85f43d9ec25d403b
+              expression: last(/Template_APC_Automatic_Transfer_Switch/atsStatusHardwareStatus)<>2
+              name: 'Hardware fail on {HOST.NAME}'
+              priority: AVERAGE
+        -
+          uuid: 438301162d9440439b7b6ca06f6fedad
+          name: atsStatusMinus12VPowerSupply
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.9.0
+          key: atsStatusMinus12VPowerSupply
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: 41b2c273862e45058289925066710cae
+          name: atsStatusOverCurrentState
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.4.0
+          key: atsStatusOverCurrentState
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: ed2e60b6df744604b7bf64d95430b451
+              expression: 'last(/Template_APC_Automatic_Transfer_Switch/atsStatusOverCurrentState)>{$APCCRITICALCURRENT}'
+              name: 'OverCurrent gt {$APCCRITICALCURRENT} Amps on {HOST.NAME}'
+              priority: HIGH
+            -
+              uuid: 6c8db8551daa407cbe21c3819c71ea28
+              expression: 'last(/Template_APC_Automatic_Transfer_Switch/atsStatusOverCurrentState)>{$APCWARNINGCURRENT}'
+              name: 'OverCurrent gt {$APCWARNINGCURRENT} Amps on {HOST.NAME}'
+              priority: INFO
+        -
+          uuid: d4d56857b4574604a64f5cba0a85d442
+          name: atsStatusPhaseSyncStatus
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.14.0
+          key: atsStatusPhaseSyncStatus
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC PhaseSyncStatus'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: d945adc169054fb390070d93a116cec0
+              expression: last(/Template_APC_Automatic_Transfer_Switch/atsStatusPhaseSyncStatus)<>1
+              name: 'Phase is out of sync on {HOST.NAME}'
+              priority: INFO
+        -
+          uuid: d3d4e3eca5874952b631169cd0fcdb78
+          name: atsStatusPlus12VPowerSupply
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.8.0
+          key: atsStatusPlus12VPowerSupply
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+        -
+          uuid: 83f25a8009e14c0bbd9461517fdc1184
+          name: atsStatusRedundancyState
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.3.0
+          key: atsStatusRedundancyState
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: 9512312348744e28944021e25322bb21
+              expression: last(/Template_APC_Automatic_Transfer_Switch/atsStatusRedundancyState)<>2
+              name: 'Check redundancy on {HOST.NAME}'
+              priority: INFO
+        -
+          uuid: f0436b4472fd4a7a98398a86de50927e
+          name: atsStatusSelectedSource
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.2.0
+          key: atsStatusSelectedSource
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Selected source'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: f0cd38a9c67046eeb6eba6a9428cf2af
+              expression: abs(change(/Template_APC_Automatic_Transfer_Switch/atsStatusSelectedSource))>0
+              name: 'Source changed on {HOST.NAME}'
+              priority: WARNING
+              description: 'Изменился источник'
+        -
+          uuid: 57094de7592c47c9b44430274d6d1c62
+          name: atsStatusSourceAStatus
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.12.0
+          key: atsStatusSourceAStatus
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: da5e049f735e489d83b6fed9f14787a4
+              expression: last(/Template_APC_Automatic_Transfer_Switch/atsStatusSourceAStatus)<>2
+              name: 'Check power in sourceA on {HOST.NAME}'
+              priority: INFO
+        -
+          uuid: 095cddd4b4ef45909dd8a69c062ffa65
+          name: atsStatusSourceBStatus
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.13.0
+          key: atsStatusSourceBStatus
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: 36145e512f924e3ba5f60d454ab38269
+              expression: last(/Template_APC_Automatic_Transfer_Switch/atsStatusSourceBStatus)<>2
+              name: 'Check power in sourceB on {HOST.NAME}'
+              priority: INFO
+        -
+          uuid: 6348ccdbc692478796c52acad12f378a
+          name: atsStatusSwitchStatus
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.10.0
+          key: atsStatusSwitchStatus
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: 2b3e80e084ae478f975c98d5e922ec7c
+              expression: last(/Template_APC_Automatic_Transfer_Switch/atsStatusSwitchStatus)<>2
+              name: 'Check {HOST.NAME} powerswitch status'
+              priority: AVERAGE
+        -
+          uuid: 1fff346ff29843edb5eae0060f65303e
+          name: atsStatusVoltageOutStatus
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.318.1.1.8.5.1.15.0
+          key: atsStatusVoltageOutStatus
+          history: 7d
+          trends: 30d
+          valuemap:
+            name: 'APC Status'
+          tags:
+            -
+              tag: Application
+              value: Status
+          triggers:
+            -
+              uuid: aac1eb36812e4f169f005ac3c43c782e
+              expression: last(/Template_APC_Automatic_Transfer_Switch/atsStatusVoltageOutStatus)<>2
+              name: 'Output voltage failed on {HOST.NAME}'
+              priority: WARNING
+      discovery_rules:
+        -
+          uuid: fc5500dd654c48a8bd48770ad3d1b881
+          name: 'Network interface discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},ifDescr]'
+          key: snmp.discovery
+          delay: '3600'
+          lifetime: 10d
+          item_prototypes:
+            -
+              uuid: ae279af8bafa428889a61f9ab9df07c8
+              name: ifInOctets.$1
+              type: SNMP_AGENT
+              snmp_oid: 'ifInOctets.{#SNMPINDEX}'
+              key: 'ifInOctets.["{#SNMPVALUE}"]'
+              delay: '120'
+              history: 1w
+              trends: 20d
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: Application
+                  value: Interfaces
+            -
+              uuid: 82430d31a9db4c6284753c47f5865f1c
+              name: ifOutOctets.$1
+              type: SNMP_AGENT
+              snmp_oid: 'ifOutOctets.{#SNMPINDEX}'
+              key: 'ifOutOctets.["{#SNMPVALUE}"]'
+              delay: '120'
+              history: 1w
+              trends: 20d
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: Application
+                  value: Interfaces
+            -
+              uuid: 2c55b64bd7634c78832b5a6c5705b41b
+              name: ifPhysAddress.$1
+              type: SNMP_AGENT
+              snmp_oid: 'ifPhysAddress.{#SNMPINDEX}'
+              key: 'ifPhysAddress.["{#SNMPVALUE}"]'
+              delay: 12h
+              history: 1w
+              trends: '0'
+              value_type: TEXT
+              tags:
+                -
+                  tag: Application
+                  value: Interfaces
+      macros:
+        -
+          macro: '{$APCCRITICALCURRENT}'
+          value: '9'
+        -
+          macro: '{$APCWARNINGCURRENT}'
+          value: '7'
+      valuemaps:
+        -
+          uuid: 91c8c9f45c1a4de6b6e9bbbb48d850c0
+          name: 'APC PhaseSyncStatus'
+          mappings:
+            -
+              value: '1'
+              newvalue: inSync
+            -
+              value: '2'
+              newvalue: outOfSync
+        -
+          uuid: dbd96b0b16b64f8187fa6bca1a80d2c0
+          name: 'APC Selected source'
+          mappings:
+            -
+              value: '1'
+              newvalue: sourceA
+            -
+              value: '2'
+              newvalue: sourceB
+        -
+          uuid: d5517626f3b84fe08525216225b9cc71
+          name: 'APC Status'
+          mappings:
+            -
+              value: '1'
+              newvalue: Fail
+            -
+              value: '2'
+              newvalue: Ok
+  triggers:
+    -
+      uuid: 23aaaf71af1b4b339868005eb8f4e89f
+      expression: 'last(/Template_APC_Automatic_Transfer_Switch/atsStatus5VPowerSupply)<>2 or last(/Template_APC_Automatic_Transfer_Switch/atsStatus24VPowerSupply)<>2 or last(/Template_APC_Automatic_Transfer_Switch/atsStatusMinus12VPowerSupply)<>2 or last(/Template_APC_Automatic_Transfer_Switch/atsStatusPlus12VPowerSupply)<>2'
+      name: 'Check internal PowerSupply on {HOST.NAME}'
+      priority: WARNING
+  graphs:
+    -
+      uuid: f98cf06f6fc143d3896e795518af656b
+      name: Current
+      graph_items:
+        -
+          color: '009900'
+          yaxisside: RIGHT
+          item:
+            host: Template_APC_Automatic_Transfer_Switch
+            key: atsOutputCurrent
+    -
+      uuid: b07bd7999c68407fa82d70462909a68a
+      name: Frequencies
+      yaxismin: '40'
+      yaxismax: '60'
+      graph_items:
+        -
+          color: '009900'
+          yaxisside: RIGHT
+          item:
+            host: Template_APC_Automatic_Transfer_Switch
+            key: atsInputFrequency1
+        -
+          sortorder: '1'
+          color: 0000FF
+          yaxisside: RIGHT
+          item:
+            host: Template_APC_Automatic_Transfer_Switch
+            key: atsInputFrequency2
+        -
+          sortorder: '2'
+          color: FF0000
+          yaxisside: RIGHT
+          item:
+            host: Template_APC_Automatic_Transfer_Switch
+            key: atsOutputFrequency
+    -
+      uuid: 5d317660e9a74963b28bd8a1e6002a4d
+      name: Voltages
+      yaxismin: '200'
+      yaxismax: '250'
+      graph_items:
+        -
+          color: '009900'
+          yaxisside: RIGHT
+          item:
+            host: Template_APC_Automatic_Transfer_Switch
+            key: atsInputVoltage1
+        -
+          sortorder: '1'
+          color: 0000FF
+          yaxisside: RIGHT
+          item:
+            host: Template_APC_Automatic_Transfer_Switch
+            key: atsInputVoltage2
+        -
+          sortorder: '2'
+          color: FF0000
+          yaxisside: RIGHT
+          item:
+            host: Template_APC_Automatic_Transfer_Switch
+            key: atsOutputVoltage
