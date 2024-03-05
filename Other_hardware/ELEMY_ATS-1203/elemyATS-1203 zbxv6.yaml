@@ -1,0 +1,703 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-03-05T13:24:59Z'
+  groups:
+    -
+      uuid: 2cb435130e6a483a8b41678605abea1b
+      name: 'Templates/Other Hardware'
+  templates:
+    -
+      uuid: 0db3ff4947b94c82aed0c0bdd1864e49
+      template: Template_ELEMY_Automatic_Transfer_Switch
+      name: Template_ELEMY_Automatic_Transfer_Switch
+      description: |
+        https://github.com/AndAndr/
+        Tested on ATS-1203. FW:h2_b2_m1.1.8
+      templates:
+        -
+          name: 'Generic by SNMP'
+      groups:
+        -
+          name: 'Templates/Other Hardware'
+      items:
+        -
+          uuid: ddaebe568c65443f91b090253dfcfb04
+          name: 'Device comm status'
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsCommStatus.0'
+          key: elmAtsCommStatus
+          history: 30d
+          trends: 60d
+          description: 'Status of communication with core'
+          valuemap:
+            name: elmCommStatus
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: elmStatus
+          triggers:
+            -
+              uuid: ae85600c5b9e4f91a7040fec150264a9
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/elmAtsCommStatus)<>0
+              name: 'Internal error on {HOST.NAME}'
+              opdata: 'Устройство неисправно'
+              priority: HIGH
+        -
+          uuid: 3a55dc6dd7fa493f8af10100aa9f5ab8
+          name: 'Fault of one of the power supplies'
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerSupplyAlarm.0'
+          key: elmAtsPowerSupplyAlarm
+          history: 30d
+          trends: 60d
+          description: 'Неисправность одного из блоков питания'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Application
+              value: elmStatus
+          triggers:
+            -
+              uuid: d63c26fb82ba4a51972ebaa4bd43b7e5
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/elmAtsPowerSupplyAlarm)<>0
+              name: 'Power supply alarm on {HOST.NAME}'
+              opdata: 'Неисправность одного из блоков питания'
+              priority: AVERAGE
+        -
+          uuid: dbb8a9dbfebf40898bd97a2eb600f377
+          name: Input1CurVoltage
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputCurVoltage.0'
+          key: Input1CurVoltage
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: V
+          description: 'Текущее значение напряжения на входе 1'
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: bbb3d074887e4d8aaa350bc7844bf28e
+          name: Input1IsActive
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputIsActive.0'
+          key: Input1IsActive
+          history: 30d
+          trends: 60d
+          description: 'Вход 1 активен?'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: d825c4b897124dfa94b42957e9367d04
+          name: Input1IsNormal
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputIsNormal.0'
+          key: Input1IsNormal
+          history: 30d
+          trends: 60d
+          description: 'Напряжение на входе 1 в норме?'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+          triggers:
+            -
+              uuid: d329803f5e174466a924fd06cf104e88
+              expression: 'last(/Template_ELEMY_Automatic_Transfer_Switch/Input1IsNormal,#2)<>1'
+              name: 'Check Input 1 on {HOST.NAME}'
+              opdata: 'Напряжение на входе №1 - не норма!'
+              priority: WARNING
+        -
+          uuid: 2eed41879e0e445a98dcf01ed315a6e3
+          name: Input1MaxVoltage
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::uetAtsPowerInputMaxVoltage.0'
+          key: Input1MaxVoltage
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: V
+          description: 'Максимально допустимое напряжение на входе 1'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: c8cba844351048f9937156c317bfda96
+          name: Input1MinVoltage
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::uetAtsPowerInputMinVoltage.0'
+          key: Input1MinVoltage
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: V
+          description: 'Минимально допустимое напряжение на входе 1'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: 6f15c7fa471443729a29e0758481d307
+          name: Input1Timeout
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputTimeout.0'
+          key: Input1Timeout
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: Sec
+          description: 'Таймаут, после которого вход 1 переходит в состояние ''норма'', если все это время напряжение было в допустимом диапазоне, сек.'
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.01'
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: e2143773a269444aa9d7a1e36ee2f782
+          name: Input2CurVoltage
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputCurVoltage.1'
+          key: Input2CurVoltage
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: V
+          description: 'Текущее значение напряжения на входе 2'
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: 149147520e5c48339b4580613f9fe50e
+          name: Input2IsActive
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputIsActive.1'
+          key: Input2IsActive
+          history: 30d
+          trends: 60d
+          description: 'Вход 2 активен?'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: 36a66bdee5514587884ed234abaa93eb
+          name: Input2IsNormal
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputIsNormal.1'
+          key: Input2IsNormal
+          history: 30d
+          trends: 60d
+          description: 'Напряжение на входе 2 в норме?'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+          triggers:
+            -
+              uuid: 4cefb6d9cd07490da5d0d021cbc26cdb
+              expression: 'last(/Template_ELEMY_Automatic_Transfer_Switch/Input2IsNormal,#2)<>1'
+              name: 'Check Input 2 on {HOST.NAME}'
+              opdata: 'Напряжение на входе №2 - не норма!'
+              priority: WARNING
+        -
+          uuid: 14f906f752ac47a292932ddc45cf766e
+          name: Input2MaxVoltage
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::uetAtsPowerInputMaxVoltage.1'
+          key: Input2MaxVoltage
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: V
+          description: 'Максимально допустимое напряжение на входе 2'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: 8451a1e2231c4d57a52dd3ab1315c4bd
+          name: Input2MinVoltage
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::uetAtsPowerInputMinVoltage.1'
+          key: Input2MinVoltage
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: V
+          description: 'Минимально допустимое напряжение на входе 2'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: 565d7603968c4810aa49dbf333754b7a
+          name: Input2Timeout
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputTimeout.1'
+          key: Input2Timeout
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: Sec
+          description: 'Таймаут, после которого вход 2 переходит в состояние ''норма'', если все это время напряжение было в допустимом диапазоне, сек.'
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.01'
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmInput
+        -
+          uuid: 736b4a7504ad4b0888e9bce328361dc8
+          name: 'Output I (A)'
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputI.0'
+          key: OutputI
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: A
+          description: 'Текущее значение тока на выходе'
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+        -
+          uuid: 1b417623f7d34ec38715961764cfca5c
+          name: OutputLoadStatus
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputLoadStatus.0'
+          key: OutputLoadStatus
+          history: 30d
+          trends: 60d
+          description: 'Статус по нагрузке'
+          valuemap:
+            name: elmPowerLoadStatus
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+          triggers:
+            -
+              uuid: 4f9b5826e9714360899074cb47aa9bb5
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/OutputLoadStatus)=1
+              name: 'Full power load on {HOST.NAME}'
+              opdata: 'Устройство загружено до номинала!'
+              priority: INFO
+            -
+              uuid: 8559f06c9cc34b4ab4f3955f897397fa
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/OutputLoadStatus)=2
+              name: 'Overload on {HOST.NAME}'
+              opdata: Перегрузка!
+              priority: HIGH
+        -
+          uuid: ebb4d22a397941248087ba8695bce022
+          name: 'Output P (W)'
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputP.0'
+          key: OutputP
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: W
+          description: 'Активная мощность, Вт'
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+        -
+          uuid: 6933e83f1b224bf18d208502836ed93d
+          name: 'Output Q (VAR)'
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputQ.0'
+          key: OutputQ
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: VAR
+          description: 'Реактивная мощность (по модулю), Вар'
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+        -
+          uuid: 1bc882e2c80645acbb9a3fd7b0d58dab
+          name: 'Output S (VA)'
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputS.0'
+          key: OutputS
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          units: VA
+          description: 'Полная мощность, ВА'
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+        -
+          uuid: 45d2eef25379423f92ee7fb378c1b378
+          name: PowerInput1Fault
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputFault.0'
+          key: PowerInput1Fault
+          history: 30d
+          trends: 60d
+          description: 'Неисправность силового реле входа 1'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmStatus
+          triggers:
+            -
+              uuid: 359c624efe36486baae19f6642bdde25
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/PowerInput1Fault)<>0
+              name: 'Internal relay1 error on {HOST.NAME}'
+              opdata: 'Неисправность реле №1'
+              priority: HIGH
+        -
+          uuid: 38d74a89e5cf43eb8d3ce4d8981ca998
+          name: PowerInput2Fault
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputFault.1'
+          key: PowerInput2Fault
+          history: 30d
+          trends: 60d
+          description: 'Неисправность силового реле входа 2'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmStatus
+          triggers:
+            -
+              uuid: 551f2c919af842449a6a679687aea635
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/PowerInput2Fault)<>0
+              name: 'Internal relay2 error on {HOST.NAME}'
+              opdata: 'Неисправность реле №2'
+              priority: HIGH
+        -
+          uuid: f06e50101d54413697bcf57821ec6ed5
+          name: PowerInputPriority
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputPriority.0'
+          key: PowerInputPriority
+          history: 30d
+          trends: 60d
+          description: 'Приоритет входа: нет, вход 1, вход2.'
+          valuemap:
+            name: elmPowerInputPriority
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmStatus
+          triggers:
+            -
+              uuid: b007d258ad6f4009865c397c45ef07d3
+              expression: '(last(/Template_ELEMY_Automatic_Transfer_Switch/PowerInputPriority,#1)<>last(/Template_ELEMY_Automatic_Transfer_Switch/PowerInputPriority,#2))=1'
+              name: 'Input priority is changed on {HOST.NAME}'
+              opdata: 'Текущий приоритет входа:  {ITEM.LASTVALUE1}'
+              priority: WARNING
+        -
+          uuid: 40baa87cd7b743299213ec6e2672b2a1
+          name: PowerInputSwitchMode
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerInputSwitchMode.0'
+          key: PowerInputSwitchMode
+          history: 30d
+          trends: 60d
+          description: 'Режим переключения между входами: немедленно или при переходе через ноль.'
+          valuemap:
+            name: elmSwitchMode
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmStatus
+          triggers:
+            -
+              uuid: 9bc42547c7594d1eaa2f247db34ea974
+              expression: '(last(/Template_ELEMY_Automatic_Transfer_Switch/PowerInputSwitchMode,#1)<>last(/Template_ELEMY_Automatic_Transfer_Switch/PowerInputSwitchMode,#2))=1'
+              name: 'Switch mode is changed on {HOST.NAME}'
+              opdata: 'Режим переключения: {ITEM.LASTVALUE1}'
+              priority: WARNING
+        -
+          uuid: 15d3fef7c07f40d6ad50e90feeb0d59c
+          name: PowerOutput1HasVolt
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputHasVolt.0'
+          key: PowerOutput1HasVolt
+          history: 30d
+          trends: 60d
+          description: 'Наличие напряжения после выходного автомата №1'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+          triggers:
+            -
+              uuid: 9ad61a9ee6cc4d52898162641300714e
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/PowerOutput1HasVolt)<>1
+              name: 'Check circuit breaker 1 on {HOST.NAME}'
+              opdata: 'Нет напряжения на выходе автомата №1'
+              priority: AVERAGE
+        -
+          uuid: 206c90c19b9042de9a9cc764755a8569
+          name: PowerOutput2HasVolt
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputHasVolt.1'
+          key: PowerOutput2HasVolt
+          history: 30d
+          trends: 60d
+          description: 'Наличие напряжения после выходного автомата №2'
+          valuemap:
+            name: elmYesNo
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+          triggers:
+            -
+              uuid: eb436d9bb4b94d89ac2c7706d808b29e
+              expression: last(/Template_ELEMY_Automatic_Transfer_Switch/PowerOutput2HasVolt)<>1
+              name: 'Check circuit breaker 2 on {HOST.NAME}'
+              opdata: 'Нет напряжения на выходе автомата №2'
+              priority: AVERAGE
+        -
+          uuid: 0931455a55ed43fda061df74e7a8b14b
+          name: PowerOutputCosF
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputCosF.0'
+          key: PowerOutputCosF
+          history: 30d
+          trends: 60d
+          value_type: FLOAT
+          description: 'Коэффициент мощности'
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.001'
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+        -
+          uuid: b1c3da1e742d4a018bbb8660933f31a0
+          name: PowerOutputQsign
+          type: SNMP_AGENT
+          snmp_oid: 'ELEMY-ATS1203-MIB::elmAtsPowerOutputQsign.0'
+          key: PowerOutputQsign
+          history: 30d
+          trends: 60d
+          description: 'Знак реактивной мощности'
+          valuemap:
+            name: elmPowerQsign
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            -
+              tag: Application
+              value: elmOutput
+      valuemaps:
+        -
+          uuid: 299cadffcbcd4d30a1937e64b865db3c
+          name: elmCommStatus
+          mappings:
+            -
+              value: '0'
+              newvalue: Ok
+            -
+              value: '1'
+              newvalue: noRefreshData
+            -
+              value: '2'
+              newvalue: noSignal
+            -
+              value: '3'
+              newvalue: readError
+        -
+          uuid: 7af82086034045168e51f60fba49eb23
+          name: elmPowerInputPriority
+          mappings:
+            -
+              value: '0'
+              newvalue: none
+            -
+              value: '1'
+              newvalue: pwIn1
+            -
+              value: '2'
+              newvalue: pwIn2
+        -
+          uuid: 9d50f32f424347bd9d45096f11d50329
+          name: elmPowerLoadStatus
+          mappings:
+            -
+              value: '0'
+              newvalue: normal
+            -
+              value: '1'
+              newvalue: fullload
+            -
+              value: '2'
+              newvalue: overload
+        -
+          uuid: 3f4ca37ffb3e467ca635b4a94e7d6d39
+          name: elmPowerQsign
+          mappings:
+            -
+              value: '0'
+              newvalue: unknown
+            -
+              value: '1'
+              newvalue: positive
+            -
+              value: '2'
+              newvalue: negative
+        -
+          uuid: 265ac37a1f294d3ea53f6d146e7637a1
+          name: elmSwitchMode
+          mappings:
+            -
+              value: '0'
+              newvalue: switchOverZero
+            -
+              value: '1'
+              newvalue: switchImmediately
+        -
+          uuid: b2c9dfdf7b7747169c6f49e442dade83
+          name: elmYesNo
+          mappings:
+            -
+              value: '0'
+              newvalue: 'no'
+            -
+              value: '1'
+              newvalue: 'yes'
