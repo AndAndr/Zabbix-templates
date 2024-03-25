@@ -1,0 +1,944 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2024-03-25T10:44:11Z</date>
+    <groups>
+        <group>
+            <name>Templates/Network devices</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Eltex ESR SNMPv2</template>
+            <name>Template Eltex ESR SNMPv2</name>
+            <description>https://github.com/AndAndr&#13;
+Мониторинг по SNMPv2 маршрутизаторов Eltex ESR.&#13;
+Тестировалось на ESR1000.&#13;
+&#13;
+Добавьте в зависимость к этому шаблону или подключите отдельно к хосту шаблон &quot;Template Module Generic SNMPv2&quot; для ZabbixV=4 или &quot;Generic by SNMP&quot; для ZabbixV&gt;=5</description>
+            <groups>
+                <group>
+                    <name>Templates/Network devices</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Eltex chassis</name>
+                </application>
+                <application>
+                    <name>Network interfaces</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>ESR Hardware Version</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.2.1.47.1.1.1.1.8.680000</snmp_oid>
+                    <key>esrHardwareVersion</key>
+                    <delay>3h</delay>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <port>{$SNMP_PORT}</port>
+                    <inventory_link>HARDWARE</inventory_link>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>Memory Free</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.9.9.48.1.1.1.6.1</snmp_oid>
+                    <key>esrMemoryFree</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>B</units>
+                    <port>{$SNMP_PORT}</port>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Memory Free %</name>
+                    <type>CALCULATED</type>
+                    <key>esrMemoryFreePercent</key>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <units>%</units>
+                    <params>100*last(esrMemoryFree)/last(esrMemoryTotal)</params>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;{$MEM.FREE.CRIT}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{last()}&gt;{$MEM.FREE.CRIT}+5</recovery_expression>
+                            <name>Free memory low on {HOST.NAME}</name>
+                            <opdata>Free mem percent: {ITEM.LASTVALUE1}</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Memory Total</name>
+                    <type>CALCULATED</type>
+                    <key>esrMemoryTotal</key>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <units>B</units>
+                    <params>last(esrMemoryUsed) + last(esrMemoryFree)</params>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>Memory Used</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.9.9.48.1.1.1.5.1</snmp_oid>
+                    <key>esrMemoryUsed</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>B</units>
+                    <port>{$SNMP_PORT}</port>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>ESR ModelName</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.2.1.47.1.1.1.1.13.680000</snmp_oid>
+                    <key>esrModelName</key>
+                    <delay>3h</delay>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <port>{$SNMP_PORT}</port>
+                    <inventory_link>MODEL</inventory_link>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>ESR Serial Number</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.2.1.47.1.1.1.1.11.680000</snmp_oid>
+                    <key>esrSerialNumber</key>
+                    <delay>3h</delay>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <port>{$SNMP_PORT}</port>
+                    <inventory_link>SERIALNO_A</inventory_link>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>ESR Software Version</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.2.1.47.1.1.1.1.10.680000</snmp_oid>
+                    <key>esrSoftwareVersion</key>
+                    <delay>3h</delay>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <port>{$SNMP_PORT}</port>
+                    <inventory_link>SOFTWARE</inventory_link>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>Fan1Status</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.89.53.15.1.4.0</snmp_oid>
+                    <key>rlPhdUnitEnvParamFan1Status</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <port>{$SNMP_PORT}</port>
+                    <description>Состояние вентилятора №1</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;1</expression>
+                            <name>Fan1 status is not OK on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Fan2Status</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.89.53.15.1.5.0</snmp_oid>
+                    <key>rlPhdUnitEnvParamFan2Status</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <port>{$SNMP_PORT}</port>
+                    <description>Состояние вентилятора №2</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;1</expression>
+                            <name>Fan2 status is not OK on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Fan3Status</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.89.53.15.1.6.0</snmp_oid>
+                    <key>rlPhdUnitEnvParamFan3Status</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <port>{$SNMP_PORT}</port>
+                    <description>Состояние вентилятора №3</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;1</expression>
+                            <name>Fan3 status is not OK on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Fan4Status</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.89.53.15.1.7.0</snmp_oid>
+                    <key>rlPhdUnitEnvParamFan4Status</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <port>{$SNMP_PORT}</port>
+                    <description>Состояние вентилятора №4</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;1</expression>
+                            <name>Fan4 status is not OK on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>PowerSupply Main status</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.89.53.15.1.2.0</snmp_oid>
+                    <key>rlPhdUnitEnvParamMainPSStatus</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <port>{$SNMP_PORT}</port>
+                    <description>Состояние главного блока питания.</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;&gt;1</expression>
+                            <name>PowerSupply MAIN failure on {HOST.NAME}</name>
+                            <opdata>Неисправность главного источника питания.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Неисправность главного источника питания.</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>PowerSupply Redundant status</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>.1.3.6.1.4.1.89.53.15.1.3.0</snmp_oid>
+                    <key>rlPhdUnitEnvParamRedundantPSStatus</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <port>{$SNMP_PORT}</port>
+                    <description>Состояние резервного блока питания.</description>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(#2)}=1 and {last(#1)}&lt;&gt;1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{last(,5m)}=1</recovery_expression>
+                            <name>PowerSupply REDUNDANT failure on {HOST.NAME}</name>
+                            <opdata>Неисправность резервного источника питания.</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Неисправность резервного источника питания.</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Temperature BOARD</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.89.53.15.1.12.0</snmp_oid>
+                    <key>temp.BOARD</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>`C</units>
+                    <port>{$SNMP_PORT}</port>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$TEMP.CRIT}</expression>
+                            <name>Temperature BOARD is gt {$TEMP.CRIT} on {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Temperature CPU</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.89.53.15.1.9.0</snmp_oid>
+                    <key>temp.CPU</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>`C</units>
+                    <port>{$SNMP_PORT}</port>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$TEMP.CRIT}</expression>
+                            <name>Temperature CPU is gt {$TEMP.CRIT} on {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Temperature SFP</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.89.53.15.1.14.0</snmp_oid>
+                    <key>temp.SFP</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>`C</units>
+                    <port>{$SNMP_PORT}</port>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$TEMP.CRIT}</expression>
+                            <name>Temperature SFP is gt {$TEMP.CRIT} on {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Temperature SWITCH</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.4.1.89.53.15.1.16.0</snmp_oid>
+                    <key>temp.SWITCH</key>
+                    <history>14d</history>
+                    <trends>60d</trends>
+                    <units>`C</units>
+                    <port>{$SNMP_PORT}</port>
+                    <applications>
+                        <application>
+                            <name>Eltex chassis</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>RlEnvMonState</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;{$TEMP.CRIT}</expression>
+                            <name>Temperature SWITCH is gt {$TEMP.CRIT} on {HOST.NAME}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>CPU Discovery</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#SNMPVALUE},1.3.6.1.4.1.9.9.109.1.1.1.1.5]</snmp_oid>
+                    <key>cpu.discovery</key>
+                    <delay>1h</delay>
+                    <port>{$SNMP_PORT}</port>
+                    <lifetime>3d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>CPU-{#SNMPINDEX} utilization</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.4.1.9.9.109.1.1.1.1.8.{#SNMPINDEX}</snmp_oid>
+                            <key>cpu.utl.[CPU.{#SNMPINDEX}]</key>
+                            <delay>10m</delay>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>%</units>
+                            <port>{$SNMP_PORT}</port>
+                            <applications>
+                                <application>
+                                    <name>Eltex chassis</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$CPU.UTIL.CRIT}</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}&lt;{$CPU.UTIL.CRIT}-10</recovery_expression>
+                                    <name>CPU: High CPU-{#SNMPINDEX}</name>
+                                    <opdata>Current utilization: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Network interfaces discovery</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1]</snmp_oid>
+                    <key>net.if.discovery</key>
+                    <delay>1h</delay>
+                    <port>{$SNMP_PORT}</port>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#IFOPERSTATUS}</macro>
+                                <value>{$NET.IF.IFOPERSTATUS.MATCHES}</value>
+                                <formulaid>G</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFALIAS}</macro>
+                                <value>{$NET.IF.IFALIAS.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>C</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFALIAS}</macro>
+                                <value>{$NET.IF.IFALIAS.MATCHES}</value>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFNAME}</macro>
+                                <value>{$NET.IF.IFNAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>E</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFNAME}</macro>
+                                <value>{$NET.IF.IFNAME.MATCHES}</value>
+                                <formulaid>F</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFADMINSTATUS}</macro>
+                                <value>{$NET.IF.IFADMINSTATUS.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFADMINSTATUS}</macro>
+                                <value>{$NET.IF.IFADMINSTATUS.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFOPERSTATUS}</macro>
+                                <value>{$NET.IF.IFOPERSTATUS.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>H</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>3h</lifetime>
+                    <description>Discovering network interfaces.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.in.errors[ifInErrors.{#IFNAME}]</key>
+                            <delay>3m</delay>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Bits received</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.in[ifHCInOctets.{#IFNAME}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <units>bps</units>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>8</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.out.errors[ifOutErrors.{#IFNAME}]</key>
+                            <delay>3m</delay>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Bits sent</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.out[ifHCOutOctets.{#IFNAME}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <units>bps</units>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>8</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Speed</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.speed[ifHighSpeed.{#IFNAME}]</key>
+                            <delay>5m</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <units>bps</units>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>1000000</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Operational status</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.status[ifOperStatus.{#IFNAME}]</key>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>IF-MIB::ifOperStatus</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}=2 and {diff()}=1</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}&lt;&gt;2</recovery_expression>
+                                    <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
+                                    <opdata>Current state: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>WARNING</priority>
+                                    <description>Триггер работает следующим образом: стреляет, если &quot;Operation status&quot; интерфейса уходит в состояние &quot;Down(2)&quot; и до этого был в состоянии &quot;Up(1)&quot;,триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что diff.</description>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>({Template Eltex ESR SNMPv2:net.if.in[ifHCInOctets.{#IFNAME}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Eltex ESR SNMPv2:net.if.speed[ifHighSpeed.{#IFNAME}].last()} or&#13;
+{Template Eltex ESR SNMPv2:net.if.out[ifHCOutOctets.{#IFNAME}].avg(15m)}&gt;({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}/100)*{Template Eltex ESR SNMPv2:net.if.speed[ifHighSpeed.{#IFNAME}].last()}) and&#13;
+{Template Eltex ESR SNMPv2:net.if.speed[ifHighSpeed.{#IFNAME}].last()}&gt;0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{Template Eltex ESR SNMPv2:net.if.in[ifHCInOctets.{#IFNAME}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Eltex ESR SNMPv2:net.if.speed[ifHighSpeed.{#IFNAME}].last()} and&#13;
+{Template Eltex ESR SNMPv2:net.if.out[ifHCOutOctets.{#IFNAME}].avg(15m)}&lt;(({$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}-3)/100)*{Template Eltex ESR SNMPv2:net.if.speed[ifHighSpeed.{#IFNAME}].last()}</recovery_expression>
+                            <name>Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( &gt; {$IF.UTIL.MAX:&quot;{#IFNAME}&quot;}% )</name>
+                            <opdata>In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}</opdata>
+                            <priority>INFO</priority>
+                            <description>The network interface utilization is close to its estimated maximum bandwidth.</description>
+                            <dependencies>
+                                <dependency>
+                                    <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
+                                    <expression>{Template Eltex ESR SNMPv2:net.if.status[ifOperStatus.{#IFNAME}].last()}=2 and {Template Eltex ESR SNMPv2:net.if.status[ifOperStatus.{#IFNAME}].diff()}=1</expression>
+                                    <recovery_expression>{Template Eltex ESR SNMPv2:net.if.status[ifOperStatus.{#IFNAME}].last()}&lt;&gt;2</recovery_expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template Eltex ESR SNMPv2:net.if.in.errors[ifInErrors.{#IFNAME}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}&#13;
+or {Template Eltex ESR SNMPv2:net.if.out.errors[ifOutErrors.{#IFNAME}].min(5m)}&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{Template Eltex ESR SNMPv2:net.if.in.errors[ifInErrors.{#IFNAME}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8&#13;
+and {Template Eltex ESR SNMPv2:net.if.out.errors[ifOutErrors.{#IFNAME}].max(5m)}&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8</recovery_expression>
+                            <name>Interface {#IFNAME}({#IFALIAS}): High error rate ( &gt; {$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;} for 5m)</name>
+                            <opdata>errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
+                                    <expression>{Template Eltex ESR SNMPv2:net.if.status[ifOperStatus.{#IFNAME}].last()}=2 and {Template Eltex ESR SNMPv2:net.if.status[ifOperStatus.{#IFNAME}].diff()}=1</expression>
+                                    <recovery_expression>{Template Eltex ESR SNMPv2:net.if.status[ifOperStatus.{#IFNAME}].last()}&lt;&gt;2</recovery_expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Network traffic</name>
+                            <graph_items>
+                                <graph_item>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template Eltex ESR SNMPv2</host>
+                                        <key>net.if.in[ifHCInOctets.{#IFNAME}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>2774A4</color>
+                                    <item>
+                                        <host>Template Eltex ESR SNMPv2</host>
+                                        <key>net.if.out[ifHCOutOctets.{#IFNAME}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>2</sortorder>
+                                    <color>F63100</color>
+                                    <yaxisside>RIGHT</yaxisside>
+                                    <item>
+                                        <host>Template Eltex ESR SNMPv2</host>
+                                        <key>net.if.out.errors[ifOutErrors.{#IFNAME}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>3</sortorder>
+                                    <color>A54F10</color>
+                                    <yaxisside>RIGHT</yaxisside>
+                                    <item>
+                                        <host>Template Eltex ESR SNMPv2</host>
+                                        <key>net.if.in.errors[ifInErrors.{#IFNAME}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$CPU.UTIL.CRIT}</macro>
+                    <value>80</value>
+                </macro>
+                <macro>
+                    <macro>{$IF.ERRORS.WARN}</macro>
+                    <value>10</value>
+                </macro>
+                <macro>
+                    <macro>{$IF.UTIL.MAX}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$MEM.FREE.CRIT}</macro>
+                    <value>20</value>
+                    <description>Free memory %</description>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFADMINSTATUS.MATCHES}</macro>
+                    <value>^.*</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFADMINSTATUS.NOT_MATCHES}</macro>
+                    <value>^2$</value>
+                    <description>Ignore down(2) administrative status</description>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFALIAS.MATCHES}</macro>
+                    <value>^.*$</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFALIAS.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNAME.MATCHES}</macro>
+                    <value>^.*$</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNAME.NOT_MATCHES}</macro>
+                    <value>^loop</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFOPERSTATUS.MATCHES}</macro>
+                    <value>^.*$</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFOPERSTATUS.NOT_MATCHES}</macro>
+                    <value>^6$</value>
+                    <description>Ignore notPresent(6)</description>
+                </macro>
+                <macro>
+                    <macro>{$TEMP.CRIT}</macro>
+                    <value>50</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>IF-MIB::ifOperStatus</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>up</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>dormant</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>notPresent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>lowerLayerDown</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>RlEnvMonState</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>normal</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>warning</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>critical</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>shutdown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>notPresent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>notFunctioning</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>readingFailed</newvalue>
+                </mapping>
+                <mapping>
+                    <value>8</value>
+                    <newvalue>notAvailable</newvalue>
+                </mapping>
+                <mapping>
+                    <value>9</value>
+                    <newvalue>backingUp</newvalue>
+                </mapping>
+                <mapping>
+                    <value>10</value>
+                    <newvalue>readingFailed</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
