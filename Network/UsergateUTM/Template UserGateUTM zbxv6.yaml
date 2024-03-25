@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-03-05T12:50:17Z'
+  date: '2024-03-25T13:01:12Z'
   groups:
     -
       uuid: 36bff6c29af64692839d077febfc7079
@@ -13,7 +13,7 @@ zabbix_export:
       description: 'https://github.com/AndAndr'
       templates:
         -
-          name: 'ICMP Ping'
+          name: 'Generic by SNMP'
       groups:
         -
           name: 'Templates/Network devices'
@@ -88,28 +88,6 @@ zabbix_export:
               recovery_expression: 'max(/Template UserGateUTM/memoryUsed,5m)<{$MEM_LOAD_MAX}-5'
               name: 'Memory utilization  is too high!'
               priority: AVERAGE
-        -
-          uuid: 1833849a3db8497992c6d8dc490d70f0
-          name: UnknownTRAP
-          type: SNMP_TRAP
-          key: snmptrap.fallback
-          delay: '0'
-          history: 7d
-          trends: '0'
-          value_type: LOG
-          tags:
-            -
-              tag: Application
-              value: Traps
-          triggers:
-            -
-              uuid: 4e0fdfb35b644c9e93770e1f2f9b36aa
-              expression: 'nodata(/Template UserGateUTM/snmptrap.fallback,{$TRAPPEDTRIGGER_TTL})=0'
-              recovery_mode: NONE
-              name: 'SNMPTrap: Unknown event on {HOST.NAME}'
-              opdata: 'SNMPTrap: Неизвестное событие'
-              priority: AVERAGE
-              manual_close: 'YES'
         -
           uuid: 64f4298d37534461bc330930f807cafb
           name: trapAttackDetected
@@ -1332,6 +1310,15 @@ zabbix_export:
             -
               value: '32'
               newvalue: frame-relay
+  triggers:
+    -
+      uuid: 4e0fdfb35b644c9e93770e1f2f9b36aa
+      expression: 'nodata(/Template UserGateUTM/snmptrap.fallback,{$TRAPPEDTRIGGER_TTL})=0'
+      recovery_mode: NONE
+      name: 'SNMPTrap: Unknown event on {HOST.NAME}'
+      opdata: 'SNMPTrap: Неизвестное событие'
+      priority: AVERAGE
+      manual_close: 'YES'
   graphs:
     -
       uuid: 3f65759391e1427fb2e613f205e0dbf4
