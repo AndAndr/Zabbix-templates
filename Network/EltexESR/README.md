@@ -16,6 +16,6 @@
 ## Howto:
 1. Импорт шаблона **Template Eltex ESR SNMPv2**.
 2. Добавить в зависимость к этому шаблону или подключить отдельно к хосту стандартный шаблон **Template Module Generic SNMPv2**
-для ZabbixV=4 или "Generic by SNMP" для младших версий.
+для ZabbixV=4 или **Generic by SNMP** для младших версий.
 3. При использовании протокола BGP, подключить модуль **Template Module Eltex ESR BGP4**.
 
