@@ -1,0 +1,102 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-04-23T13:16:18Z'
+  groups:
+    -
+      uuid: 57b7ae836ca64446ba2c296389c009b7
+      name: Templates/Modules
+  templates:
+    -
+      uuid: 365096d3ae2846e09e9e5ababd7b88cc
+      template: 'Module Eltex OSPF SNMPv2'
+      name: 'Module Eltex OSPF SNMPv2'
+      description: |
+        https://github.com/AndAndr
+        Автообнаружение соседей OSPF для коммутаторов Eltex серии MES.
+      groups:
+        -
+          name: Templates/Modules
+      discovery_rules:
+        -
+          uuid: c1986099f55246edab809b7769e9dacc
+          name: 'Eltex OSPF nbr discover'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.89.210.11.1.2.1]'
+          key: rlOspfNbrIpAddr
+          delay: 1h
+          lifetime: 10d
+          item_prototypes:
+            -
+              uuid: abd2799e57204787a211fb37b3114f65
+              name: 'Eltex OSPF neighbor {#SNMPVALUE} state'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.210.11.1.7.1.{#SNMPVALUE}.0'
+              key: 'rlOspfNbrState[{#SNMPVALUE}]'
+              history: 14d
+              trends: '0'
+              description: 'Full (8) - норма. Когда TwoWay (4) тоже норма, то триггер можно закрыть руками.'
+              valuemap:
+                name: 'SNMP OSPF Neighbor State (ospfNbrState)'
+              tags:
+                -
+                  tag: application
+                  value: ospf
+              trigger_prototypes:
+                -
+                  uuid: f30a485f98ee4e87a735497928f17e4c
+                  expression: 'last(/Module Eltex OSPF SNMPv2/rlOspfNbrState[{#SNMPVALUE}])<>8 and (last(/Module Eltex OSPF SNMPv2/rlOspfNbrState[{#SNMPVALUE}],#1)<>last(/Module Eltex OSPF SNMPv2/rlOspfNbrState[{#SNMPVALUE}],#2))=1'
+                  name: 'OSPF: Check neighbor {#SNMPVALUE} state on {HOST.NAME}'
+                  opdata: 'NBR State={ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: |
+                    Доступно ручное закрытие, если TwoWay (4) - это норма.
+                    Триггер повторно не стреляет.
+                  tags:
+                    -
+                      tag: application
+                      value: 'neighbor {#SNMPVALUE}'
+                    -
+                      tag: application
+                      value: ospf
+      tags:
+        -
+          tag: application
+          value: ospf
+        -
+          tag: class
+          value: network
+        -
+          tag: target
+          value: eltex
+        -
+          tag: target
+          value: eltex-mes
+      valuemaps:
+        -
+          uuid: 4fb05142e48b44db8cdc68502fbbddf9
+          name: 'SNMP OSPF Neighbor State (ospfNbrState)'
+          mappings:
+            -
+              value: '1'
+              newvalue: Down
+            -
+              value: '2'
+              newvalue: Attempt
+            -
+              value: '3'
+              newvalue: Init
+            -
+              value: '4'
+              newvalue: TwoWay
+            -
+              value: '5'
+              newvalue: ExchangeStart
+            -
+              value: '6'
+              newvalue: Exchange
+            -
+              value: '7'
+              newvalue: Loading
+            -
+              value: '8'
+              newvalue: Full

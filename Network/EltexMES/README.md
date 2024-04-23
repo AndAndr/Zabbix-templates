@@ -1,12 +1,6 @@
 # EltexMES
 
-**Template Eltex MES SNMPv2 ver.2.xml** Шаблон для коммутаторов Eltex серии MES для версии Zabbix 4.4 и выше.
-
-
-Работает совместно с модулями:
-**Template Module Eltex MES Interfaces SNMPv2.xml**,
-**Template Module Eltex OSPF SNMPv2.xml**,
-**Template Module Generic SNMPv2**
+Шаблоны для коммутаторов Eltex серии MES для версии Zabbix 4 и 6.
 
 
 Реализовано автообнаружение:
@@ -43,12 +37,11 @@
 
 Предупреждения, замечания и ограничения - см. документацию к Zabbix.
 
-Корректно работает со стеком. Тестировалось на MES3324_rev.B, MES5332A_rev.B.
+Корректно работает со стеком.
 
 
 ## Howto:
-1. Импорт модулей **Template Module Eltex MES Interfaces SNMPv2.xml**, **Template Module Eltex OSPF SNMPv2.xml**.
-2. Импорт шаблона **Template Eltex MES SNMPv2 ver.2.xml**.
-3. Модули можно прилинковать к шаблону в зависимость, плюс можно к шаблону прилинковать стандартный модуль **Template Module Generic SNMPv2** для
-оценки доступности хоста и получения статуса работы SNMP.
+1. Импорт модулей **Module Eltex OSPF SNMPv2**, **Module Eltex MES Interfaces SNMPv2**.
+2. Импорт шаблона **Template Eltex MES SNMPv2**.
+
 

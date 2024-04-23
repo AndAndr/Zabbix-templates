@@ -12,16 +12,12 @@ For Zabbix 4.4. All Linux and Windows versions.
 Collecting data from **"selected source"** of `ntpq -p` output.
 
 
-## Modules
-**TemplateModuleEltexESRBGP4** Eltex ESR Состояние BGP для Zabbix v4,v6 по SNMP
-
-
 ## Network
-**UsergateUTM** Шаблон для Usergate UTM SNMP poll and traps.
+**UsergateUTM** Шаблон Zabbix для мониторинга Usergate UTM по SNMP с поддержкой трапов.
 
-**EltexMES** Шаблон+модули для коммутаторов Eltex серии MES.
+**EltexMES** Шаблоны Zabbix для мониторинга коммутаторов Eltex серии MES по SNMP.
 
-**EltexESR** Шаблон для маршрутизаторов Eltex ESR.
+**EltexESR** Шаблоны Zabbix для мониторинга маршрутизаторов Eltex ESR  по SNMP.
 
 
 ## Other_hardware

@@ -1,7 +1,7 @@
 # EltexESR
 
-`Template Eltex ESR SNMPv2.xml` Шаблон для маршрутизаторов Eltex серии ESR для версии Zabbix 4.4 и выше.
-Мониторинг по SNMPv2 маршрутизаторов Eltex ESR. Тестировалось на ESR1000.
+Шаблоны для маршрутизаторов Eltex серии ESR для версий Zabbix 4 и 6.
+Мониторинг по SNMPv2 маршрутизаторов Eltex ESR. Тестировалось на ESR1000, ESR1500.
 
 ## Реализовано автообнаружение:
 1. Интерфейсов.
@@ -12,10 +12,10 @@
 2. Блоков питания.
 3. Памяти.
 4. Вентиляторов.
+5. Состояния пиров BGP.
 
 ## Howto:
-1. Импорт шаблона **Template Eltex ESR SNMPv2**.
-2. Добавить в зависимость к этому шаблону или подключить отдельно к хосту стандартный шаблон **Template Module Generic SNMPv2**
-для ZabbixV=4 или **Generic by SNMP** для младших версий.
-3. При использовании протокола BGP, подключить модуль **Template Module Eltex ESR BGP4**.
+1. Импорт **Module Eltex ESR BGP4 SNMPv2**.
+2. Импорт **Template Eltex ESR SNMPv2**.
+
 
