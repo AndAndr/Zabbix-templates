@@ -13,7 +13,7 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 
 ## Modules
-**TemplateModuleEltexESRBGP4.xml** Eltex ESR BGP state
+**TemplateModuleEltexESRBGP4** Eltex ESR Состояние BGP для Zabbix v4,v6 по SNMP
 
 
 ## Network
