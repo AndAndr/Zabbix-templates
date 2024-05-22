@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2024-05-21T07:56:58Z</date>
+    <date>2024-05-22T12:20:56Z</date>
     <groups>
         <group>
             <name>Templates/Modules</name>
@@ -77,15 +77,9 @@ OSPF NBRs state for Eltex ESR</description>
                                     <name>ESR OSPF</name>
                                 </application>
                             </applications>
-                            <preprocessing>
-                                <step>
-                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
-                                    <params>10m</params>
-                                </step>
-                            </preprocessing>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{avg(#3)}&gt;{$RETRANSQLENMAX}</expression>
+                                    <expression>{avg(#3)}&gt;{$RETRANSQLENMAX} and {last()}&lt;&gt;0</expression>
                                     <name>OSPF: retransmission queue gt {$RETRANSQLENMAX} NbrRtrIP:{#SNMPINDEX}</name>
                                     <priority>INFO</priority>
                                     <manual_close>YES</manual_close>
@@ -134,7 +128,7 @@ down (1), attempt (2), init (3), twoWay (4), exchangeStart (5), exchange (6), lo
             <macros>
                 <macro>
                     <macro>{$RETRANSQLENMAX}</macro>
-                    <value>5</value>
+                    <value>10</value>
                 </macro>
             </macros>
         </template>

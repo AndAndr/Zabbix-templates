@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-05-21T07:56:32Z'
+  date: '2024-05-22T12:24:57Z'
   groups:
     -
       uuid: 57b7ae836ca64446ba2c296389c009b7
@@ -8,8 +8,8 @@ zabbix_export:
   templates:
     -
       uuid: b6669c212a814869a40bd6d6ef713916
-      template: 'Template Module Eltex ESR OSPF SNMPv2'
-      name: 'Template Module Eltex ESR OSPF SNMPv2'
+      template: 'Module Eltex ESR OSPF SNMPv2'
+      name: 'Module Eltex ESR OSPF SNMPv2'
       description: |
         https://github.com/AndAndr
         OSPF NBRs state for Eltex ESR
@@ -47,7 +47,7 @@ zabbix_export:
               trigger_prototypes:
                 -
                   uuid: 19e9bee1381645929dff04b91ec1c950
-                  expression: 'change(/Template Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrEvents[{#SNMPINDEX}])>1 and last(/Template Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrEvents[{#SNMPINDEX}])<>0'
+                  expression: 'change(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrEvents[{#SNMPINDEX}])>1 and last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrEvents[{#SNMPINDEX}])<>0'
                   name: 'OSPF: neighbor relationship has changed or an error has occurred with NbrRtrIP-{#SNMPINDEX}'
                   priority: INFO
                   tags:
@@ -65,11 +65,6 @@ zabbix_export:
               key: 'eltEsrOspfNbrLsRetransQLen[{#SNMPINDEX}]'
               history: 14d
               description: 'Текущая длина очереди повторной передачи.'
-              preprocessing:
-                -
-                  type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - 10m
               tags:
                 -
                   tag: application
@@ -77,7 +72,7 @@ zabbix_export:
               trigger_prototypes:
                 -
                   uuid: a2fa30b14e324c9eacf3cd2af589e02d
-                  expression: 'avg(/Template Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrLsRetransQLen[{#SNMPINDEX}],#3)>{$RETRANSQLENMAX}'
+                  expression: 'avg(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrLsRetransQLen[{#SNMPINDEX}],#3)>{$RETRANSQLENMAX} and last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrLsRetransQLen[{#SNMPINDEX}])<>0'
                   name: 'OSPF: retransmission queue gt {$RETRANSQLENMAX} NbrRtrIP:{#SNMPINDEX}'
                   priority: INFO
                   manual_close: 'YES'
@@ -112,7 +107,7 @@ zabbix_export:
               trigger_prototypes:
                 -
                   uuid: d0b898737c4d48149c9ee060f87658f1
-                  expression: 'last(/Template Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}])<>8 and (last(/Template Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#1)<>last(/Template Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#2))=1'
+                  expression: 'last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}])<>8 and (last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#1)<>last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#2))=1'
                   name: 'OSPF: Check RtrId-{#SNMPVALUE} neighbor state NbrRtrIP-{#SNMPINDEX}'
                   opdata: 'NBR State={ITEM.LASTVALUE1}'
                   priority: AVERAGE
@@ -146,7 +141,7 @@ zabbix_export:
       macros:
         -
           macro: '{$RETRANSQLENMAX}'
-          value: '5'
+          value: '10'
       valuemaps:
         -
           uuid: 7a020fd8f0cb4194a973f6c66100bfa6
