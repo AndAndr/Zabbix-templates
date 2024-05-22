@@ -1,0 +1,254 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-05-22T07:02:08Z'
+  groups:
+    -
+      uuid: 57b7ae836ca64446ba2c296389c009b7
+      name: Templates/Modules
+  templates:
+    -
+      uuid: 7597bbc3c8674c038c7f2d06a655b906
+      template: 'Module Cisco Nexus OSPF SNMPv2'
+      name: 'Module Cisco Nexus OSPF SNMPv2'
+      description: |
+        https://github.com/AndAndr
+        OSPF NBRs state and area state for Cisco Nexus
+      groups:
+        -
+          name: Templates/Modules
+      items:
+        -
+          uuid: 26e57d0f6c0b4bbf95f7d7b71b3cdb24
+          name: ospfRouterId
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.14.1.1.0
+          key: ospfRouterId
+          delay: 10m
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: application
+              value: ospf
+      discovery_rules:
+        -
+          uuid: a30bb9e1d3e34939a3c472501ce3953a
+          name: 'Cisco nexus OSPF area discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.14.2.1.1]'
+          key: ospfArea
+          delay: 1h
+          lifetime: 7d
+          description: 'Обнаружение area OSPF'
+          item_prototypes:
+            -
+              uuid: be8b5296c6e344b0ba14e3b018f2dfc6
+              name: 'OSPF Area {#SNMPVALUE} status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.14.2.1.10.{#SNMPINDEX}'
+              key: 'ospfAreaStatus[{#SNMPINDEX}]'
+              history: 14d
+              valuemap:
+                name: 'SNMP OSPF area Status (ospfAreaStatus)'
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 3h
+              tags:
+                -
+                  tag: application
+                  value: ospf
+              trigger_prototypes:
+                -
+                  uuid: 55d545e6134040c8a067b900d26c6aff
+                  expression: 'last(/Module Cisco Nexus OSPF SNMPv2/ospfAreaStatus[{#SNMPINDEX}])<>1'
+                  name: 'OSPF area {#SNMPINDEX} status is down'
+                  priority: WARNING
+                  tags:
+                    -
+                      tag: application
+                      value: ospf
+        -
+          uuid: 4ad97e80b59b447d8c7f9d404fe8d8b1
+          name: 'Cisco nexus OSPF NBR(s) discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.14.10.1.3]'
+          key: ospfNbrRtrId
+          delay: 1h
+          lifetime: 7d
+          description: 'Обнаружение соседей OSPF'
+          item_prototypes:
+            -
+              uuid: 51f8b5e29a794a29a7a962c0f361cd46
+              name: 'NbrRtrIP:{#SNMPINDEX} events'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.2.1.14.10.1.7.{#SNMPINDEX}'
+              key: 'OspfNbrEvents[{#SNMPINDEX}]'
+              history: 14d
+              description: 'Количество раз, когда это соседнее отношение меняло свое состояние или возникала ошибка.'
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 10m
+              tags:
+                -
+                  tag: application
+                  value: ospf
+              trigger_prototypes:
+                -
+                  uuid: 2a1f46c5bd964cb7a8f4ec7ad6b34c2b
+                  expression: 'change(/Module Cisco Nexus OSPF SNMPv2/OspfNbrEvents[{#SNMPINDEX}])>1 and last(/Module Cisco Nexus OSPF SNMPv2/OspfNbrEvents[{#SNMPINDEX}])<>0'
+                  name: 'OSPF: neighbor relationship has changed or an error has occurred with NbrRtrIP-{#SNMPINDEX}'
+                  priority: INFO
+                  tags:
+                    -
+                      tag: application
+                      value: 'NbrRtrIP {#SNMPINDEX}'
+                    -
+                      tag: application
+                      value: ospf
+            -
+              uuid: b4beee9e09f446c891635bae71ce9e79
+              name: 'NbrRtrIP:{#SNMPINDEX} retransmission queue length'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.2.1.14.10.1.8.{#SNMPINDEX}'
+              key: 'OspfNbrLsRetransQLen[{#SNMPINDEX}]'
+              history: 14d
+              description: 'Текущая длина очереди повторной передачи.'
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 10m
+              tags:
+                -
+                  tag: application
+                  value: ospf
+              trigger_prototypes:
+                -
+                  uuid: dac202896f6847f58cf5ebf245d93a18
+                  expression: 'avg(/Module Cisco Nexus OSPF SNMPv2/OspfNbrLsRetransQLen[{#SNMPINDEX}],#3)>{$RETRANSQLENMAX}'
+                  name: 'OSPF: retransmission queue gt {$RETRANSQLENMAX} NbrRtrIP:{#SNMPINDEX}'
+                  priority: INFO
+                  tags:
+                    -
+                      tag: application
+                      value: 'NbrRtrIP {#SNMPINDEX}'
+                    -
+                      tag: application
+                      value: ospf
+            -
+              uuid: d85d3196f08b4ce5967c643937c9263c
+              name: 'NbrRtrIP:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE} state'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.2.1.14.10.1.6.{#SNMPINDEX}'
+              key: 'OspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}]'
+              history: 14d
+              description: |
+                Состояние отношений с соседом:
+                down (1), attempt (2), init (3), twoWay (4), exchangeStart (5), exchange (6), loading (7), full (8)
+              valuemap:
+                name: 'SNMP OSPF Neighbor State (ospfNbrState)'
+              preprocessing:
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 10m
+              tags:
+                -
+                  tag: application
+                  value: ospf
+              trigger_prototypes:
+                -
+                  uuid: 66d2e697449147b2ad0418fa9451ac6d
+                  expression: 'last(/Module Cisco Nexus OSPF SNMPv2/OspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}])<>8 and (last(/Module Cisco Nexus OSPF SNMPv2/OspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#1)<>last(/Module Cisco Nexus OSPF SNMPv2/OspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#2))=1'
+                  name: 'OSPF: Check RtrId-{#SNMPVALUE} neighbor state NbrRtrIP-{#SNMPINDEX}'
+                  opdata: 'NBR State={ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  description: |
+                    Доступно ручное закрытие, если TwoWay (4) - это норма.
+                    Триггер повторно не стреляет.
+                  tags:
+                    -
+                      tag: application
+                      value: 'NbrRtrIP {#SNMPINDEX}'
+                    -
+                      tag: application
+                      value: ospf
+                    -
+                      tag: application
+                      value: 'RtrId {#SNMPVALUE}'
+      tags:
+        -
+          tag: application
+          value: ospf
+        -
+          tag: class
+          value: network
+        -
+          tag: target
+          value: cisco
+        -
+          tag: target
+          value: cisco-nexus
+      macros:
+        -
+          macro: '{$RETRANSQLENMAX}'
+          value: '5'
+      valuemaps:
+        -
+          uuid: f5099b5c02124b6a91cac4da5b00847f
+          name: 'SNMP OSPF Admin State (ospfAdminStat)'
+          mappings:
+            -
+              value: '1'
+              newvalue: Enabled
+            -
+              value: '2'
+              newvalue: Disabled
+        -
+          uuid: 53799d2740864fc2bb0eadaaeb8d3b63
+          name: 'SNMP OSPF area Status (ospfAreaStatus)'
+          mappings:
+            -
+              value: '1'
+              newvalue: Enabled
+            -
+              value: '2'
+              newvalue: Disabled
+        -
+          uuid: f646fc5575174c049999d859b6feb2d5
+          name: 'SNMP OSPF Neighbor State (ospfNbrState)'
+          mappings:
+            -
+              value: '1'
+              newvalue: Down
+            -
+              value: '2'
+              newvalue: Attempt
+            -
+              value: '3'
+              newvalue: Init
+            -
+              value: '4'
+              newvalue: TwoWay
+            -
+              value: '5'
+              newvalue: ExchangeStart
+            -
+              value: '6'
+              newvalue: Exchange
+            -
+              value: '7'
+              newvalue: Loading
+            -
+              value: '8'
+              newvalue: Full

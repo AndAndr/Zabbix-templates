@@ -13,6 +13,8 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 
 ## Network
+**CiscoNexus** Модуль Zabbix 6 для мониторинга по SNMPv2 состояния соседей и area OSPF для Cisco Nexus.
+
 **UsergateUTM** Шаблон Zabbix для мониторинга Usergate UTM по SNMP с поддержкой трапов.
 
 **EltexMES** Шаблоны Zabbix для мониторинга коммутаторов Eltex серии MES по SNMP.
