@@ -13,6 +13,7 @@ zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*
 AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]  ##для агента ver.>=5:
 
 EnableRemoteCommands=1                                            ##для агента ver.<5:
+
 3. Прикрепить шаблон к хосту, где выполнены п.1,2
 4. При необходимости, скорректировать значения макросов.
 
