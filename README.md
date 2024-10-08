@@ -11,6 +11,9 @@ For Zabbix 4.4. All Linux and Windows versions.
 **NTP**
 Collecting data from **"selected source"** of `ntpq -p` output.
 
+**Chrony**
+Сбор данных из выхлопа `chronyc ntpdata`.
+
 
 ## Network
 **CiscoNexus** Модуль Zabbix 6 для мониторинга по SNMPv2 состояния соседей и area OSPF для Cisco Nexus.

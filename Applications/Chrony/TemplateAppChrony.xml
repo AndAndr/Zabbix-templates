@@ -1,0 +1,684 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2024-10-08T06:22:47Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template App Chrony</template>
+            <name>Template App Chrony</name>
+            <description>https://github.com/AndAndr&#13;
+Автообнаружение и мониторинг источников времени, заданных для синхронизации, через вызов /usr/bin/chronyc -nc ntpdata.&#13;
+Howto:&#13;
+1. Добавить в файл /etc/suders:&#13;
+zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*&#13;
+, где zabbix - пользователь, от имени которого работает агент.&#13;
+2. Добавить с файл /etc/zabbix/zabbix_agent.conf:&#13;
+AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
+3. Прикрепить шаблон к хосту, где выполнены п.1,2&#13;
+4. При необходимости, скорректировать значения макросов.&#13;
+&#13;
+прим. Zabbix обрабатывает числа с плавающей запятой до 4 знаков после запятой - так определены соответствующие таблицы БД.</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Chrony</name>
+                </application>
+                <application>
+                    <name>Zabbix raw items</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Remote chrony timesource discovery</name>
+                    <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata]</key>
+                    <delay>20m</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#ADDRESS}</macro>
+                                <value>{$CHRONY.SOURCE.IP.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#ADDRESS}</macro>
+                                <value>{$CHRONY.SOURCE.IP.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>1d</lifetime>
+                    <description>Обнаружение настроенных источников времени.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#ADDRESS} Leap status</name>
+                            <type>DEPENDENT</type>
+                            <key>leapstatus.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Normal, Insert second, Delete second or Not synchronised.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.6</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>8h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Mode</name>
+                            <type>DEPENDENT</type>
+                            <key>mode.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.8</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} NTP tests123 result</name>
+                            <type>DEPENDENT</type>
+                            <key>ntp.test.123.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <description>RFC 5905 тесты №1,2,3. Результат 111 - норма.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.24</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;111</expression>
+                                    <name>Chrony: NTP tests123 failed for timesource {#ADDRESS}</name>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Chrony: No data 15m for {#ADDRESS}</name>
+                                            <expression>{Template App Chrony:offset.[{#ADDRESS}].nodata(15m)}=1</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} NTP tests567 result</name>
+                            <type>DEPENDENT</type>
+                            <key>ntp.test.567.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <description>RFC 5905 тесты 5,6,7.  Результат 111 - норма.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.25</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;111</expression>
+                                    <name>Chrony: NTP tests567 failed for timesource {#ADDRESS}</name>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Chrony: NTP tests123 failed for timesource {#ADDRESS}</name>
+                                            <expression>{Template App Chrony:ntp.test.123.[{#ADDRESS}].last()}&lt;&gt;111</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} NTP testsABCD result</name>
+                            <type>DEPENDENT</type>
+                            <key>ntp.test.abcd.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <description>Тесты: maximum delay, maximum delay ratio, maximum delay dev ratio, synchronisation loop - ABCD.&#13;
+Результат 1111 - норма.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.26</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1111</expression>
+                                    <name>Chrony: NTP testsABCD failed for timesource {#ADDRESS}</name>
+                                    <status>DISABLED</status>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Offset</name>
+                            <type>DEPENDENT</type>
+                            <key>offset.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.19</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{nodata(15m)}=1</expression>
+                                    <name>Chrony: No data 15m for {#ADDRESS}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$CHRONY.MAX.OFFSET} or {last()}&lt;-{$CHRONY.MAX.OFFSET}</expression>
+                                    <name>Chrony: Offset is hoo high for {#ADDRESS}</name>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Peer delay</name>
+                            <type>DEPENDENT</type>
+                            <key>peerdelay.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.20</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Reference ID</name>
+                            <type>DEPENDENT</type>
+                            <key>refid.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.17</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>8h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Root delay</name>
+                            <type>DEPENDENT</type>
+                            <key>root.delay.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <description>Общее количество задержек на сетевом пути к stratum-1, с которого компьютер в конечном итоге синхронизируется.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.14</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Root dispersion</name>
+                            <type>DEPENDENT</type>
+                            <key>root.dispersion.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <description>Общая дисперсия, накопленная всеми компьютерами и переданная на компьютер stratum-1, с которым компьютер в конечном итоге синхронизируется.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.15</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$CHRONY.MAX.ROOT.DISP}</expression>
+                                    <name>Chrony: Root dispersion is hoo high for {#ADDRESS}</name>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Stratum</name>
+                            <type>DEPENDENT</type>
+                            <key>stratum.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <units>stratum</units>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.9</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>3h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff()}=1</expression>
+                                    <name>Chrony: Stratum has been changed for {#ADDRESS}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Get ntpdata for {#ADDRESS} - Master item</name>
+                            <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            <delay>5m</delay>
+                            <history>1h</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Zabbix raw items</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>CSV_TO_JSON</type>
+                                    <params>,
+
+0</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Total good RX</name>
+                            <type>DEPENDENT</type>
+                            <key>total.good.rx.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <description>Количество пакетов, прошедших все три группы тестов NTP, т.е. измерение NTP было принято.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.34</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Total RX</name>
+                            <type>DEPENDENT</type>
+                            <key>total.rx.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <description>Количество всех пакетов, полученных от источника.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.32</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Total TX</name>
+                            <type>DEPENDENT</type>
+                            <key>total.tx.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <description>Количество пакетов, отправленных источнику.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.31</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#ADDRESS} Total valid RX</name>
+                            <type>DEPENDENT</type>
+                            <key>total.valid.rx.[{#ADDRESS}]</key>
+                            <delay>0</delay>
+                            <history>20d</history>
+                            <trends>60d</trends>
+                            <description>Количество пакетов, прошедших первые две группы тестов NTP.</description>
+                            <applications>
+                                <application>
+                                    <name>Chrony</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.*.33</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>[]&quot;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Chrony: {#ADDRESS} Offset graph</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template App Chrony</host>
+                                        <key>offset.[{#ADDRESS}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <name>Chrony: {#ADDRESS} Peer delay graph</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template App Chrony</host>
+                                        <key>peerdelay.[{#ADDRESS}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <name>Chrony: {#ADDRESS} Root delay</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template App Chrony</host>
+                                        <key>root.delay.[{#ADDRESS}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <name>Chrony: {#ADDRESS} Root dispersion</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>F63100</color>
+                                    <item>
+                                        <host>Template App Chrony</host>
+                                        <key>root.dispersion.[{#ADDRESS}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var lld = [];
+var lines = value.match(/^\d+\.\d+\.\d+\.\d+/gm).reduce(function(a,b){if(a.indexOf(b) &lt; 0)a.push(b);return a;},[]).join(&quot;\n&quot;).replace(/:/g,&quot;&quot;).replace(/ /g,&quot;&quot;).split(&quot;\n&quot;);
+var lines_num = lines.length;
+for (i = 0; i &lt; lines_num; i++)
+{
+var row = {};
+row[&quot;{#ADDRESS}&quot;] = lines[i]
+lld.push(row);
+}
+return JSON.stringify(lld);</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$CHRONY.CHRONYC_LOCATION}</macro>
+                    <value>/usr/bin/chronyc</value>
+                    <description>Edit path, if needed.</description>
+                </macro>
+                <macro>
+                    <macro>{$CHRONY.MAX.OFFSET}</macro>
+                    <value>0.02</value>
+                </macro>
+                <macro>
+                    <macro>{$CHRONY.MAX.ROOT.DISP}</macro>
+                    <value>0.002</value>
+                </macro>
+                <macro>
+                    <macro>{$CHRONY.MAX.TX.GOODRX.DIFF}</macro>
+                    <value>10</value>
+                </macro>
+                <macro>
+                    <macro>{$CHRONY.SOURCE.IP.MATCHES}</macro>
+                    <value>^.*$</value>
+                </macro>
+                <macro>
+                    <macro>{$CHRONY.SOURCE.IP.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                </macro>
+                <macro>
+                    <macro>{$CHRONY.SUDO_LOCATION}</macro>
+                    <value>/usr/bin/sudo</value>
+                    <description>Edit path, if needed.</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
