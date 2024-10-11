@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-10-08T06:21:42Z'
+  date: '2024-10-11T08:18:34Z'
   groups:
     -
       uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
@@ -17,7 +17,7 @@ zabbix_export:
         1. Добавить в файл /etc/suders:
         zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*
         , где zabbix - пользователь, от имени которого работает агент.
-        2. Добавить с файл /etc/zabbix/zabbix_agent.conf:
+        2. Добавить в файл /etc/zabbix/zabbix_agent.conf:
         AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]
         3. Прикрепить шаблон к хосту, где выполнены п.1,2
         4. При необходимости, скорректировать значения макросов.
@@ -482,7 +482,7 @@ zabbix_export:
               trigger_prototypes:
                 -
                   uuid: 802d4184c7034bd7a171bda557852f96
-                  expression: '(last(/Chrony/stratum.[{#ADDRESS}],#1)<>last(/Chrony/stratum.[{#ADDRESS}],#2))=1'
+                  expression: 'last(/Chrony/stratum.[{#ADDRESS}],#1)>last(/Chrony/stratum.[{#ADDRESS}],#2)'
                   name: 'Chrony: Stratum has been changed for {#ADDRESS}'
                   priority: WARNING
                   tags:

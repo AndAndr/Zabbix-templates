@@ -8,7 +8,7 @@
 1. Добавить в файл /etc/suders:
 zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*
 , где zabbix - пользователь, от имени которого работает агент.
-2. Добавить с файл /etc/zabbix/zabbix_agent.conf:
+2. Добавить в файл /etc/zabbix/zabbix_agent.conf:
 
 AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]  ##для агента ver.>=5:
 

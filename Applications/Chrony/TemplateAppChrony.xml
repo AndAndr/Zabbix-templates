@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2024-10-08T06:22:47Z</date>
+    <date>2024-10-11T08:17:07Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -17,7 +17,7 @@ Howto:&#13;
 1. Добавить в файл /etc/suders:&#13;
 zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*&#13;
 , где zabbix - пользователь, от имени которого работает агент.&#13;
-2. Добавить с файл /etc/zabbix/zabbix_agent.conf:&#13;
+2. Добавить в файл /etc/zabbix/zabbix_agent.conf:&#13;
 AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
 3. Прикрепить шаблон к хосту, где выполнены п.1,2&#13;
 4. При необходимости, скорректировать значения макросов.&#13;
@@ -444,7 +444,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{diff()}=1</expression>
+                                    <expression>{last(#1)}&gt;{last(#2)}</expression>
                                     <name>Chrony: Stratum has been changed for {#ADDRESS}</name>
                                     <priority>WARNING</priority>
                                 </trigger_prototype>
