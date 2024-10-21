@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-03-25T13:01:12Z'
+  date: '2024-10-21T12:08:47Z'
   groups:
     -
       uuid: 36bff6c29af64692839d077febfc7079
@@ -30,8 +30,11 @@ zabbix_export:
           description: 'Утилизация CPU'
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: cpu
+            -
+              tag: component
+              value: device
           triggers:
             -
               uuid: 74bef4569aab4a2aafe3a4af496af334
@@ -40,6 +43,10 @@ zabbix_export:
               recovery_expression: 'max(/Template UserGateUTM/cpuLoad,5m)<{$CPU_USED_MAX}-5'
               name: 'CPU load is too high!'
               priority: AVERAGE
+              tags:
+                -
+                  tag: scope
+                  value: performance
         -
           uuid: e44e42e005aa44de9e964dc2eb4c5308
           name: 'Used space on log disk percentage'
@@ -58,14 +65,24 @@ zabbix_export:
                 - 6h
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: device
+            -
+              tag: component
+              value: disk
           triggers:
             -
               uuid: 67b01d9ca19b448da64f8ca50f9133c7
               expression: 'last(/Template UserGateUTM/logDiskSpace)>{$LOG_USED_MAX}'
               name: 'Check used space on log disk'
               priority: WARNING
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: capacity
         -
           uuid: 8f21a2d566a847788f0b416814cbfc4c
           name: 'Memory used percentage'
@@ -78,8 +95,11 @@ zabbix_export:
           description: 'Утилизация памяти'
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: device
+            -
+              tag: component
+              value: memory
           triggers:
             -
               uuid: b86b145726fb4f1d9be4b5ab69e21c8d
@@ -88,6 +108,13 @@ zabbix_export:
               recovery_expression: 'max(/Template UserGateUTM/memoryUsed,5m)<{$MEM_LOAD_MAX}-5'
               name: 'Memory utilization  is too high!'
               priority: AVERAGE
+              tags:
+                -
+                  tag: scope
+                  value: capacity
+                -
+                  tag: scope
+                  value: performance
         -
           uuid: 64f4298d37534461bc330930f807cafb
           name: trapAttackDetected
@@ -100,8 +127,11 @@ zabbix_export:
           description: 'Notification about IDPS attack'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: idps
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 93964985487640e99a1c8dcf47484e04
@@ -112,6 +142,13 @@ zabbix_export:
               priority: WARNING
               description: 'Notification about IDPS attack'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
+                -
+                  tag: scope
+                  value: security
         -
           uuid: 47640e38a13a4ee388d18790dd5e7bba
           name: trapCableStatus
@@ -124,8 +161,11 @@ zabbix_export:
           description: 'Cable was plugged/unplugged from interface'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: device
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: cf25bb7dce6c4016a97de32f2ec0f6fa
@@ -135,6 +175,10 @@ zabbix_export:
               priority: AVERAGE
               description: 'Cable was plugged/unplugged from interface'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: 5b77ca0775f34755bd73033fc390c552
           name: trapChecksumFailed
@@ -147,8 +191,11 @@ zabbix_export:
           description: 'Some files checksum failed'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: device
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 23b7d003de9e4256a3ffe815750a3a4f
@@ -159,6 +206,10 @@ zabbix_export:
               priority: AVERAGE
               description: 'Some files checksum failed'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: 2a1027fe952b4ae981ef909111b5456c
           name: trapCoreBootstrapEnd
@@ -171,8 +222,11 @@ zabbix_export:
           description: 'Notification about utm-core boot finished'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: network
+            -
+              tag: component
+              value: system
           triggers:
             -
               uuid: bd9e86dbbace483ba0c1d01ee2b7ef20
@@ -181,6 +235,10 @@ zabbix_export:
               priority: INFO
               description: 'Notification about utm-core boot finished'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
         -
           uuid: 118a213b2795455193e9b6aaa93e80b2
           name: trapCoreCrush
@@ -193,8 +251,11 @@ zabbix_export:
           description: 'Notification about core crushing'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: network
+            -
+              tag: component
+              value: system
           triggers:
             -
               uuid: 555bf01f1ee347dbb1d1e21a664be255
@@ -205,6 +266,10 @@ zabbix_export:
               priority: HIGH
               description: 'Notification about core crushing'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: 6572bcd138724c0a8ab938d98ef378f9
           name: trapDefaultGatewayChanged
@@ -217,8 +282,11 @@ zabbix_export:
           description: 'Default gateway IP changed'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: network
+            -
+              tag: component
+              value: system
           triggers:
             -
               uuid: ac2f3bd5e21c44429e288aba5b096d81
@@ -227,6 +295,10 @@ zabbix_export:
               priority: INFO
               description: 'Default gateway IP changed'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
         -
           uuid: 60656bde006e4d439680a3367fb91ec9
           name: trapHighCPUUsage
@@ -239,8 +311,11 @@ zabbix_export:
           description: 'High CPU usage notification'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: device
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 169f438ba021440e98816de0a6c1c757
@@ -249,6 +324,10 @@ zabbix_export:
               priority: WARNING
               description: 'High CPU usage notification'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: performance
         -
           uuid: e910295d60784381b361ab8f2caa70a6
           name: trapHighSessionsCounter
@@ -261,8 +340,11 @@ zabbix_export:
           description: 'Active sessions number are near the limit'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: network
+            -
+              tag: component
+              value: system
           triggers:
             -
               uuid: 40d8ef3413fc436c970d4e45fa6b2348
@@ -271,6 +353,10 @@ zabbix_export:
               priority: WARNING
               description: 'Active sessions number are near the limit'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: 4eb71f29f15b452f90307cf91ce5ee10
           name: trapHighUsersCounter
@@ -283,8 +369,11 @@ zabbix_export:
           description: 'Active users number are near the limit'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: network
+            -
+              tag: component
+              value: system
           triggers:
             -
               uuid: 4a6fc9efb94f4e2783b27e0bb4cd63f7
@@ -293,6 +382,10 @@ zabbix_export:
               priority: WARNING
               description: 'Active users number are near the limit'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: cdac452c4e694181ab69879a6e82d4f5
           name: trapLDAPServerDown
@@ -305,8 +398,11 @@ zabbix_export:
           description: 'LDAP Server is not responding'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: account
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 364faa824eb544b79d5933e92cecc240
@@ -317,6 +413,10 @@ zabbix_export:
               priority: WARNING
               description: 'LDAP Server is not responding'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: 17de35e59dac40e99e6545d72e30c5e5
           name: trapLowLogdiskSpace
@@ -329,8 +429,11 @@ zabbix_export:
           description: 'Low log disk space notification'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: device
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: cb38a4dd59e04beea4fbfb0a469a7230
@@ -341,6 +444,13 @@ zabbix_export:
               priority: AVERAGE
               description: 'Low log disk space notification'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: capacity
         -
           uuid: 889bcb0f64394713bf2f251b48a26e5e
           name: trapLowMemory
@@ -353,8 +463,11 @@ zabbix_export:
           description: 'Low memory notification'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: device
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: adffd1272d2a4b6c8cfc6f4229d97191
@@ -365,6 +478,13 @@ zabbix_export:
               priority: AVERAGE
               description: 'Low memory notification'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: capacity
+                -
+                  tag: scope
+                  value: performance
         -
           uuid: 87613e4123a344df824311090478da40
           name: trapMemberDown
@@ -377,8 +497,11 @@ zabbix_export:
           description: 'HA cluster node offline'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: 'ha cluster'
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 9bfbae0121ea409bad915546322a10c8
@@ -387,6 +510,10 @@ zabbix_export:
               priority: AVERAGE
               description: 'HA cluster node offline'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: 15bbd01f7fac49978f4e3b45ed548e21
           name: trapMemberUp
@@ -399,8 +526,11 @@ zabbix_export:
           description: 'HA cluster node online'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: 'ha cluster'
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: ab6fff1abd8741c5aa56cd83a4de0440
@@ -409,6 +539,10 @@ zabbix_export:
               priority: INFO
               description: 'HA cluster node online'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: eae4da488b2a414d9f86705bb0a769ef
           name: trapPowerSupply
@@ -421,8 +555,11 @@ zabbix_export:
           description: 'Power supply unit 1 switched off'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: device
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 7cf3c083cfa441948fda25ea922eda7a
@@ -433,6 +570,13 @@ zabbix_export:
               priority: AVERAGE
               description: 'Power supply unit switched off'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: notice
         -
           uuid: ec09cc3d8a444e099b55f0cff52ea258
           name: trapRaidStatus
@@ -445,8 +589,11 @@ zabbix_export:
           description: 'Raid status is changed'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: device
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 54dc57f76b6340cb91e15195bbcb456b
@@ -457,6 +604,10 @@ zabbix_export:
               priority: AVERAGE
               description: 'Raid status is changed'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
         -
           uuid: a973d96908fa4d9eab8ec321b7b9ca16
           name: trapStatDown
@@ -469,8 +620,11 @@ zabbix_export:
           description: 'Notification about statistics server shutting down'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: network
+            -
+              tag: component
+              value: system
           triggers:
             -
               uuid: d946e3539c43466ab3807dba0e0e0cfa
@@ -481,6 +635,13 @@ zabbix_export:
               priority: AVERAGE
               description: 'Notification about statistics server shutting down'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: notice
         -
           uuid: 8999e8e99b7e4f1ea731461f27d48af6
           name: trapStatusChanged
@@ -493,8 +654,11 @@ zabbix_export:
           description: 'HA cluster node status changed notification'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: 'ha cluster'
+            -
+              tag: component
+              value: network
           triggers:
             -
               uuid: 855749cbdf5e4aef83a6820c638f7cf1
@@ -505,6 +669,10 @@ zabbix_export:
               priority: AVERAGE
               description: 'HA cluster node status changed notification'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
         -
           uuid: 3d285b34e5a946e8bcd7878a0718ec16
           name: trapTrafficDrop
@@ -517,8 +685,11 @@ zabbix_export:
           description: 'Firewall DENY rule triggered'
           tags:
             -
-              tag: Application
-              value: Traps
+              tag: component
+              value: network
+            -
+              tag: component
+              value: traffic
           triggers:
             -
               uuid: 23ebd9b08a5444a7a0470e1fb7c1319b
@@ -527,6 +698,13 @@ zabbix_export:
               priority: INFO
               description: 'Сработало запрещающее правило межсетевого экрана.'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
+                -
+                  tag: scope
+                  value: security
         -
           uuid: 51c533f22864422fabb480741bb9b363
           name: Uptime
@@ -545,8 +723,8 @@ zabbix_export:
                 - '0.01'
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: system
           triggers:
             -
               uuid: 9f1184d1b7d84f62acc3e6f35ee0dfa8
@@ -555,12 +733,20 @@ zabbix_export:
               priority: HIGH
               description: 'Устройство перестало отвечать на SNMP-запросы.'
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
             -
               uuid: 58f1572ce86a49ccbebe7f3be6aafb97
               expression: 'last(/Template UserGateUTM/system.uptime[sysUpTime.0])<10m'
               name: '{HOST.NAME} has been restarted!'
               priority: WARNING
               manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
         -
           uuid: 08dac57b65b949a0ab416b71cfcd6963
           name: 'The number of active current users'
@@ -578,8 +764,8 @@ zabbix_export:
                 - 10m
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: system
         -
           uuid: d2dcb432c6ab4da29e38c9572eaf856d
           name: 'vCPU percentage'
@@ -593,8 +779,11 @@ zabbix_export:
           description: 'Процент утилизации vCPU'
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: cpu
+            -
+              tag: component
+              value: system
           triggers:
             -
               uuid: e50d4aae621e41c9a7d0b126a8d17333
@@ -603,6 +792,10 @@ zabbix_export:
               recovery_expression: 'avg(/Template UserGateUTM/vCPU.percentage,10m)<{$VCPU_USED_MAX}-10'
               name: 'vCPU load is too high!'
               priority: AVERAGE
+              tags:
+                -
+                  tag: scope
+                  value: performance
         -
           uuid: 9e576278150b47348b4d76ec5bc136fe
           name: 'vCPU count'
@@ -621,8 +814,11 @@ zabbix_export:
                 - 1d
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: cpu
+            -
+              tag: component
+              value: system
         -
           uuid: 53a35cbcd0674ba8b94da465dd11857a
           name: 'vCPU used'
@@ -640,8 +836,11 @@ zabbix_export:
                 - 10m
           tags:
             -
-              tag: Application
-              value: System
+              tag: component
+              value: cpu
+            -
+              tag: component
+              value: system
       discovery_rules:
         -
           uuid: 7d245a77b7844773a55bcb0544daaf5e
@@ -670,8 +869,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: eae166c7049f4f3eaf4f34ce5d962067
               name: 'Description of interface $1'
@@ -689,8 +888,8 @@ zabbix_export:
                     - 1d
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: f67c681cc99a48f99473d7dd37ae096d
               name: 'Incoming discarded packets on interface $1'
@@ -708,8 +907,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: f7d9130a3ade40b1b5327228953ab18c
               name: 'Inbound errors on interface $1'
@@ -726,8 +925,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
               trigger_prototypes:
                 -
                   uuid: 5802f11f67624fd5ad160284b417b20e
@@ -736,6 +935,10 @@ zabbix_export:
                     nodata(/Template UserGateUTM/ifInErrors[{#SNMPVALUE}],1m)=0
                   name: 'Errors on interface {#SNMPVALUE}'
                   priority: WARNING
+                  tags:
+                    -
+                      tag: scope
+                      value: performance
             -
               uuid: 1093330015b046418f73238daa295938
               name: 'Incoming non-unicast packets on interface $1'
@@ -754,8 +957,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: e8a1e9016d884991965a7e77e3037964
               name: 'Incoming traffic on interface $1'
@@ -776,8 +979,8 @@ zabbix_export:
                     - '8'
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: 67ed229e6baf443e9a10adcda4fd5848
               name: 'Incoming Unicast packets on interface $1'
@@ -796,8 +999,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: a99941cd2c5d47ab8e8c0b7666206fb8
               name: 'Incoming discarded unknown or unsupported protocol packets on interface $1'
@@ -815,8 +1018,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: ffb3b4f415df4adf8e312f883ea628f4
               name: 'Last change of interface $1'
@@ -838,8 +1041,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: e473b1ef13374bf39db0e55a52080a20
               name: 'MTU size of interface $1'
@@ -862,8 +1065,8 @@ zabbix_export:
                     - 24h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: ad2f60bc4fe2470bb96e81330a748522
               name: 'Operational status of interface $1'
@@ -881,14 +1084,18 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
               trigger_prototypes:
                 -
                   uuid: a8f9092ee2a24f54a4ac9b7865191355
                   expression: '(last(/Template UserGateUTM/ifOperStatus[{#SNMPVALUE}],#1)<>last(/Template UserGateUTM/ifOperStatus[{#SNMPVALUE}],#2))>0 and nodata(/Template UserGateUTM/ifOperStatus[{#SNMPVALUE}],1m)=0'
                   name: 'Operational status was changed on interface {#SNMPVALUE}'
                   priority: INFO
+                  tags:
+                    -
+                      tag: scope
+                      value: notice
             -
               uuid: 439c2b421c9e4b97bf2da985aa3790d3
               name: 'Outgoing discarded packets on interface  $1'
@@ -906,8 +1113,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: c8ddf3ad143343ed83770450f6bc0ef9
               name: 'Outbound errors on interface $1'
@@ -924,8 +1131,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: 56a5641e8377409099c9258f1e41f0b4
               name: 'Outgoing non-unicast packets on interface $1'
@@ -944,8 +1151,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: 89bf08b873344a2cbeb5f901917c1c6d
               name: 'Outgoing traffic on interface $1'
@@ -966,8 +1173,8 @@ zabbix_export:
                     - '8'
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: 91508d95b2fa41f4918eacc02b0fca15
               name: 'Length of the output packet queue for interface $1'
@@ -986,8 +1193,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
               trigger_prototypes:
                 -
                   uuid: 236b5f75826540d3aa112948a9a8089d
@@ -1015,8 +1222,8 @@ zabbix_export:
                     - 6h
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: 548dc8ba7a67474c8dd6d59da89ea104
               name: 'Physic address of interface $1'
@@ -1036,8 +1243,8 @@ zabbix_export:
                     - 1d
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: 0f39abf3da78461e875a2a38920c2dec
               name: 'Speed of interface $1'
@@ -1055,8 +1262,8 @@ zabbix_export:
                     - 1d
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
             -
               uuid: 03a5f2002183455b99b50bf9eae22aea
               name: 'Type of interface $1'
@@ -1077,22 +1284,34 @@ zabbix_export:
                     - 1d
               tags:
                 -
-                  tag: Application
-                  value: Interface(s)
+                  tag: component
+                  value: interface
           trigger_prototypes:
             -
               uuid: b4dd068363b84de7ac01a23860e18399
               expression: 'last(/Template UserGateUTM/ifSpeed[{#SNMPVALUE}])>0 and (avg(/Template UserGateUTM/ifInOctets[{#SNMPVALUE}],300s))>(last(/Template UserGateUTM/ifSpeed[{#SNMPVALUE}]))*0.8'
               name: 'Incoming use on interface {#SNMPVALUE} exceed 80% for the last 5 minutes'
+              tags:
+                -
+                  tag: scope
+                  value: performance
             -
               uuid: e7826d72df994f7383180ee6b1522540
               expression: 'last(/Template UserGateUTM/ifAdminStatus[{#SNMPVALUE}])=1 and last(/Template UserGateUTM/ifOperStatus[{#SNMPVALUE}])=2'
               name: 'Operational status of interface {#SNMPVALUE} is DOWN!'
               priority: HIGH
+              tags:
+                -
+                  tag: scope
+                  value: availability
             -
               uuid: 79980386eb224135881433afb5890ac6
               expression: 'last(/Template UserGateUTM/ifSpeed[{#SNMPVALUE}])>0 and (avg(/Template UserGateUTM/ifOutOctets[{#SNMPVALUE}],300s))>(last(/Template UserGateUTM/ifSpeed[{#SNMPVALUE}]))*0.8'
               name: 'Outgoing use on interface {#SNMPVALUE} exceed 80% for the last 5 minutes'
+              tags:
+                -
+                  tag: scope
+                  value: performance
           graph_prototypes:
             -
               uuid: 5daf80c2954149fda77747fa2ff4b1c3
@@ -1150,6 +1369,16 @@ zabbix_export:
                   item:
                     host: 'Template UserGateUTM'
                     key: 'ifOutOctets[{#SNMPVALUE}]'
+      tags:
+        -
+          tag: class
+          value: network
+        -
+          tag: target
+          value: usergate
+        -
+          tag: target
+          value: usergate-utm
       macros:
         -
           macro: '{$CPU_USED_MAX}'
@@ -1319,6 +1548,10 @@ zabbix_export:
       opdata: 'SNMPTrap: Неизвестное событие'
       priority: AVERAGE
       manual_close: 'YES'
+      tags:
+        -
+          tag: scope
+          value: rtfm
   graphs:
     -
       uuid: 3f65759391e1427fb2e613f205e0dbf4
