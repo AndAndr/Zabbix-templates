@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-10-11T08:18:34Z'
+  date: '2024-10-21T08:10:12Z'
   groups:
     -
       uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
@@ -30,7 +30,7 @@ zabbix_export:
         -
           uuid: 04c8d02300b04258924440f6fdde1e45
           name: 'Remote chrony timesource discovery'
-          key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata]'
+          key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata]'
           delay: 20m
           filter:
             evaltype: AND
@@ -71,7 +71,7 @@ zabbix_export:
                   parameters:
                     - 8h
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -102,7 +102,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -136,7 +136,7 @@ zabbix_export:
                   parameters:
                     - 1h
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -184,7 +184,7 @@ zabbix_export:
                   parameters:
                     - 1h
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -234,7 +234,7 @@ zabbix_export:
                   parameters:
                     - 1h
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -276,7 +276,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -326,7 +326,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -360,7 +360,7 @@ zabbix_export:
                   parameters:
                     - 8h
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -392,7 +392,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -424,7 +424,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -468,7 +468,7 @@ zabbix_export:
                   parameters:
                     - 3h
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -482,8 +482,8 @@ zabbix_export:
               trigger_prototypes:
                 -
                   uuid: 802d4184c7034bd7a171bda557852f96
-                  expression: 'last(/Chrony/stratum.[{#ADDRESS}],#1)>last(/Chrony/stratum.[{#ADDRESS}],#2)'
-                  name: 'Chrony: Stratum has been changed for {#ADDRESS}'
+                  expression: 'last(/Chrony/stratum.[{#ADDRESS}])>{$CHRONY.STRATUM.THRESHOLD}'
+                  name: 'Chrony: Stratum too low {#ADDRESS}'
                   priority: WARNING
                   tags:
                     -
@@ -492,7 +492,7 @@ zabbix_export:
             -
               uuid: a9d68fcc258444b3b284c13a16fcccf3
               name: 'Get ntpdata for {#ADDRESS} - Master item'
-              key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+              key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               delay: 5m
               history: 1h
               trends: '0'
@@ -527,7 +527,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -557,7 +557,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -587,7 +587,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -617,7 +617,7 @@ zabbix_export:
                   parameters:
                     - '[]"'
               master_item:
-                key: 'system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]'
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
               tags:
                 -
                   tag: component
@@ -689,7 +689,7 @@ zabbix_export:
           value: chrony
       macros:
         -
-          macro: '{$CHRONY.CHRONYC_LOCATION}'
+          macro: '{$CHRONY.CHRONYC.LOCATION}'
           value: /usr/bin/chronyc
           description: 'Edit path, if needed.'
         -
@@ -708,6 +708,9 @@ zabbix_export:
           macro: '{$CHRONY.SOURCE.IP.NOT_MATCHES}'
           value: CHANGE_IF_NEEDED
         -
-          macro: '{$CHRONY.SUDO_LOCATION}'
+          macro: '{$CHRONY.STRATUM.THRESHOLD}'
+          value: '5'
+        -
+          macro: '{$CHRONY.SUDO.LOCATION}'
           value: /usr/bin/sudo
           description: 'Edit path, if needed.'

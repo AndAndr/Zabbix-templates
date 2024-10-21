@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2024-10-11T08:17:07Z</date>
+    <date>2024-10-21T08:05:13Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -39,7 +39,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
             <discovery_rules>
                 <discovery_rule>
                     <name>Remote chrony timesource discovery</name>
-                    <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata]</key>
+                    <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata]</key>
                     <delay>20m</delay>
                     <filter>
                         <evaltype>AND</evaltype>
@@ -89,7 +89,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -117,7 +117,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -148,7 +148,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
@@ -192,7 +192,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
@@ -237,7 +237,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
@@ -273,7 +273,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
@@ -285,6 +285,12 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                     <expression>{last()}&gt;{$CHRONY.MAX.OFFSET} or {last()}&lt;-{$CHRONY.MAX.OFFSET}</expression>
                                     <name>Chrony: Offset is hoo high for {#ADDRESS}</name>
                                     <priority>INFO</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Chrony: Stratum too low {#ADDRESS}</name>
+                                            <expression>{Template App Chrony:stratum.[{#ADDRESS}].last()}&gt;{$CHRONY.STRATUM.THRESHOLD}</expression>
+                                        </dependency>
+                                    </dependencies>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
@@ -313,7 +319,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -344,7 +350,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -373,7 +379,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -402,13 +408,19 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
                                     <expression>{last()}&gt;{$CHRONY.MAX.ROOT.DISP}</expression>
                                     <name>Chrony: Root dispersion is hoo high for {#ADDRESS}</name>
                                     <priority>INFO</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Chrony: Stratum too low {#ADDRESS}</name>
+                                            <expression>{Template App Chrony:stratum.[{#ADDRESS}].last()}&gt;{$CHRONY.STRATUM.THRESHOLD}</expression>
+                                        </dependency>
+                                    </dependencies>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
@@ -440,19 +452,19 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{last(#1)}&gt;{last(#2)}</expression>
-                                    <name>Chrony: Stratum has been changed for {#ADDRESS}</name>
+                                    <expression>{last()}&gt;{$CHRONY.STRATUM.THRESHOLD}</expression>
+                                    <name>Chrony: Stratum too low {#ADDRESS}</name>
                                     <priority>WARNING</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
                             <name>Get ntpdata for {#ADDRESS} - Master item</name>
-                            <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                            <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             <delay>5m</delay>
                             <history>1h</history>
                             <trends>0</trends>
@@ -495,7 +507,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -522,7 +534,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -549,7 +561,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -576,7 +588,7 @@ AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]&#13;
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>system.run[{$CHRONY.SUDO_LOCATION} {$CHRONY.CHRONYC_LOCATION} -nc ntpdata {#ADDRESS}]</key>
+                                <key>system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]</key>
                             </master_item>
                         </item_prototype>
                     </item_prototypes>
@@ -649,7 +661,7 @@ return JSON.stringify(lld);</params>
             </discovery_rules>
             <macros>
                 <macro>
-                    <macro>{$CHRONY.CHRONYC_LOCATION}</macro>
+                    <macro>{$CHRONY.CHRONYC.LOCATION}</macro>
                     <value>/usr/bin/chronyc</value>
                     <description>Edit path, if needed.</description>
                 </macro>
@@ -674,7 +686,11 @@ return JSON.stringify(lld);</params>
                     <value>CHANGE_IF_NEEDED</value>
                 </macro>
                 <macro>
-                    <macro>{$CHRONY.SUDO_LOCATION}</macro>
+                    <macro>{$CHRONY.STRATUM.THRESHOLD}</macro>
+                    <value>5</value>
+                </macro>
+                <macro>
+                    <macro>{$CHRONY.SUDO.LOCATION}</macro>
                     <value>/usr/bin/sudo</value>
                     <description>Edit path, if needed.</description>
                 </macro>
