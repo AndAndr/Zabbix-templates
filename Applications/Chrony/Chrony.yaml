@@ -606,7 +606,7 @@ zabbix_export:
           value: '30'
           description: ms
         - macro: '{$CHRONY.MAX.ROOT.DISP}'
-          value: '2'
+          value: '6'
           description: ms
         - macro: '{$CHRONY.MAX.TX.GOODRX.DIFF}'
           value: '10'
