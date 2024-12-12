@@ -1,0 +1,892 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: cee0d7cd026a4cb4b9ff10c8226e970a
+      name: 'Templates/Other Hardware'
+  templates:
+    - uuid: d514e3e0325a41159b2e17a7f7e654be
+      template: 'Komset SSV-1G by SNMP'
+      name: 'Komset SSV-1G by SNMP'
+      description: |
+        https://github.com/AndAndr
+        Мониторинг по SNMP сервера точного времени Комсет ССВ-1Г:
+        1. Состояния БП.
+        2. Статус устройства.
+        3. Статус аварии.
+        4. Состояния внутреннего модуля ГНСС.
+      templates:
+        - name: 'Generic by SNMP'
+      groups:
+        - name: 'Templates/Other Hardware'
+      items:
+        - uuid: ecbc2ba045f34265a5d2ece088b9fe30
+          name: 'Alarm status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.5.0]'
+          key: devAlarmStatus
+          trends: '0'
+          valuemap:
+            name: AlarmStatus
+          tags:
+            - tag: component
+              value: alert
+          triggers:
+            - uuid: bdc4cd06424f4498b5290ca689276744
+              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=7'
+              name: 'Alert alarm'
+              priority: HIGH
+            - uuid: 6c9fff725d1d49b790fb06992d08041c
+              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=6'
+              name: 'Critical alarm'
+              priority: AVERAGE
+            - uuid: a59ddf1f6735486cade00e3b81c5a468
+              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=8'
+              name: 'Emergency alarm'
+              priority: HIGH
+            - uuid: 55292d25e7864a63bd29cc5313c30d21
+              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=5'
+              name: 'Error alarm'
+              priority: AVERAGE
+            - uuid: cf3a6e78f5154fe9babbc2ad51a7b690
+              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=3'
+              name: 'Notice alarm'
+              priority: INFO
+            - uuid: 3a76171f318a427ba507ab0333b48df5
+              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=0'
+              name: 'Unknown alarm'
+              priority: WARNING
+            - uuid: f871d48f54694ae3af5bf1df8d565d67
+              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=4'
+              name: 'Warning alarm'
+              priority: AVERAGE
+        - uuid: ac115f6898754c0c836a8a93c7ded4ac
+          name: 'Device status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.6.0]'
+          key: devDeviceStatus
+          trends: '0'
+          valuemap:
+            name: DeviceStatus
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: e1c32e0c67f640b289056b534b4252fe
+              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=6'
+              name: 'Clock not sync'
+              priority: HIGH
+            - uuid: 285ac69eb3854ceab7e5f68caa46cca0
+              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=2'
+              name: 'No sync source'
+              priority: HIGH
+            - uuid: 9213837861424a1d9179d2c25e7099a4
+              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=4'
+              name: 'No time source'
+              priority: HIGH
+            - uuid: 8790a8903cf149008d7a7feff38ebc0e
+              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=3'
+              name: 'Sync source not valid'
+              priority: HIGH
+            - uuid: adb2997aa03141ddafcd1841de1fcdf2
+              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=5'
+              name: 'Time source not valid'
+              priority: HIGH
+            - uuid: 1458328dcc514d0281f258e999d06807
+              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=0'
+              name: 'Unknown device status'
+              priority: HIGH
+        - uuid: a18dbaa9c4164bfa995401bab57a4686
+          name: 'Hardware version'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.2.0]'
+          key: devHwVersion
+          delay: 5m
+          value_type: TEXT
+          trends: '0'
+          description: 'Hardware version'
+          inventory_link: HARDWARE
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: ca438b8350094105be64bdc58fede652
+          name: 'Syncronization Status Message'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.11.2.0]'
+          key: devOscSSM
+          valuemap:
+            name: OscStatus
+          tags:
+            - tag: component
+              value: system
+        - uuid: bf0b9e8eedc148278cd705551d442e1f
+          name: 'Internal oscillator status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.11.1.0]'
+          key: devOscStatus
+          valuemap:
+            name: OscStatus
+          tags:
+            - tag: component
+              value: system
+        - uuid: 1d6fe054c62c4258ae5b48b02db61cfd
+          name: 'Power supply 1 status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.7.1.0]'
+          key: devPowerStatus1
+          valuemap:
+            name: devPowerStatus
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: 3bf8276e32274a62a9f7a2d0896add7a
+              expression: 'last(/Komset SSV-1G by SNMP/devPowerStatus1)<>5'
+              name: 'Check PS1'
+              opdata: 'Проверь БП1'
+              priority: WARNING
+        - uuid: 226ec942d7514e12a85626b3ab99eab0
+          name: 'Power supply 2 status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.7.2.0]'
+          key: devPowerStatus2
+          valuemap:
+            name: devPowerStatus
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: 5866cd639fa24c69a9efe964978f61e2
+              expression: 'last(/Komset SSV-1G by SNMP/devPowerStatus2)<>5'
+              name: 'Check PS2'
+              opdata: 'Проверь БП2'
+              priority: WARNING
+        - uuid: 52e7f544554d4969b5e98546f7945d3c
+          name: 'Serial number'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.4.0]'
+          key: devSerialNumber
+          delay: 5m
+          value_type: TEXT
+          trends: '0'
+          description: 'Serial number'
+          inventory_link: SERIALNO_A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 9829b9e768774b29bc023e3896e2c978
+          name: 'Software version'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.3.0]'
+          key: devSwVersion
+          delay: 5m
+          value_type: TEXT
+          trends: '0'
+          description: 'Software version'
+          inventory_link: SOFTWARE
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 6d8f46fd5b1e4f8985383911cdea7e7e
+          name: 'Leap second TimeScalePopravka'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.10.2.0]'
+          key: devTimeScalePopravka
+          tags:
+            - tag: component
+              value: ntp
+        - uuid: 75a88094e14e47f1bc1c81879fdf250c
+          name: 'Leap second status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.10.1.0]'
+          key: devTimeScaleStatus
+          valuemap:
+            name: TimeScaleStatus
+          tags:
+            - tag: component
+              value: ntp
+          triggers:
+            - uuid: 62f3aae6eea44576b5dcfc564520646e
+              expression: 'last(/Komset SSV-1G by SNMP/devTimeScaleStatus)=3'
+              name: 'Leap status - Delete second'
+              priority: AVERAGE
+            - uuid: 5a711860e55c418dac23614f697ed2ee
+              expression: 'last(/Komset SSV-1G by SNMP/devTimeScaleStatus)=2'
+              name: 'Leap status - Insert second'
+              priority: AVERAGE
+            - uuid: 51f5c537dc394a23a98b095d62b567d1
+              expression: 'last(/Komset SSV-1G by SNMP/devTimeScaleStatus)=4'
+              name: 'Leap status - Not synchronised'
+              priority: AVERAGE
+            - uuid: 12a0e644a141463cb53acf292d299490
+              expression: 'nodata(/Komset SSV-1G by SNMP/devTimeScaleStatus,5m)=1'
+              name: 'No SNMP data from device'
+              priority: WARNING
+        - uuid: 3afb39bb63574434abd6855fcfdeeb8d
+          name: 'Device TimeZone'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.10.3.0]'
+          key: devTimeZone
+          tags:
+            - tag: component
+              value: system
+        - uuid: 1a833473503f4de981f9b29c3db21005
+          name: 'BEIDOU navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.6.0]'
+          key: GnssNavSatBeidou
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 059663d570b14d9ba460526c89488a39
+          name: 'GALILEO navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.5.0]'
+          key: GnssNavSatGalileo
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 0cbede8f60a74d6da2e83edb36c85993
+          name: 'GLONASS navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.3.0]'
+          key: GnssNavSatGlonass
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: a631f85b2b3145eea9257051f849049d
+          name: 'GPS navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.4.0]'
+          key: GnssNavSatGPS
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 86a0fb37ee1f451dbca0dd395e10b8c1
+          name: 'GNSS navigation satellites count summary'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.2.0]'
+          key: GnssNavSatSummary
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: f5a194df46e24bb58e0edffa221c26fd
+          name: 'GNSS Status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.1.0]'
+          key: GnssStatus
+          valuemap:
+            name: GnssStatus
+          tags:
+            - tag: component
+              value: gnss
+          triggers:
+            - uuid: 66ed85dec38c4ac9a7788c8e44860402
+              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=4'
+              name: 'GNSS Antenna alarm'
+              priority: HIGH
+            - uuid: 44040b41f5914e37819d510921a6227b
+              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=6'
+              name: 'GNSS Antenna not connected'
+              priority: HIGH
+            - uuid: 0c0a054032bc43598291950809c7f9cb
+              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=3'
+              name: 'GNSS Antenna shadowed'
+              priority: HIGH
+            - uuid: 1bd6aa1993a24ad89fc767342bf35386
+              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=5'
+              name: 'GNSS Antenna shorted'
+              priority: HIGH
+            - uuid: 4dc5e239fc8a432988b0063b7e51e19c
+              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=7'
+              name: 'GNSS Low sat count'
+              priority: WARNING
+            - uuid: 72a9c745988c4325bf51715fd57174d5
+              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=0'
+              name: 'GNSS unknown status'
+              priority: HIGH
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: komset
+        - tag: target
+          value: ssv-1g
+      dashboards:
+        - uuid: afdc271e5cf94d6088a8a0fa10fe91fd
+          name: ССВ-1Г
+          pages:
+            - widgets:
+                - type: graph
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Komset SSV-1G by SNMP'
+                        name: 'Количество спутников'
+                    - type: STRING
+                      name: reference
+                      value: XZJXW
+                - type: item
+                  name: 'Блок питания'
+                  'y': '5'
+                  width: '6'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: B2EBF2
+                    - type: STRING
+                      name: description
+                      value: БП1
+                    - type: INTEGER
+                      name: desc_size
+                      value: '30'
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '1'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Komset SSV-1G by SNMP'
+                        key: devPowerStatus1
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FFFF00
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '4'
+                    - type: STRING
+                      name: thresholds.5.color
+                      value: 00FF00
+                    - type: STRING
+                      name: thresholds.5.threshold
+                      value: '5'
+                - type: item
+                  name: 'Блок питания'
+                  x: '6'
+                  'y': '5'
+                  width: '6'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: B2EBF2
+                    - type: STRING
+                      name: description
+                      value: БП1
+                    - type: INTEGER
+                      name: desc_size
+                      value: '30'
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '1'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Komset SSV-1G by SNMP'
+                        key: devPowerStatus2
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FFFF00
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '4'
+                    - type: STRING
+                      name: thresholds.5.color
+                      value: 00FF00
+                    - type: STRING
+                      name: thresholds.5.threshold
+                      value: '5'
+                - type: item
+                  name: Статус
+                  x: '12'
+                  'y': '5'
+                  width: '6'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: B2EBF2
+                    - type: STRING
+                      name: description
+                      value: |
+                        Индикация
+                        статуса
+                        устройства
+                    - type: INTEGER
+                      name: desc_size
+                      value: '30'
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '1'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Komset SSV-1G by SNMP'
+                        key: devDeviceStatus
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 00FF00
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '4'
+                    - type: STRING
+                      name: thresholds.5.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.5.threshold
+                      value: '5'
+                    - type: STRING
+                      name: thresholds.6.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.6.threshold
+                      value: '6'
+                - type: item
+                  name: Алярм
+                  x: '18'
+                  'y': '5'
+                  width: '6'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: B2EBF2
+                    - type: STRING
+                      name: description
+                      value: |
+                        Индикация
+                        аварии
+                    - type: INTEGER
+                      name: desc_size
+                      value: '30'
+                    - type: INTEGER
+                      name: desc_v_pos
+                      value: '1'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Komset SSV-1G by SNMP'
+                        key: devAlarmStatus
+                    - type: INTEGER
+                      name: show.0
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 00FF00
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FFD54F
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FFD54F
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '4'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '5'
+                    - type: STRING
+                      name: thresholds.5.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.5.threshold
+                      value: '6'
+                    - type: STRING
+                      name: thresholds.6.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.6.threshold
+                      value: '7'
+                    - type: STRING
+                      name: thresholds.7.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.7.threshold
+                      value: '8'
+                - type: item
+                  name: 'Leap status'
+                  x: '24'
+                  'y': '5'
+                  width: '6'
+                  fields:
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Komset SSV-1G by SNMP'
+                        key: devTimeScaleStatus
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 00FF00
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FFFF00
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FFFF00
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '4'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'Статус ГНСС'
+                  x: '30'
+                  'y': '5'
+                  width: '6'
+                  fields:
+                    - type: INTEGER
+                      name: decimal_size
+                      value: '15'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Komset SSV-1G by SNMP'
+                        key: GnssStatus
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: 00FF00
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: FFFF00
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '4'
+                    - type: STRING
+                      name: thresholds.5.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.5.threshold
+                      value: '5'
+                    - type: STRING
+                      name: thresholds.6.color
+                      value: FFFF00
+                    - type: STRING
+                      name: thresholds.6.threshold
+                      value: '6'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_size
+                      value: '15'
+                    - type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: value_size
+                      value: '15'
+      valuemaps:
+        - uuid: 6f48e640a4704bc6ab3fbda530fe7d1c
+          name: AlarmStatus
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: success
+            - value: '2'
+              newvalue: informational
+            - value: '3'
+              newvalue: notice
+            - value: '4'
+              newvalue: warning
+            - value: '5'
+              newvalue: error
+            - value: '6'
+              newvalue: critical
+            - value: '7'
+              newvalue: alert
+            - value: '8'
+              newvalue: emergency
+        - uuid: b8ef0472b56d471c805c8db5f6a0650a
+          name: DeviceStatus
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: noSyncSrc
+            - value: '3'
+              newvalue: syncSrcNotValid
+            - value: '4'
+              newvalue: noTimeSrc
+            - value: '5'
+              newvalue: timeSrcNotValid
+            - value: '6'
+              newvalue: clockNotSync
+        - uuid: 2bb73f5a8e2847b7bb11663c10d5d621
+          name: devPowerStatus
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: disabled
+            - value: '2'
+              newvalue: notPresent
+            - value: '3'
+              newvalue: noInputVoltage
+            - value: '4'
+              newvalue: noOutputVoltage
+            - value: '5'
+              newvalue: success
+        - uuid: 5e3e34c90b5a423f8f58cd259aadd903
+          name: GnssStatus
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: stateDisable
+            - value: '2'
+              newvalue: stateNormal
+            - value: '3'
+              newvalue: stateAntennaShadow
+            - value: '4'
+              newvalue: stateAntennaAlarm
+            - value: '5'
+              newvalue: stateAntennaShorted
+            - value: '6'
+              newvalue: stateAntennaNotConnected
+            - value: '7'
+              newvalue: stateLoSatCount
+        - uuid: 069f1378a02748c8bde8e4eb7d9e2c80
+          name: OscSSM
+          mappings:
+            - value: '1'
+              newvalue: ssmUNKN
+            - value: '2'
+              newvalue: ssmPRS
+            - value: '3'
+              newvalue: ssmPRC
+            - value: '4'
+              newvalue: ssmINV3
+            - value: '5'
+              newvalue: ssmSSUA
+            - value: '6'
+              newvalue: ssmINV5
+            - value: '7'
+              newvalue: ssmINV6
+            - value: '8'
+              newvalue: ssmINV7
+            - value: '9'
+              newvalue: ssmSSUB
+            - value: '10'
+              newvalue: ssmINV9
+            - value: '11'
+              newvalue: ssmEEC2
+            - value: '12'
+              newvalue: ssmEEC1
+            - value: '13'
+              newvalue: ssmINV12
+            - value: '14'
+              newvalue: ssmINV13
+            - value: '15'
+              newvalue: ssmINV14
+            - value: '16'
+              newvalue: ssmDNU
+        - uuid: fba5ccaea7f8466fa78916c863484415
+          name: OscStatus
+          mappings:
+            - value: '1'
+              newvalue: oscAlarm
+            - value: '2'
+              newvalue: oscFreerun
+            - value: '3'
+              newvalue: oscHoldover
+            - value: '4'
+              newvalue: oscSync
+            - value: '5'
+              newvalue: oscTraceable
+            - value: '6'
+              newvalue: oscLocked
+        - uuid: d310dd419c3046f8a1a4f240cd485763
+          name: TimeScaleStatus
+          mappings:
+            - value: '1'
+              newvalue: Normal
+            - value: '2'
+              newvalue: 'Insert sec.'
+            - value: '3'
+              newvalue: 'Delete sec.'
+            - value: '4'
+              newvalue: Alarm
+  graphs:
+    - uuid: b1007dfdef7e40f58dabc1c4f8d56489
+      name: 'Количество спутников'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: 00FF00
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G by SNMP'
+            key: GnssNavSatGlonass
+        - sortorder: '1'
+          color: 0040FF
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G by SNMP'
+            key: GnssNavSatGalileo
+        - sortorder: '2'
+          color: FFFF00
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G by SNMP'
+            key: GnssNavSatBeidou
+        - sortorder: '3'
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G by SNMP'
+            key: GnssNavSatGPS

@@ -38,6 +38,8 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 **ZKTeco** Контроль состояния биометрических считывателей ZKTeco для версий Zabbix 4.4 и выше. Tested on ZKTeco MA300.
 
+**Komset SSV-1G** SNMP Мониторинг сервера времени Комсет ССВ-1Г для Zabbix 7.0.
+
 
 ## Server_hardware
 **YADRO_Vegman_V4-4.xml** Мониторинг BMC серверов YADRO Vegman для Zabbix 4.4.
