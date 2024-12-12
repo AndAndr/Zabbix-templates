@@ -1,0 +1,639 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    - uuid: cfa3a471dd2447dba865f68a444c38db
+      template: 'Chrony by Zabbix agent'
+      name: 'Chrony by Zabbix agent'
+      description: |
+        https://github.com/AndAndr
+        Автообнаружение и мониторинг источников времени, заданных для синхронизации, через вызов /usr/bin/chronyc -nc ntpdata.
+        Howto:
+        1. Добавить в файл /etc/suders:
+        zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*
+        , где zabbix - пользователь, от имени которого работает агент.
+        2. Добавить в файл /etc/zabbix/zabbix_agent.conf:
+        AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]
+        3. Прикрепить шаблон к хосту, где выполнены п.1,2
+        4. При необходимости, скорректировать значения макросов.
+      groups:
+        - name: Templates/Applications
+      discovery_rules:
+        - uuid: 04c8d02300b04258924440f6fdde1e45
+          name: 'Remote chrony timesource discovery'
+          key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata]'
+          delay: 20m
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#ADDRESS}'
+                value: '{$CHRONY.SOURCE.IP.MATCHES}'
+                formulaid: A
+              - macro: '{#ADDRESS}'
+                value: '{$CHRONY.SOURCE.IP.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          lifetime: 1d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Обнаружение настроенных источников времени.'
+          item_prototypes:
+            - uuid: 5bb0f38b7f9a460283ad93541e570161
+              name: '{#ADDRESS} Leap status'
+              type: DEPENDENT
+              key: 'leapstatus.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: '0=Normal, 1=Insert second, 2=Delete second, 3=Not synchronised or 4=Parse error.'
+              valuemap:
+                name: 'Chrony Leap status'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.6'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 8h
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      switch (value) {
+                          case "Normal":
+                              return 0;
+                          case "Insert second":
+                              return 1;
+                          case "Delete second":
+                              return 2;
+                          case "Not synchronised":
+                              return 3;
+                          default:
+                              return 4;
+                      }
+                      
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+              trigger_prototypes:
+                - uuid: a288481b8e564e8f98b548214d832c2f
+                  expression: 'last(/Chrony by Zabbix agent/leapstatus.[{#ADDRESS}])=3'
+                  name: 'Chrony: Leap second parse error for {#ADDRESS}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: notice
+                - uuid: fd48827f35e14833b3883bfd992d46a8
+                  expression: 'last(/Chrony by Zabbix agent/leapstatus.[{#ADDRESS}])=2'
+                  name: 'Chrony: Leap second status - Delete for {#ADDRESS}'
+                  priority: INFO
+                  tags:
+                    - tag: scope
+                      value: notice
+                - uuid: 5155c87cd0644f00af62e495f1354d34
+                  expression: 'last(/Chrony by Zabbix agent/leapstatus.[{#ADDRESS}])=1'
+                  name: 'Chrony: Leap second status - Insert for {#ADDRESS}'
+                  priority: INFO
+                  tags:
+                    - tag: scope
+                      value: notice
+                - uuid: fc7c4b76ac1444edb633619fcabcc185
+                  expression: 'last(/Chrony by Zabbix agent/leapstatus.[{#ADDRESS}])=3'
+                  name: 'Chrony: Leap second status - Not Sync for {#ADDRESS}'
+                  priority: INFO
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: 0159e53c6e43494aa35db0b600f0569f
+              name: '{#ADDRESS} Mode'
+              type: DEPENDENT
+              key: 'mode.[{#ADDRESS}]'
+              delay: '0'
+              history: 20d
+              value_type: TEXT
+              trends: '0'
+              status: DISABLED
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.8'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+            - uuid: 176feae926b74bd0bad01c4d571e91c3
+              name: '{#ADDRESS} NTP tests123 result'
+              type: DEPENDENT
+              key: 'ntp.test.123.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: 'RFC 5905 тесты №1,2,3. Результат 111 - норма.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.24'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+              trigger_prototypes:
+                - uuid: 8f1b9400a19f48fa990f700e784900ec
+                  expression: 'last(/Chrony by Zabbix agent/ntp.test.123.[{#ADDRESS}])<>111'
+                  name: 'Chrony: NTP tests123 failed for timesource {#ADDRESS}'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'Chrony: No data 15m for {#ADDRESS}'
+                      expression: 'nodata(/Chrony by Zabbix agent/offset.[{#ADDRESS}],15m)=1'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: a0f119c81ad544bd911204b299655d46
+              name: '{#ADDRESS} NTP tests567 result'
+              type: DEPENDENT
+              key: 'ntp.test.567.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: 'RFC 5905 тесты 5,6,7.  Результат 111 - норма.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.25'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+              trigger_prototypes:
+                - uuid: dbc7a8327f144a52ae9ca83a5135048a
+                  expression: 'last(/Chrony by Zabbix agent/ntp.test.567.[{#ADDRESS}])<>111'
+                  name: 'Chrony: NTP tests567 failed for timesource {#ADDRESS}'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'Chrony: NTP tests123 failed for timesource {#ADDRESS}'
+                      expression: 'last(/Chrony by Zabbix agent/ntp.test.123.[{#ADDRESS}])<>111'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 587c4c2fc5db4858b536c6164ab16c60
+              name: '{#ADDRESS} NTP testsABCD result'
+              type: DEPENDENT
+              key: 'ntp.test.abcd.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: |
+                Тесты: maximum delay, maximum delay ratio, maximum delay dev ratio, synchronisation loop - ABCD.
+                Результат 1111 - норма.
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.26'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+              trigger_prototypes:
+                - uuid: 60d1be4b9fd146f1b76e59fd3831fa11
+                  expression: 'last(/Chrony by Zabbix agent/ntp.test.abcd.[{#ADDRESS}])<>1111'
+                  name: 'Chrony: NTP testsABCD failed for timesource {#ADDRESS}'
+                  status: DISABLED
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: ec11870578e24552b43dfecea9e12dde
+              name: '{#ADDRESS} Offset'
+              type: DEPENDENT
+              key: 'offset.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              value_type: FLOAT
+              units: ms
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.19'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+              trigger_prototypes:
+                - uuid: 0841e3b9d96c4ee9af00a9ac31d58439
+                  expression: 'nodata(/Chrony by Zabbix agent/offset.[{#ADDRESS}],15m)=1'
+                  name: 'Chrony: No data 15m for {#ADDRESS}'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: bf4fdff555ab447a8710d2c4ff671366
+                  expression: 'last(/Chrony by Zabbix agent/offset.[{#ADDRESS}])>{$CHRONY.MAX.OFFSET} or last(/Chrony by Zabbix agent/offset.[{#ADDRESS}])<-{$CHRONY.MAX.OFFSET}'
+                  name: 'Chrony: Offset is hoo high for {#ADDRESS}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: 6ec576da1e0b4b9bb7c855a3b7ab23c8
+              name: '{#ADDRESS} Peer delay'
+              type: DEPENDENT
+              key: 'peerdelay.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              value_type: FLOAT
+              units: ms
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.20'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+            - uuid: e05acfcdec934f88a31cd62a65b55675
+              name: '{#ADDRESS} Reference ID'
+              type: DEPENDENT
+              key: 'refid.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.17'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 8h
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+            - uuid: 62c1232ebc084fe79c9626edb7494e73
+              name: '{#ADDRESS} Root delay'
+              type: DEPENDENT
+              key: 'root.delay.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              value_type: FLOAT
+              units: s
+              description: 'Общее количество задержек на сетевом пути к stratum-1, с которого компьютер в конечном итоге синхронизируется.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.14'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+            - uuid: 62b3e2171a36417d8dcf8270adb16691
+              name: '{#ADDRESS} Root dispersion'
+              type: DEPENDENT
+              key: 'root.dispersion.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              value_type: FLOAT
+              units: ms
+              description: 'Общая дисперсия, накопленная всеми компьютерами и переданная на компьютер stratum-1, с которым компьютер в конечном итоге синхронизируется.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.15'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+              trigger_prototypes:
+                - uuid: c60e572ddcae40a99e7229fdac3474cd
+                  expression: 'last(/Chrony by Zabbix agent/root.dispersion.[{#ADDRESS}])>{$CHRONY.MAX.ROOT.DISP}'
+                  name: 'Chrony: Root dispersion is hoo high for {#ADDRESS}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: a8b9f3fc385c4dda8278a4f68b200402
+              name: '{#ADDRESS} Stratum'
+              type: DEPENDENT
+              key: 'stratum.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              units: stratum
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.9'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 3h
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+              trigger_prototypes:
+                - uuid: 802d4184c7034bd7a171bda557852f96
+                  expression: 'last(/Chrony by Zabbix agent/stratum.[{#ADDRESS}])>{$CHRONY.STRATUM.THRESHOLD}'
+                  name: 'Chrony: Stratum too low {#ADDRESS}'
+                  priority: HIGH
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: a9d68fcc258444b3b284c13a16fcccf3
+              name: 'Get ntpdata for {#ADDRESS} - Master item'
+              key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              delay: 5m
+              history: 1h
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: CSV_TO_JSON
+                  parameters:
+                    - ','
+                    - ''
+                    - '0'
+              tags:
+                - tag: component
+                  value: raw
+            - uuid: 5dd90e3589cd47428706439b6d854b6f
+              name: '{#ADDRESS} Total good RX'
+              type: DEPENDENT
+              key: 'total.good.rx.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: 'Количество пакетов, прошедших все три группы тестов NTP, т.е. измерение NTP было принято.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.34'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+            - uuid: e37839f874c5401faf0f32892c251766
+              name: '{#ADDRESS} Total RX'
+              type: DEPENDENT
+              key: 'total.rx.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: 'Количество всех пакетов, полученных от источника.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.32'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+            - uuid: f6f4bbab0de64e5484b24cdea7713b58
+              name: '{#ADDRESS} Total TX'
+              type: DEPENDENT
+              key: 'total.tx.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: 'Количество пакетов, отправленных источнику.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.31'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+            - uuid: 001ba1c1a10948ef8dc903c5e29ffc3d
+              name: '{#ADDRESS} Total valid RX'
+              type: DEPENDENT
+              key: 'total.valid.rx.[{#ADDRESS}]'
+              delay: '0'
+              history: 30d
+              description: 'Количество пакетов, прошедших первые две группы тестов NTP.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.*.33'
+                - type: TRIM
+                  parameters:
+                    - '[]"'
+              master_item:
+                key: 'system.run[{$CHRONY.SUDO.LOCATION} {$CHRONY.CHRONYC.LOCATION} -nc ntpdata {#ADDRESS}]'
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: timesource
+                - tag: timesource
+                  value: '{#ADDRESS}'
+          graph_prototypes:
+            - uuid: 243d3d75095f43589140333e09cf59cd
+              name: 'Chrony: {#ADDRESS} Offset graph'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'Chrony by Zabbix agent'
+                    key: 'offset.[{#ADDRESS}]'
+            - uuid: 079a181551714135b2287d986804b75e
+              name: 'Chrony: {#ADDRESS} Peer delay graph'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'Chrony by Zabbix agent'
+                    key: 'peerdelay.[{#ADDRESS}]'
+            - uuid: 92985263ae2a4c7b80fb26584e502093
+              name: 'Chrony: {#ADDRESS} Root delay'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'Chrony by Zabbix agent'
+                    key: 'root.delay.[{#ADDRESS}]'
+            - uuid: d3b87ebf6e00420f9df6c0a035ac450c
+              name: 'Chrony: {#ADDRESS} Root dispersion'
+              graph_items:
+                - color: F63100
+                  item:
+                    host: 'Chrony by Zabbix agent'
+                    key: 'root.dispersion.[{#ADDRESS}]'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var lld = [];
+                  var lines = value.match(/^\d+\.\d+\.\d+\.\d+/gm).reduce(function(a,b){if(a.indexOf(b) < 0)a.push(b);return a;},[]).join("\n").replace(/:/g,"").replace(/ /g,"").split("\n");
+                  var lines_num = lines.length;
+                  for (i = 0; i < lines_num; i++)
+                  {
+                  var row = {};
+                  row["{#ADDRESS}"] = lines[i]
+                  lld.push(row);
+                  }
+                  return JSON.stringify(lld);
+      tags:
+        - tag: class
+          value: application
+        - tag: target
+          value: chrony
+      macros:
+        - macro: '{$CHRONY.CHRONYC.LOCATION}'
+          value: /usr/bin/chronyc
+          description: 'whereis chronyc'
+        - macro: '{$CHRONY.MAX.OFFSET}'
+          value: '30'
+          description: ms
+        - macro: '{$CHRONY.MAX.ROOT.DISP}'
+          value: '6'
+          description: ms
+        - macro: '{$CHRONY.MAX.TX.GOODRX.DIFF}'
+          value: '10'
+          description: Тест
+        - macro: '{$CHRONY.SOURCE.IP.MATCHES}'
+          value: '^.*$'
+          description: 'IP источников для обнаружения, регулярное выражение. Умолчание - обнаружение всех настроенных.'
+        - macro: '{$CHRONY.SOURCE.IP.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+          description: 'IP источников для возможности исключения из обнаружения, регулярное выражение.'
+        - macro: '{$CHRONY.STRATUM.THRESHOLD}'
+          value: '5'
+          description: 'Если stratum источника становится ниже данного значения, то стреляем.'
+        - macro: '{$CHRONY.SUDO.LOCATION}'
+          value: /usr/bin/sudo
+          description: 'whereis sudo'
+      valuemaps:
+        - uuid: 57aa75f7af1c4df08a59615912ff873d
+          name: 'Chrony Leap status'
+          mappings:
+            - value: '0'
+              newvalue: Normal
+            - value: '1'
+              newvalue: 'Insert second'
+            - value: '2'
+              newvalue: 'Delete second'
+            - value: '3'
+              newvalue: 'Not synchronised'
+            - value: '4'
+              newvalue: 'Parse error'
