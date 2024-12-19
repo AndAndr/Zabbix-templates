@@ -24,6 +24,9 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 **EltexESR** Шаблоны и модули Zabbix 4 и 6 для мониторинга маршрутизаторов Eltex ESR  по SNMPv2.
 
+**Eltex SBC** Шаблон Zabbix 7.2 для мониторинга функционала SBC Eltex по SNMPv2.
+
+
 
 ## Other_hardware
 **DeltaSTS** Статический переключатель ввода - СТС Delta Electronics для Zabbix 4.4. Delta Static Transfer Switch - **Delta STS32A** Tested on STS30002SR10035 v.01.12.15j.
