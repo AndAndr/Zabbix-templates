@@ -1,0 +1,796 @@
+zabbix_export:
+  version: '7.2'
+  template_groups:
+    - uuid: 62055bfd2b5b48a0bc2bcf51c23c1390
+      name: eltex
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: dbb73770ec4a42cc8a42655d4c7a05dc
+      template: 'Eltex SBC SNMPv2'
+      name: 'Eltex SBC SNMPv2'
+      description: |
+        ## Author
+        
+        Gridnev Anton
+      groups:
+        - name: eltex
+        - name: Templates
+      items:
+        - uuid: f8d8e6a187b54267a689e1fc8570a1ee
+          name: activeCallCount
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-SMI::enterprises.35265.1.49.42.1.0'
+          key: activeCallCount
+          delay: 30s
+          history: 90d
+          tags:
+            - tag: Application
+              value: Calls
+        - uuid: 7632ac0a4a504453b24550356b782fac
+          name: cpuUsage1
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.37.1.9.1
+          key: cpuUsage1
+          delay: 5m
+          history: 1w
+          value_type: TEXT
+          description: 'Get CPU Load'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: Application
+              value: General
+        - uuid: f8f9fdb775e14394be4d9ab5e7d65283
+          name: cpuUsage2
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.37.1.9.2
+          key: cpuUsage2
+          delay: 5m
+          history: 1w
+          value_type: TEXT
+          description: 'Get CPU Load'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 9b259e53cf5142cca428b64f1cc0127e
+          name: cpuUsage4
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.37.1.9.4
+          key: cpuUsage4
+          delay: 5m
+          history: 1w
+          value_type: TEXT
+          description: 'Get CPU Load'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 35d017cdbf2b48ae928af68a000b426f
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          trends: 60d
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: Application
+              value: ICMP
+          triggers:
+            - uuid: da7235589bba4ff08186b85f8bcd8e07
+              expression: 'max(/Eltex SBC SNMPv2/icmpping,#3)=0'
+              name: 'Unavailable by ICMP ping'
+              priority: HIGH
+        - uuid: a78b5d9ed84b40878719fde2f2492ff9
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          delay: 2m
+          history: 1w
+          value_type: FLOAT
+          trends: 60d
+          units: '%'
+          tags:
+            - tag: Application
+              value: ICMP
+          triggers:
+            - uuid: c981d877974349e99065555d0ffeff34
+              expression: 'min(/Eltex SBC SNMPv2/icmppingloss,5m)>20'
+              name: 'Ping loss is too high on {HOST.NAME}'
+              priority: WARNING
+              dependencies:
+                - name: 'Unavailable by ICMP ping'
+                  expression: 'max(/Eltex SBC SNMPv2/icmpping,#3)=0'
+        - uuid: a88201fcf03f44568e05b384b0f27d36
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          delay: 2m
+          history: 1w
+          value_type: FLOAT
+          trends: 60d
+          units: s
+          tags:
+            - tag: Application
+              value: ICMP
+          triggers:
+            - uuid: 1537ef96635d4832bc467590a5f71cca
+              expression: 'avg(/Eltex SBC SNMPv2/icmppingsec,5m)>0.15'
+              name: 'Response time is too high on {HOST.NAME}'
+              priority: WARNING
+              dependencies:
+                - name: 'Unavailable by ICMP ping'
+                  expression: 'max(/Eltex SBC SNMPv2/icmpping,#3)=0'
+        - uuid: 17d70d9fed6f4915bd073244c4d5498e
+          name: pmPower1
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.36.1.3.1
+          key: pmPower1
+          delay: 30s
+          history: 90d
+          valuemap:
+            name: 'IP-MIB::ipv4InterfaceEnableStatus'
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 95327ae53722455db78a14d9a7ef173a
+          name: pmPower2
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.36.1.3.2
+          key: pmPower2
+          delay: 30s
+          history: 90d
+          valuemap:
+            name: 'IP-MIB::ipv4InterfaceEnableStatus'
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 936ef22348fd4ed2ad3c86df9f3d1174
+          name: registrationCount
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.42.2.0
+          key: registrationCount
+          delay: 30s
+          history: 90d
+          tags:
+            - tag: Application
+              value: Calls
+        - uuid: dbc7ce2d716e493c8cfc56919888313d
+          name: sbcFan0
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.35.3.0
+          key: sbcFan0
+          history: 90d
+          tags:
+            - tag: Application
+              value: General
+        - uuid: e325bfb2977e450aae4f52c3319221a4
+          name: sbcFan1
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.35.4.0
+          key: sbcFan1
+          history: 90d
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 8981c21b3a894fc7b613edd373b7f2f8
+          name: sbcFan2
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.35.5.0
+          key: sbcFan2
+          history: 90d
+          tags:
+            - tag: Application
+              value: General
+        - uuid: a586231e143849b8bc72e8b3fb07fd2f
+          name: sbcFan3
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.35.6.0
+          key: sbcFan3
+          history: 90d
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 0c46a31ae709490c80538f7ede1c36c6
+          name: sbcFreeRam
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.33.0
+          key: sbcFreeRam
+          history: 90d
+          value_type: TEXT
+          description: 'Get Free RAM'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 8c9c255c026e4402a14a7d2744fdba69
+          name: sbcTemperature1
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.35.2.0
+          key: sbcTemperature1
+          delay: 30s
+          history: 90d
+          value_type: TEXT
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - '([0-9]+)'
+                - \1
+            - type: MULTIPLIER
+              parameters:
+                - '1'
+          tags:
+            - tag: Application
+              value: General
+          triggers:
+            - uuid: 39b166e3081e42899118475a34810c64
+              expression: 'last(/Eltex SBC SNMPv2/sbcTemperature1)>{$TEMP_CRIT}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Eltex SBC SNMPv2/sbcTemperature1)<{$TEMP_CRIT}'
+              name: 'Temperature is above critical threshold'
+              event_name: 'Temperature is above critical threshold: sbcTemperature1 > {$TEMP_CRIT}°C'
+              priority: HIGH
+              description: 'This trigger uses the values of the temperature sensor.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: dd5f3d4bce6d4ab6a7a778f60ee546cb
+          name: sbcTemperature2
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.49.35.2.0
+          key: sbcTemperature2
+          delay: 30s
+          history: 90d
+          value_type: TEXT
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - '([0-9]+)'
+                - \1
+            - type: MULTIPLIER
+              parameters:
+                - '1'
+          tags:
+            - tag: Application
+              value: General
+          triggers:
+            - uuid: f735756f4e5240fd93abce7062ba888b
+              expression: 'last(/Eltex SBC SNMPv2/sbcTemperature2)>{$TEMP_CRIT}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Eltex SBC SNMPv2/sbcTemperature2)<{$TEMP_CRIT}'
+              name: 'Temperature is above critical threshold'
+              event_name: 'Temperature is above critical threshold: sbcTemperature2 > {$TEMP_CRIT}°C'
+              priority: HIGH
+              description: 'This trigger uses the values of the temperature sensor.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 52729f58e9de4ce098b6add4ec2aff45
+          name: smgE1Busy0
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-SMI::enterprises.35265.1.29.31.1.0.0'
+          key: smgEOneStream0
+          delay: 10s
+          history: 90d
+          tags:
+            - tag: Application
+              value: E1
+        - uuid: f6c076fd6fdb43d483f7cb4fe0b530f1
+          name: smgE1Busy1
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-SMI::enterprises.35265.1.29.31.1.1.0'
+          key: smgEOneStream1
+          delay: 10s
+          history: 90d
+          tags:
+            - tag: Application
+              value: E1
+        - uuid: c8d7775b4b864726826214031bae28db
+          name: smgE1Busy2
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-SMI::enterprises.35265.1.29.31.1.2.0'
+          key: smgEOneStream2
+          delay: 10s
+          history: 90d
+          tags:
+            - tag: Application
+              value: E1
+        - uuid: cf29f9ec23a04a7bb64624a525f0804b
+          name: 'Device contact details'
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-MIB::sysContact.0'
+          key: sysContact
+          delay: 1h
+          history: 1w
+          value_type: CHAR
+          description: 'The textual identification of the contact person for this managed node, together with information on how to contact this person.  If no contact information is known, the value is the zero-length string.'
+          inventory_link: CONTACT
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 20ac255577ee450dba06b610146a2f7c
+          name: 'Device description'
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-MIB::sysDescr.0'
+          key: sysDescr
+          delay: 1h
+          history: 1w
+          value_type: CHAR
+          description: 'A textual description of the entity.  This value should include the full name and version identification of the system''s hardware type, software operating-system, and networking software.'
+          inventory_link: HARDWARE
+          tags:
+            - tag: Application
+              value: General
+        - uuid: a81e8f9fe10d4252aa76a36ce760c9e2
+          name: 'Device location'
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-MIB::sysLocation.0'
+          key: sysLocation
+          delay: 1h
+          history: 1w
+          value_type: CHAR
+          description: 'The physical location of this node (e.g., `telephone closet, 3rd floor'').  If the location is unknown, the value is the zero-length string.'
+          inventory_link: LOCATION
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 2bb23f483359408698b78d9ce1e87a0a
+          name: 'Device name'
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-MIB::sysName.0'
+          key: sysName
+          delay: 1h
+          history: 1w
+          value_type: CHAR
+          description: 'An administratively-assigned name for this managed node. By convention, this is the node''s fully-qualified domain name.  If the name is unknown, the value is the zero-length string.'
+          inventory_link: NAME
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 6e14433fecfe4feb98de3f2e4d4c121b
+          name: 'Device uptime'
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-MIB::sysUpTime.0'
+          key: sysUpTime
+          delay: 5m
+          history: 1w
+          trends: 60d
+          units: uptime
+          description: 'The time since the network management portion of the system was last re-initialized.'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: Application
+              value: General
+        - uuid: 0b36f30a60494c3f8c5beeb0c0794120
+          name: smgVoip0busyChannels
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.1.29.40.1.0
+          key: Voip0busyChannels
+          delay: 30s
+          history: 90d
+          tags:
+            - tag: Application
+              value: Calls
+      discovery_rules:
+        - uuid: 032830dade0245de8aa717abbfea33b7
+          name: 'Network interfaces'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFNAME},IF-MIB::ifName,{#IFALIAS},IF-MIB::ifAlias]'
+          key: ifName
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.MATCHES}'
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+              - macro: '{#IFNAME}'
+                value: ^(host|front|sm)-port\s\d/\d$|^bond\d+\.\d+$
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovering interfaces from IF-MIB.'
+          item_prototypes:
+            - uuid: b1735e3d8cfe41fab265ddcb3b24c495
+              name: 'Interface {#IFNAME}({#IFALIAS}): Admin status'
+              type: SNMP_AGENT
+              snmp_oid: 'IF-MIB::ifAdminStatus.{#SNMPINDEX}'
+              key: 'ifAdminStatus[{#SNMPVALUE}]'
+              delay: 10m
+              history: 1w
+              trends: 60d
+              valuemap:
+                name: 'IP-MIB::ipv4InterfaceEnableStatus'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 58cf7bec043d4427afb97885f9fa0e46
+              name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets discarded'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}'
+              key: 'net.if.in.discards[ifInDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7w
+              trends: 60d
+              description: |
+                MIB: IF-MIB
+                The number of inbound packets which were chosen to be discarded
+                even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.
+                One possible reason for discarding such a packet could be to free up buffer space.
+                Discontinuities in the value of this counter can occur at re-initialization of the management system,
+                and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 126a19fa5745402aa770dcaa29444318
+              name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
+              key: 'net.if.in.errors[ifInErrors.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7w
+              trends: 60d
+              description: |
+                MIB: IF-MIB
+                For packet-oriented interfaces, the number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.  For character-oriented or fixed-length interfaces, the number of inbound transmission units that contained errors preventing them from being deliverable to a higher-layer protocol. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: d4b538503e7f43968d6b77f2fc7bb0af
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
+              key: 'net.if.in[ifHCInOctets.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7w
+              trends: 60d
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets received on the interface, including framing characters. This object is a 64-bit version of ifInOctets. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 6e1b5fb67bd148599a49aa1aa2f16ac3
+              name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets discarded'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}'
+              key: 'net.if.out.discards[ifOutDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7w
+              trends: 60d
+              description: |
+                MIB: IF-MIB
+                The number of outbound packets which were chosen to be discarded
+                even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.
+                One possible reason for discarding such a packet could be to free up buffer space.
+                Discontinuities in the value of this counter can occur at re-initialization of the management system,
+                and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: ae65ad1a7cbd48b98e3d4dfbdd390d84
+              name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
+              key: 'net.if.out.errors[ifOutErrors.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7w
+              trends: 60d
+              description: |
+                MIB: IF-MIB
+                For packet-oriented interfaces, the number of outbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.  For character-oriented or fixed-length interfaces, the number of outbound transmission units that contained errors preventing them from being deliverable to a higher-layer protocol. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 39cc17ed1f30427984724817ff20a141
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
+              key: 'net.if.out[ifHCOutOctets.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7w
+              trends: 60d
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets transmitted out of the interface, including framing characters. This object is a 64-bit version of ifOutOctets.Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 023329e97e0447a898070b296280cc82
+              name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
+              type: SNMP_AGENT
+              snmp_oid: 'IF-MIB::ifOperStatus.{#SNMPINDEX}'
+              key: 'net.if.status[ifOperStatus.{#SNMPINDEX}]'
+              delay: 15m
+              history: 1w
+              trends: 60d
+              description: 'The current operational state of the interface.'
+              valuemap:
+                name: 'IP-MIB::ipv4InterfaceEnableStatus'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+              trigger_prototypes:
+                - uuid: dabef1bb80fd42d6b162175f20f81367
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  name: 'Interface {#IFNAME}({#IFALIAS}):  Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  description: |
+                    This trigger expression works as follows:
+                    1. Can be triggered if operations status is down.
+                    2. {$IFCONTROL:"{#IFNAME}"}=1 - user can redefine Context macro to value - 0. That marks this interface as not important. No new trigger will be fired if this interface is down.
+                    3. {TEMPLATE_NAME:METRIC.diff()}=1) - trigger fires only if operational status was up(1) sometime before. (So, do not fire 'ethernal off' interfaces.)
+                    
+                    WARNING: if closed manually - won't fire again on next poll, because of .diff.
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+          trigger_prototypes:
+            - uuid: 779af62b81d146d889240fd756f3c0fc
+              expression: |
+                min(/Eltex SBC SNMPv2/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/Eltex SBC SNMPv2/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                max(/Eltex SBC SNMPv2/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/Eltex SBC SNMPv2/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+              name: 'Interface {#IFNAME}({#IFALIAS}): High error rate'
+              event_name: 'Interface {#IFNAME}({#IFALIAS}): High error rate (>{$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              description: 'Recovers when below 80% of {$IF.ERRORS.WARN:"{#IFNAME}"} threshold'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}):  Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))'
+                  recovery_expression: 'last(/Eltex SBC SNMPv2/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+      macros:
+        - macro: '{$SNMP_COMMUNITY}'
+          value: public
+        - macro: '{$TEMP_CRIT}'
+          value: '50'
+      valuemaps:
+        - uuid: 832a8392a2ac4d4c9fc8e8d722805209
+          name: 'Eltex TAU calls'
+          mappings:
+            - value: '0'
+              newvalue: '1'
+            - value: '1'
+              newvalue: '0'
+            - value: '2'
+              newvalue: '1'
+            - value: '3'
+              newvalue: '1'
+            - value: '4'
+              newvalue: '1'
+            - value: '5'
+              newvalue: '1'
+            - value: '6'
+              newvalue: '1'
+            - value: '7'
+              newvalue: '1'
+            - value: '8'
+              newvalue: '1'
+            - value: '9'
+              newvalue: '1'
+            - value: '10'
+              newvalue: '0'
+            - value: '11'
+              newvalue: '0'
+            - value: '12'
+              newvalue: '0'
+            - value: '13'
+              newvalue: '1'
+            - value: '14'
+              newvalue: '1'
+            - value: '15'
+              newvalue: '0'
+            - value: '16'
+              newvalue: '1'
+            - value: '17'
+              newvalue: '0'
+            - value: '255'
+              newvalue: '0'
+        - uuid: 2915e86ba5d3444784310590b65af978
+          name: 'IP-MIB::ipv4InterfaceEnableStatus'
+          mappings:
+            - value: '1'
+              newvalue: up
+            - value: '2'
+              newvalue: down
+        - uuid: faa09f6a7c3f46deb24a68992e657795
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up
+  graphs:
+    - uuid: 8fcaf92e923749fc8b4ca56e16093876
+      name: E1
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: smgEOneStream0
+        - sortorder: '1'
+          color: 0040FF
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: smgEOneStream1
+        - sortorder: '2'
+          color: 2774A4
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: smgEOneStream2
+        - sortorder: '3'
+          drawtype: BOLD_LINE
+          color: FF0000
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: activeCallCount
+    - uuid: 5015c06e00fa4fa6b85e74a5ba5af7a8
+      name: pmPower
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: pmPower1
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: pmPower2
+    - uuid: 6543e60b40a0422ba1a831fdf7bf53a4
+      name: smgCalls
+      graph_items:
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: Voip0busyChannels
+        - sortorder: '2'
+          color: 2774A4
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: activeCallCount
+        - sortorder: '3'
+          color: A54F10
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: registrationCount
+    - uuid: b492143695154a73a85abdea8f068a98
+      name: smgFan
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: sbcFan0
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: sbcFan1
+        - sortorder: '2'
+          color: 2774A4
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: sbcFan2
+        - sortorder: '3'
+          color: A54F10
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: sbcFan3
+    - uuid: 84ca12a5ef5049308291e9a65630d784
+      name: smgTemperature
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: sbcTemperature1
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: sbcTemperature2
+    - uuid: 93b2cf04d4d44c1fbbb729fe6d088fa6
+      name: Uptime
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: sysUpTime
+    - uuid: 8204e6af3bc34daa99eb4105fbe5cf38
+      name: Voip0busyChannels
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Eltex SBC SNMPv2'
+            key: Voip0busyChannels
