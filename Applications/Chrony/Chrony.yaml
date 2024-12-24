@@ -16,10 +16,35 @@ zabbix_export:
         , где zabbix - пользователь, от имени которого работает агент.
         2. Добавить в файл /etc/zabbix/zabbix_agent.conf:
         AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]
+        AllowKey=system.run[/usr/bin/chronyc -nc sources*]
         3. Прикрепить шаблон к хосту, где выполнены п.1,2
         4. При необходимости, скорректировать значения макросов.
       groups:
         - name: Templates/Applications
+      items:
+        - uuid: 794d71b57dd24979b4d30852ea514fa0
+          name: 'Chrony "current best"'
+          key: 'system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*'']'
+          delay: 5m
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - '^.,.,(\d+\.\d+\.\d+\.\d+).*$'
+                - \1
+              error_handler: CUSTOM_VALUE
+              error_handler_params: nobest
+          triggers:
+            - uuid: 31e17bcf9fe84188bfff183424d93706
+              expression: 'find(/Chrony by Zabbix agent/system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*''],#3,"like","nobest")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Chrony by Zabbix agent/system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*''],,"like","nobest")=0'
+              name: 'No "current best" is selected'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: notice
       discovery_rules:
         - uuid: 04c8d02300b04258924440f6fdde1e45
           name: 'Remote chrony timesource discovery'
@@ -602,11 +627,14 @@ zabbix_export:
         - macro: '{$CHRONY.CHRONYC.LOCATION}'
           value: /usr/bin/chronyc
           description: 'whereis chronyc'
+        - macro: '{$CHRONY.GREP.LOCATION}'
+          value: /usr/bin/grep
+          description: 'whereis grep'
         - macro: '{$CHRONY.MAX.OFFSET}'
           value: '30'
           description: ms
         - macro: '{$CHRONY.MAX.ROOT.DISP}'
-          value: '6'
+          value: '10'
           description: ms
         - macro: '{$CHRONY.MAX.TX.GOODRX.DIFF}'
           value: '10'
