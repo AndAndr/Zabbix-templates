@@ -12,6 +12,7 @@ zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*
 2. Добавить в файл /etc/zabbix/zabbix_agent.conf:
 
 AllowKey=system.run[/usr/bin/sudo /usr/bin/chronyc -nc ntpdata*]
+
 AllowKey=system.run[/usr/bin/chronyc -nc sources*]
 
 
