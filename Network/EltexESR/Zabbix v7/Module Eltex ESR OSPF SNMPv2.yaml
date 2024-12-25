@@ -1,0 +1,136 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 57b7ae836ca64446ba2c296389c009b7
+      name: Templates/Modules
+  templates:
+    - uuid: b6669c212a814869a40bd6d6ef713916
+      template: 'Module Eltex ESR OSPF SNMPv2'
+      name: 'Module Eltex ESR OSPF SNMPv2'
+      description: |
+        https://github.com/AndAndr
+        OSPF NBRs state for Eltex ESR
+      groups:
+        - name: Templates/Modules
+      discovery_rules:
+        - uuid: 0fd2e969e62a4465932d1e5511b92cb6
+          name: 'Eltex OSPF NBR(s)'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.4.1.35265.1.147.2.3.1.3.1.1.3.1.49]'
+          key: eltEsrOspfNbrRtrId
+          delay: 1h
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Обнаружение соседей OSPF'
+          item_prototypes:
+            - uuid: 93bae02b77a54d259771b133576c7460
+              name: 'NbrRtrIP:{#SNMPINDEX} events'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.3.1.3.1.1.7.1.49.{#SNMPINDEX}'
+              key: 'eltEsrOspfNbrEvents[{#SNMPINDEX}]'
+              history: 14d
+              description: 'Количество раз, когда это соседнее отношение меняло свое состояние или возникала ошибка.'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 10m
+              tags:
+                - tag: application
+                  value: ospf
+              trigger_prototypes:
+                - uuid: 19e9bee1381645929dff04b91ec1c950
+                  expression: 'change(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrEvents[{#SNMPINDEX}])>1 and last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrEvents[{#SNMPINDEX}])<>0'
+                  name: 'OSPF: neighbor relationship has changed or an error has occurred with NbrRtrIP-{#SNMPINDEX}'
+                  priority: INFO
+                  tags:
+                    - tag: application
+                      value: 'NbrRtrIP {#SNMPINDEX}'
+                    - tag: application
+                      value: ospf
+            - uuid: d849abbe7f154ef7979e1d70a9dc4ca8
+              name: 'NbrRtrIP:{#SNMPINDEX} retransmission queue length'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.3.1.3.1.1.8.1.49.{#SNMPINDEX}'
+              key: 'eltEsrOspfNbrLsRetransQLen[{#SNMPINDEX}]'
+              history: 14d
+              description: 'Текущая длина очереди повторной передачи.'
+              tags:
+                - tag: application
+                  value: ospf
+              trigger_prototypes:
+                - uuid: a2fa30b14e324c9eacf3cd2af589e02d
+                  expression: 'avg(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrLsRetransQLen[{#SNMPINDEX}],#3)>{$RETRANSQLENMAX} and last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrLsRetransQLen[{#SNMPINDEX}])<>0'
+                  name: 'OSPF: retransmission queue gt {$RETRANSQLENMAX} NbrRtrIP:{#SNMPINDEX}'
+                  priority: INFO
+                  manual_close: 'YES'
+                  tags:
+                    - tag: application
+                      value: 'NbrRtrIP {#SNMPINDEX}'
+                    - tag: application
+                      value: ospf
+            - uuid: 8304bbf37dbd4d398846fbe745daa928
+              name: 'NbrRtrIP:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE} state'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.3.1.3.1.1.6.1.49.{#SNMPINDEX}'
+              key: 'eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}]'
+              history: 14d
+              description: |
+                Состояние отношений с соседом:
+                down (1), attempt (2), init (3), twoWay (4), exchangeStart (5), exchange (6), loading (7), full (8)
+              valuemap:
+                name: 'SNMP OSPF Neighbor State (ospfNbrState)'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 10m
+              tags:
+                - tag: application
+                  value: ospf
+              trigger_prototypes:
+                - uuid: d0b898737c4d48149c9ee060f87658f1
+                  expression: 'last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}])<>8 and (last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#1)<>last(/Module Eltex ESR OSPF SNMPv2/eltEsrOspfNbrState[int:{#SNMPINDEX}-NbrRtrId:{#SNMPVALUE}],#2))=1'
+                  name: 'OSPF: Check RtrId-{#SNMPVALUE} neighbor state NbrRtrIP-{#SNMPINDEX}'
+                  opdata: 'NBR State={ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  description: |
+                    Доступно ручное закрытие, если TwoWay (4) - это норма.
+                    Триггер повторно не стреляет.
+                  manual_close: 'YES'
+                  tags:
+                    - tag: application
+                      value: 'NbrRtrIP {#SNMPINDEX}'
+                    - tag: application
+                      value: ospf
+                    - tag: application
+                      value: 'RtrId {#SNMPVALUE}'
+      tags:
+        - tag: application
+          value: ospf
+        - tag: class
+          value: network
+        - tag: target
+          value: eltex
+        - tag: target
+          value: eltex-esr
+      macros:
+        - macro: '{$RETRANSQLENMAX}'
+          value: '10'
+      valuemaps:
+        - uuid: 7a020fd8f0cb4194a973f6c66100bfa6
+          name: 'SNMP OSPF Neighbor State (ospfNbrState)'
+          mappings:
+            - value: '1'
+              newvalue: Down
+            - value: '2'
+              newvalue: Attempt
+            - value: '3'
+              newvalue: Init
+            - value: '4'
+              newvalue: TwoWay
+            - value: '5'
+              newvalue: ExchangeStart
+            - value: '6'
+              newvalue: Exchange
+            - value: '7'
+              newvalue: Loading
+            - value: '8'
+              newvalue: Full

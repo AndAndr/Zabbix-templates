@@ -1,0 +1,195 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 57b7ae836ca64446ba2c296389c009b7
+      name: Templates/Modules
+  templates:
+    - uuid: 5b17167987844880beb89725c1ddef58
+      template: 'Module Eltex ESR BGP4 SNMPv2'
+      name: 'Module Eltex ESR BGP4 SNMPv2'
+      description: |
+        https://github.com/AndAndr
+        BGP peer state for Eltex ESR
+      groups:
+        - name: Templates/Modules
+      discovery_rules:
+        - uuid: dcbc3afd6a7946329b408bd3a2df3ade
+          name: 'Eltex BGP4 Peer(s)'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.15.1.49.1.4,{#BGPPEERDESC},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13.1.49.1.4]'
+          key: eltEsrBgp4V2PeerRemoteAddrStr
+          delay: 1h
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Обнаружение BGP пиров'
+          item_prototypes:
+            - uuid: 6f891842bb5646e6b4e442c0d96ba65b
+              name: 'BGP Admin status for peer {#BGPPEERDESC}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.14.1.49.1.4.{#SNMPVALUE}'
+              key: 'eltEsrBgp4V2PeerAdminStatus[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              description: 'Whether or not the BGP FSM for this remote peer is halted or running. The BGP FSM for a remote peer is halted after processing a Stop event. Likewise, it is in the running state after a Start event.'
+              valuemap:
+                name: eltEsrBgp4V2PeerAdminStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: application
+                  value: bgp4
+                - tag: application
+                  value: 'bgp4 {#BGPPEERDESC}'
+            - uuid: 75f8869b88ba4ea7a1fbf5c92abe8c25
+              name: 'BGP peer {#SNMPVALUE} description'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13.1.49.1.4.{#SNMPVALUE}'
+              key: 'eltEsrBgp4V2PeerDescription[{#SNMPVALUE}]'
+              delay: 10m
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              description: 'A user configured description identifying this peer.  When this object is not the empty string, this object SHOULD contain a description that is unique within a given BGP instance for this peer.'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: application
+                  value: bgp4
+                - tag: application
+                  value: 'bgp4 {#BGPPEERDESC}'
+            - uuid: 161ab60108504a2fb6e072c9956a230b
+              name: 'BGP peer {#BGPPEERDESC} accepted routes'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.18.1.49.1.4.{#SNMPVALUE}'
+              key: 'eltEsrBgp4V2PeerImpRouteCount[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              description: 'The number of accepted routes.'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: application
+                  value: bgp4
+                - tag: application
+                  value: 'bgp4 {#BGPPEERDESC}'
+            - uuid: 43fbccddcab24b6f8361ba347de6c880
+              name: 'BGP peer {#BGPPEERDESC} last state change'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.17.1.49.1.4.{#SNMPVALUE}'
+              key: 'eltEsrBgp4V2PeerLastStateChange[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              units: s
+              description: 'Time since last state change for this BGP entry in seconds.'
+              tags:
+                - tag: application
+                  value: bgp4
+                - tag: application
+                  value: 'bgp4 {#BGPPEERDESC}'
+            - uuid: 89cb526570914dc2bd6b0238a365baf2
+              name: 'BGP peer {#BGPPEERDESC} remote AS'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.10.1.49.1.4.{#SNMPVALUE}'
+              key: 'eltEsrBgp4V2PeerRemoteAs[{#SNMPVALUE}]'
+              delay: 10m
+              history: 14d
+              value_type: FLOAT
+              trends: 60d
+              description: 'The remote autonomous system number received in the BGP OPEN message.'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: application
+                  value: bgp4
+                - tag: application
+                  value: 'bgp4 {#BGPPEERDESC}'
+            - uuid: 7875e774f3e24adcacd696c0aed5961e
+              name: 'BGP peer {#BGPPEERDESC} remote ID'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.11.1.49.1.4.{#SNMPVALUE}'
+              key: 'eltEsrBgp4V2PeerRemoteIdentifier[{#SNMPVALUE}]'
+              delay: 10m
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              description: 'The BGP Identifier of this entry''s remote BGP peer. This entry should be 0.0.0.0 unless the bgp4V2PeerState is in the openconfirm or the established state. The bgp4V2PeerState will generally be in the idle state when the FSM is halted.'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: application
+                  value: bgp4
+                - tag: application
+                  value: 'bgp4 {#BGPPEERDESC}'
+            - uuid: 50fea1345ff446c1baad477ddefb6819
+              name: 'BGP peer {#BGPPEERDESC} state'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.12.1.49.1.4.{#SNMPVALUE}'
+              key: 'eltEsrBgp4V2PeerState[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              description: 'The BGP peer connection state.'
+              valuemap:
+                name: BgpPeerState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: application
+                  value: bgp4
+                - tag: application
+                  value: 'bgp4 {#BGPPEERDESC}'
+              trigger_prototypes:
+                - uuid: 703197a01429441eb5ff8bf2ebdeab15
+                  expression: 'last(/Module Eltex ESR BGP4 SNMPv2/eltEsrBgp4V2PeerState[{#SNMPVALUE}])<>6'
+                  name: 'BGP session is not established with peer {#BGPPEERDESC}'
+                  opdata: 'Peer IP={#SNMPVALUE}; Peer ID={#BGPPEERDESC}'
+                  priority: AVERAGE
+                  tags:
+                    - tag: application
+                      value: bgp4
+                    - tag: application
+                      value: 'peer id {#BGPPEERDESC}'
+                    - tag: application
+                      value: 'peer ip {#SNMPVALUE}'
+      tags:
+        - tag: application
+          value: bgp4
+        - tag: class
+          value: network
+        - tag: target
+          value: eltex
+        - tag: target
+          value: eltex-esr
+      valuemaps:
+        - uuid: 64b2ca78774c452fa2097720bfb2e7d2
+          name: BgpPeerState
+          mappings:
+            - value: '1'
+              newvalue: idle
+            - value: '2'
+              newvalue: connect
+            - value: '3'
+              newvalue: active
+            - value: '4'
+              newvalue: opensent
+            - value: '5'
+              newvalue: openconfirm
+            - value: '6'
+              newvalue: established
+        - uuid: f690ff3c505244bdbcb310630c7dc062
+          name: eltEsrBgp4V2PeerAdminStatus
+          mappings:
+            - value: '1'
+              newvalue: halted
+            - value: '2'
+              newvalue: running
