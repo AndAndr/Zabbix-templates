@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2023-11-13T06:04:54Z</date>
+    <date>2024-12-25T14:54:14Z</date>
     <groups>
         <group>
             <name>Templates/Modules</name>
@@ -83,6 +83,45 @@ BGP peer state for Eltex ESR</description>
                                     <params>1d</params>
                                 </step>
                             </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEERDESC} accepted routes</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.18.1.49.1.4.{#SNMPVALUE}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerImpRouteCount[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <description>The number of accepted routes.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEERDESC} last state change</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.17.1.49.1.4.{#SNMPVALUE}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerLastStateChange[{#SNMPVALUE}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <units>s</units>
+                            <port>{$SNMP_PORT}</port>
+                            <description>Time since last state change for this BGP entry in seconds.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
                         </item_prototype>
                         <item_prototype>
                             <name>BGP peer {#BGPPEERDESC} remote AS</name>
