@@ -9,9 +9,9 @@ zabbix_export:
       name: 'Chrony by Zabbix agent'
       description: |
         https://github.com/AndAndr
-        Автообнаружение и мониторинг источников времени, заданных для синхронизации, через вызов /usr/bin/chronyc -nc ntpdata.
+        Автообнаружение и мониторинг источников времени, заданных для синхронизации, через вызов /usr/bin/chronyc.
         Howto:
-        1. Добавить в файл /etc/suders:
+        1. Добавить в файл /etc/sudoers:
         zabbix ALL = NOPASSWD: /usr/bin/chronyc -nc ntpdata*
         , где zabbix - пользователь, от имени которого работает агент.
         2. Добавить в файл /etc/zabbix/zabbix_agent.conf:
