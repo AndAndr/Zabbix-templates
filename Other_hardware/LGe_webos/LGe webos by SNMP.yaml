@@ -1,27 +1,21 @@
 zabbix_export:
-  version: '6.0'
-  date: '2024-03-05T13:38:03Z'
-  groups:
-    -
-      uuid: 2cb435130e6a483a8b41678605abea1b
+  version: '7.0'
+  template_groups:
+    - uuid: 2cb435130e6a483a8b41678605abea1b
       name: 'Templates/Other Hardware'
   templates:
-    -
-      uuid: 8e57c4ba614242c39c0c4dbc653e110b
-      template: Template_LGe_webos
-      name: Template_LGe_webos
+    - uuid: 8e57c4ba614242c39c0c4dbc653e110b
+      template: 'LGe webos by SNMP'
+      name: 'LGe webos by SNMP'
       description: |
         LGe webos SNMP monitoring for 24/7 commercial display
         https://github.com/AndAndr/Zabbix-templates
       templates:
-        -
-          name: 'Generic by SNMP'
+        - name: 'Generic SNMP'
       groups:
-        -
-          name: 'Templates/Other Hardware'
+        - name: 'Templates/Other Hardware'
       items:
-        -
-          uuid: 98fa6a59b916446f87ee85c4b8d25866
+        - uuid: 98fa6a59b916446f87ee85c4b8d25866
           name: 'LG aspect ratio'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.3.3.0
@@ -31,27 +25,25 @@ zabbix_export:
           valuemap:
             name: 'LG aspect ratio'
           preprocessing:
-            -
-              type: HEX_TO_DECIMAL
+            - type: HEX_TO_DECIMAL
               parameters:
                 - ''
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: 11410909343c468b9fc2fb0be960e42a
-              expression: '(last(/Template_LGe_webos/LG.aspectratio,#1)<>last(/Template_LGe_webos/LG.aspectratio,#2))=1'
+            - uuid: 11410909343c468b9fc2fb0be960e42a
+              expression: '(last(/LGe webos by SNMP/LG.aspectratio,#1)<>last(/LGe webos by SNMP/LG.aspectratio,#2))=1'
               name: 'Check Aspect Ratio on {HOST.NAME}'
               opdata: 'Aspect Ratio: {ITEM.LASTVALUE1}'
               priority: WARNING
-        -
-          uuid: 7712490cfe474054a3db48e50eefb652
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 7712490cfe474054a3db48e50eefb652
           name: 'LG CPU temperature'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.3.24.0
@@ -60,29 +52,27 @@ zabbix_export:
           trends: 60d
           units: '`C'
           preprocessing:
-            -
-              type: HEX_TO_DECIMAL
+            - type: HEX_TO_DECIMAL
               parameters:
                 - ''
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: 0c2a45de84ba407e917aea218d28ee98
-              expression: 'avg(/Template_LGe_webos/LG.CPUtemperature,5m)>{$LGCPUMAXTEMP}'
+            - uuid: 0c2a45de84ba407e917aea218d28ee98
+              expression: 'avg(/LGe webos by SNMP/LG.CPUtemperature,5m)>{$LGCPUMAXTEMP}'
               recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'avg(/Template_LGe_webos/LG.CPUtemperature,5m)<{$LGCPUMAXTEMP}-2'
+              recovery_expression: 'avg(/LGe webos by SNMP/LG.CPUtemperature,5m)<{$LGCPUMAXTEMP}-2'
               name: 'CPU temperature is too high on {HOST.NAME}'
               opdata: 'CPUTemperature: {ITEM.LASTVALUE1}'
               priority: AVERAGE
-        -
-          uuid: 439539f3b3db4404b1a7e3c945e04358
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 439539f3b3db4404b1a7e3c945e04358
           name: 'LG CPU Usage percent'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.2.9.0
@@ -91,25 +81,24 @@ zabbix_export:
           trends: 60d
           units: '%'
           preprocessing:
-            -
-              type: REGEX
+            - type: REGEX
               parameters:
                 - ^CPU\D+(\d+)%$
                 - \1
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: d3b27a9255b54935b36f4647e3263944
-              expression: 'avg(/Template_LGe_webos/LG.CPUusage,10m)>{$LGCPUMAXUTIL}'
+            - uuid: d3b27a9255b54935b36f4647e3263944
+              expression: 'avg(/LGe webos by SNMP/LG.CPUusage,10m)>{$LGCPUMAXUTIL}'
               recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'avg(/Template_LGe_webos/LG.CPUusage,10m)<{$LGCPUMAXUTIL}-10'
+              recovery_expression: 'avg(/LGe webos by SNMP/LG.CPUusage,10m)<{$LGCPUMAXUTIL}-10'
               name: 'High CPU usage on {HOST.NAME}'
               priority: WARNING
-        -
-          uuid: 74e16e3789ea47feb3905b0227b432ec
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 74e16e3789ea47feb3905b0227b432ec
           name: 'LG Energy Saving'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.3.19.0
@@ -119,27 +108,25 @@ zabbix_export:
           valuemap:
             name: 'LG energy saving'
           preprocessing:
-            -
-              type: HEX_TO_DECIMAL
+            - type: HEX_TO_DECIMAL
               parameters:
                 - ''
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: 91f40c9b5e6d4110b075552d8efc7113
-              expression: last(/Template_LGe_webos/LG.energysaving)<>0
+            - uuid: 91f40c9b5e6d4110b075552d8efc7113
+              expression: 'last(/LGe webos by SNMP/LG.energysaving)<>0'
               name: 'Energy Save Enabled on {HOST.NAME}'
               opdata: 'Energy Save Mode: {ITEM.LASTVALUE1}'
               priority: WARNING
-        -
-          uuid: ba4589c48f8549ad80a353d767acea50
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: ba4589c48f8549ad80a353d767acea50
           name: 'LG input signal'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.3.25.0
@@ -149,27 +136,25 @@ zabbix_export:
           valuemap:
             name: 'LG input signal'
           preprocessing:
-            -
-              type: HEX_TO_DECIMAL
+            - type: HEX_TO_DECIMAL
               parameters:
                 - ''
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: 2a640021416f4c68b01108f24b12190e
-              expression: last(/Template_LGe_webos/LG.input)<>1
+            - uuid: 2a640021416f4c68b01108f24b12190e
+              expression: 'last(/LGe webos by SNMP/LG.input)<>1'
               name: 'Check input signal on {HOST.NAME}'
               opdata: 'Input: {ITEM.LASTVALUE1}'
-              priority: WARNING
-        -
-          uuid: c0f829d0f1e94a428184789c329603a8
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: c0f829d0f1e94a428184789c329603a8
           name: 'LG input select'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.3.2.0
@@ -179,27 +164,25 @@ zabbix_export:
           valuemap:
             name: 'LG Input'
           preprocessing:
-            -
-              type: HEX_TO_DECIMAL
+            - type: HEX_TO_DECIMAL
               parameters:
                 - ''
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: 3904a5716352464097e7cbf73e001395
-              expression: '(last(/Template_LGe_webos/LG.inputselect,#1)<>last(/Template_LGe_webos/LG.inputselect,#2))=1'
+            - uuid: 3904a5716352464097e7cbf73e001395
+              expression: '(last(/LGe webos by SNMP/LG.inputselect,#1)<>last(/LGe webos by SNMP/LG.inputselect,#2))=1'
               name: 'Check input on {HOST.NAME}'
               opdata: '{ITEM.LASTVALUE1}'
-              priority: WARNING
-        -
-          uuid: cb41cef19f3e4655b44a1e0a66ed29cb
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: cb41cef19f3e4655b44a1e0a66ed29cb
           name: 'LG Memory usage percent'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.2.10.0
@@ -209,21 +192,17 @@ zabbix_export:
           units: '%'
           description: 'Что такое? Пока не понял.'
           preprocessing:
-            -
-              type: REGEX
+            - type: REGEX
               parameters:
                 - ^.+\((\d+)%\)
                 - \1
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
-        -
-          uuid: c907ef981f264efaab75e525f641d810
+            - tag: application
+              value: 'lge webos'
+        - uuid: c907ef981f264efaab75e525f641d810
           name: 'LG power state'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.3.1.0
@@ -233,26 +212,24 @@ zabbix_export:
           valuemap:
             name: 'LG power state'
           preprocessing:
-            -
-              type: HEX_TO_DECIMAL
+            - type: HEX_TO_DECIMAL
               parameters:
                 - ''
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: ee8ae60c467c487c9afa2fea944675a1
-              expression: last(/Template_LGe_webos/LG.power)<>1
+            - uuid: ee8ae60c467c487c9afa2fea944675a1
+              expression: 'last(/LGe webos by SNMP/LG.power)<>1'
               name: '{HOST.NAME} is powered off'
-              priority: WARNING
-        -
-          uuid: 21f5f2b7c9d74cd291e3e66bf980a3d7
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 21f5f2b7c9d74cd291e3e66bf980a3d7
           name: 'LG screen mute'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.7824.300.3.4.0
@@ -262,224 +239,164 @@ zabbix_export:
           valuemap:
             name: 'LG screen mute'
           preprocessing:
-            -
-              type: HEX_TO_DECIMAL
+            - type: HEX_TO_DECIMAL
               parameters:
                 - ''
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1h
           tags:
-            -
-              tag: Application
-              value: 'LGe webos'
+            - tag: application
+              value: 'lge webos'
           triggers:
-            -
-              uuid: ee9cd75b679548a59dbb11fff5797fac
-              expression: last(/Template_LGe_webos/LG.screenmute)<>0
+            - uuid: ee9cd75b679548a59dbb11fff5797fac
+              expression: 'last(/LGe webos by SNMP/LG.screenmute)<>0'
               name: '{ITEM.LASTVALUE1} on {HOST.NAME}'
               opdata: 'Screen Mute: {ITEM.LASTVALUE1}'
               priority: WARNING
+              tags:
+                - tag: scope
+                  value: notice
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: lg
       macros:
-        -
-          macro: '{$LGCPUMAXTEMP}'
+        - macro: '{$LGCPUMAXTEMP}'
           value: '45'
           description: 'Celsius CPU max. temperature'
-        -
-          macro: '{$LGCPUMAXUTIL}'
+        - macro: '{$LGCPUMAXUTIL}'
           value: '95'
           description: 'CPU MAX Util in Percent'
-        -
-          macro: '{$SNMP_COMMUNITY}'
+        - macro: '{$SNMP_COMMUNITY}'
           value: lgecommer
       valuemaps:
-        -
-          uuid: ea2a697d524947a78ce9279d64c9f4ba
+        - uuid: ea2a697d524947a78ce9279d64c9f4ba
           name: 'LG aspect ratio'
           mappings:
-            -
-              value: '1'
+            - value: '1'
               newvalue: '4:3'
-            -
-              value: '2'
+            - value: '2'
               newvalue: '16:9'
-            -
-              value: '4'
+            - value: '4'
               newvalue: Zoom
-            -
-              value: '6'
+            - value: '6'
               newvalue: 'Just Scan'
-            -
-              value: '16'
+            - value: '16'
               newvalue: 'Cinema Zoom 1'
-            -
-              value: '17'
+            - value: '17'
               newvalue: 'Cinema Zoom 2'
-            -
-              value: '18'
+            - value: '18'
               newvalue: 'Cinema Zoom 3'
-            -
-              value: '19'
+            - value: '19'
               newvalue: 'Cinema Zoom 4'
-            -
-              value: '20'
+            - value: '20'
               newvalue: 'Cinema Zoom 5'
-            -
-              value: '21'
+            - value: '21'
               newvalue: 'Cinema Zoom 6'
-            -
-              value: '22'
+            - value: '22'
               newvalue: 'Cinema Zoom 7'
-            -
-              value: '23'
+            - value: '23'
               newvalue: 'Cinema Zoom 8'
-            -
-              value: '24'
+            - value: '24'
               newvalue: 'Cinema Zoom 9'
-            -
-              value: '25'
+            - value: '25'
               newvalue: 'Cinema Zoom 10'
-            -
-              value: '26'
+            - value: '26'
               newvalue: 'Cinema Zoom 11'
-            -
-              value: '27'
+            - value: '27'
               newvalue: 'Cinema Zoom 12'
-            -
-              value: '28'
+            - value: '28'
               newvalue: 'Cinema Zoom 13'
-            -
-              value: '29'
+            - value: '29'
               newvalue: 'Cinema Zoom 14'
-            -
-              value: '30'
+            - value: '30'
               newvalue: 'Cinema Zoom 15'
-            -
-              value: '31'
+            - value: '31'
               newvalue: 'Cinema Zoom 16'
-            -
-              value: '33'
+            - value: '33'
               newvalue: '58:9'
-            -
-              value: '48'
+            - value: '48'
               newvalue: 'Vertical Zoom'
-            -
-              value: '49'
+            - value: '49'
               newvalue: 'All-Direction Zoom'
-        -
-          uuid: 48995ecb7edb407f8a192077e95f5724
+        - uuid: 48995ecb7edb407f8a192077e95f5724
           name: 'LG energy saving'
           mappings:
-            -
-              value: '0'
+            - value: '0'
               newvalue: 'off'
-            -
-              value: '1'
+            - value: '1'
               newvalue: Minimum
-            -
-              value: '2'
+            - value: '2'
               newvalue: Medium
-            -
-              value: '3'
+            - value: '3'
               newvalue: Maximum
-            -
-              value: '4'
+            - value: '4'
               newvalue: Auto
-            -
-              value: '5'
+            - value: '5'
               newvalue: 'Screen off'
-        -
-          uuid: 4db56594e9a64ba5ad7fcd85d0d8bf18
+        - uuid: 4db56594e9a64ba5ad7fcd85d0d8bf18
           name: 'LG Input'
           mappings:
-            -
-              value: '32'
+            - value: '32'
               newvalue: AV
-            -
-              value: '64'
+            - value: '64'
               newvalue: COMPONENT
-            -
-              value: '96'
+            - value: '96'
               newvalue: RGB
-            -
-              value: '112'
+            - value: '112'
               newvalue: 'DVI/SuperSign (PC)'
-            -
-              value: '128'
+            - value: '128'
               newvalue: 'DVI/SuperSign (DTV)'
-            -
-              value: '144'
+            - value: '144'
               newvalue: 'HDMI1 (DTV)'
-            -
-              value: '145'
+            - value: '145'
               newvalue: 'HDMI2/OPS (DTV)'
-            -
-              value: '146'
+            - value: '146'
               newvalue: 'OPS/HDMI3/DVI (DTV)'
-            -
-              value: '149'
+            - value: '149'
               newvalue: 'OPS/DVI (DTV)'
-            -
-              value: '152'
+            - value: '152'
               newvalue: 'OPS (DTV)'
-            -
-              value: '160'
+            - value: '160'
               newvalue: 'HDMI1 (PC)'
-            -
-              value: '161'
+            - value: '161'
               newvalue: 'HDMI2/OPS (PC)'
-            -
-              value: '162'
+            - value: '162'
               newvalue: 'OPS/HDMI3/DVI (PC)'
-            -
-              value: '165'
+            - value: '165'
               newvalue: 'OPS/DVI (PC)'
-            -
-              value: '168'
+            - value: '168'
               newvalue: 'OPS (PC)'
-            -
-              value: '192'
+            - value: '192'
               newvalue: 'DISPLAYPORT (DTV)'
-            -
-              value: '208'
+            - value: '208'
               newvalue: 'DISPLAYPORT (PC)'
-            -
-              value: '224'
+            - value: '224'
               newvalue: 'SuperSign webOS Player'
-            -
-              value: '225'
+            - value: '225'
               newvalue: Others
-            -
-              value: '226'
+            - value: '226'
               newvalue: 'Multi Screen'
-        -
-          uuid: 32a4e1e50cd44a9b93827d748b4b8e19
+        - uuid: 32a4e1e50cd44a9b93827d748b4b8e19
           name: 'LG input signal'
           mappings:
-            -
-              value: '0'
+            - value: '0'
               newvalue: 'No Signal'
-            -
-              value: '1'
+            - value: '1'
               newvalue: 'OK Signal'
-        -
-          uuid: e2b1300ff42b48edb643a0ee55405d5c
+        - uuid: e2b1300ff42b48edb643a0ee55405d5c
           name: 'LG power state'
           mappings:
-            -
-              value: '0'
+            - value: '0'
               newvalue: 'Power OFF'
-            -
-              value: '1'
+            - value: '1'
               newvalue: 'Power ON'
-        -
-          uuid: 0849eea2d61342f6ad7ef6c56f3eccfb
+        - uuid: 0849eea2d61342f6ad7ef6c56f3eccfb
           name: 'LG screen mute'
           mappings:
-            -
-              value: '0'
+            - value: '0'
               newvalue: 'Picture ON'
-            -
-              value: '1'
+            - value: '1'
               newvalue: 'Picture OFF'
