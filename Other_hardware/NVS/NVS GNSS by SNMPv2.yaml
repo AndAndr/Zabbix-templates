@@ -1,0 +1,128 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 2cb435130e6a483a8b41678605abea1b
+      name: 'Templates/Other Hardware'
+  templates:
+    - uuid: e197c8a5f303472398a59f3fc92c7c8f
+      template: 'NVS GNSS by SNMPv2'
+      name: 'NVS GNSS by SNMPv2'
+      description: 'https://github.com/AndAndr/'
+      templates:
+        - name: 'Generic SNMP'
+      groups:
+        - name: 'Templates/Other Hardware'
+      items:
+        - uuid: 407eb7302d694e0099a94365c8358574
+          name: 'Refclock mode'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.5597.3.2.4.0]'
+          key: mbgLtRefclock
+          description: |
+            "current mode of refclock connected to NTP time server as value"
+                --- " 0: not available"
+                --- " 1: Normal Operation"
+                --- " 2: Tracking/Searching"
+                --- " 3: Antenna Faulty"
+                --- " 4: Warm Boot"
+                --- " 5: Cold Boot"
+                --- " 6: Antenna Short Circuit"
+          valuemap:
+            name: mbgLtRefClockModeVal
+          tags:
+            - tag: component
+              value: gnss
+          triggers:
+            - uuid: 2667324a86e34b2887d3ffcc9ad61c18
+              expression: 'last(/NVS GNSS by SNMPv2/mbgLtRefclock,#3)<>1'
+              name: 'Check current refclock mode'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: gnss
+        - uuid: 4bba31991e40417698b43f140ca5f21d
+          name: Location
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.5597.3.2.7.0]'
+          key: mbgLtRefGpsPosition
+          value_type: TEXT
+          trends: '0'
+          description: 'Current Position of GPS refclock conneted to NTP time server.'
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: c75bb6405aac4247ba8724ebe743e3ac
+          name: 'Satellites Good'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.5597.3.2.9.0]'
+          key: mbgLtRefGpsSatellitesGood
+          description: 'Current good Satellites of GPS refclock connected to NTP time server as value.'
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: a43920eda89c4c1885811678f025a397
+          name: 'Satellites in view'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.5597.3.2.10.0]'
+          key: mbgLtRefGpsSatellitesInView
+          description: 'Current Satellites in view of GPS refclock conneted to NTP time server as value.'
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: f9866f3cc35640198b81aca8a6de7fa9
+          name: 'Refclock state'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.5597.3.2.5.0]'
+          key: mbgLtRefGpsState
+          description: 'Current State of GPS refclock conneted to NTP time server.'
+          valuemap:
+            name: mbgLtRefGpsStateVal
+          tags:
+            - tag: component
+              value: gnss
+          triggers:
+            - uuid: fb136fe033eb46938a9ec815bd1fbdc3
+              expression: 'last(/NVS GNSS by SNMPv2/mbgLtRefGpsState)<>1'
+              name: 'GPS refclock is not sync'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: gnss
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: nvs
+        - tag: target
+          value: nvs-gnss-ntp
+      valuemaps:
+        - uuid: 73516db4ad91416a96d1380f30edf11e
+          name: mbgLtRefClockModeVal
+          mappings:
+            - value: '0'
+              newvalue: notavailable
+            - value: '1'
+              newvalue: normalOperation
+            - value: '2'
+              newvalue: trackingSearching
+            - value: '3'
+              newvalue: antennaFaulty
+            - value: '4'
+              newvalue: warmBoot
+            - value: '5'
+              newvalue: coldBoot
+            - value: '6'
+              newvalue: antennaShortcircuit
+        - uuid: dbc9a03d484c484da2f2a8de69b107c5
+          name: mbgLtRefGpsStateVal
+          mappings:
+            - value: '0'
+              newvalue: notavailable
+            - value: '1'
+              newvalue: synchronized
+            - value: '2'
+              newvalue: notsynchronized
