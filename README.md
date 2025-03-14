@@ -20,7 +20,7 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 **UsergateUTM** Шаблон Zabbix 4,7 для мониторинга Usergate UTM по SNMPv2 с поддержкой трапов.
 
-**EltexMES** Шаблоны и модули Zabbix 4 и 6 для мониторинга коммутаторов Eltex серии MES по SNMPv2.
+**EltexMES** Шаблоны и модули Zabbix 4,6,7 для мониторинга коммутаторов Eltex серии MES по SNMPv2.
 
 **EltexESR** Шаблоны и модули Zabbix 4 и 6 для мониторинга маршрутизаторов Eltex ESR  по SNMPv2.
 

@@ -1,0 +1,455 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: 15bcb573039e476d9e721aa2cfdbc4f3
+      template: 'Template Eltex MES SNMPv2'
+      name: 'Template Eltex MES SNMPv2'
+      description: |
+        https://github.com/AndAndr
+        Шаблон для коммутаторов Eltex серии MES
+      templates:
+        - name: 'Generic SNMP'
+        - name: 'Module Eltex MES Interfaces SNMPv2'
+        - name: 'Module Eltex OSPF SNMPv2'
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: cf5a77e9e76e4ba18b03581a6ca9d049
+          name: 'Memory Utilization Free'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.7.0
+          key: eltexProcessMemoryFree
+          delay: 5m
+          history: 2w
+          trends: 30d
+          status: DISABLED
+          units: b
+          description: 'The overall CPU wide system memory which is currently free in bytes.'
+          tags:
+            - tag: Application
+              value: 'Eltex chassis'
+        - uuid: 3ffd377e1054415fa4b7949dafb33fd3
+          name: 'Memory Utilization Free Percent'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.6.0
+          key: eltexProcessMemoryFreePercent
+          delay: 5m
+          history: 2w
+          trends: 30d
+          units: '%'
+          description: 'The overall CPU wide system memory which is currently free in percents.'
+          tags:
+            - tag: Application
+              value: 'Eltex chassis'
+          triggers:
+            - uuid: 81afdffc2b0c4d268e5a7effaa78c0ae
+              expression: 'last(/Template Eltex MES SNMPv2/eltexProcessMemoryFreePercent)>{$MEM.MAX.USAGE}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template Eltex MES SNMPv2/eltexProcessMemoryFreePercent)<{$MEM.MAX.USAGE}-5'
+              name: 'High memory usage on {HOST.NAME}'
+              opdata: 'Memory Usage: {ITEM.LASTVALUE1}'
+              priority: WARNING
+        - uuid: 925026d95ac345f6acb59ce005dfd18c
+          name: 'Memory Total'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.3.0
+          key: eltexProcessMemoryTotal
+          delay: 5m
+          history: 2w
+          trends: 30d
+          status: DISABLED
+          units: b
+          description: 'The overall CPU wide system memory size which is currently in system.'
+          tags:
+            - tag: Application
+              value: 'Eltex chassis'
+        - uuid: 8cd7e62d0bea4d07844a9304d5622747
+          name: 'CPU Utilization 1min'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.1.8.0
+          key: rlCpuUtilDuringLastMinute
+          delay: 3m
+          history: 14d
+          trends: 60d
+          units: '%'
+          description: 'Percentage of the device CPU utilization during last minute. The value 101 is a dummy value, indicating that the CPU utilization was not measured (since measurement is disabled or was disabled during last minute).'
+          tags:
+            - tag: Application
+              value: 'Eltex chassis'
+          triggers:
+            - uuid: ab025cf935874da2a740669ce4efeef8
+              expression: 'last(/Template Eltex MES SNMPv2/rlCpuUtilDuringLastMinute)>{$CPU.MAX.USAGE} and last(/Template Eltex MES SNMPv2/rlCpuUtilDuringLastMinute)<=100'
+              name: 'High CPU usage on {HOST.NAME}'
+              opdata: 'CPU Usage: {ITEM.LASTVALUE1}'
+              priority: WARNING
+      discovery_rules:
+        - uuid: 19204aa9087b439e9b465cafed0f527d
+          name: 'Eltex chassis discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.89.53.15.1.1]'
+          key: StackUnit
+          delay: 1h
+          lifetime: 1w
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: b00ce774f0f64dcbb316ba6e140de27d
+              name: 'StackUnit-{#SNMPVALUE} ProductID'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.4.1.6.{#SNMPVALUE}'
+              key: 'rlPhdStackProductID.[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: 'Eltex chassis'
+            - uuid: a22f76e56efe4ec78e45c8bb5c2df46a
+              name: 'StackUnit-{#SNMPVALUE} Fan1 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.4.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: 7ed4d4d51744476d960ed81eea6f7eb4
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}])<>1 and (last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}],#1)<>last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}])=1'
+                  name: 'Fan1 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: 5b0c7a10780c49d3a0493c53b783aeda
+              name: 'StackUnit-{#SNMPVALUE} Fan2 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.5.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: d562a45d7e42492692fb4815234075cd
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}])<>1 and (last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}],#1)<>last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}])=1'
+                  name: 'Fan2 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: f9d63c259bbc4a0ba0a2205984b5dc72
+              name: 'StackUnit-{#SNMPVALUE} Fan3 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.6.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: 4b06a4ecaaa24efc9ea71792583b313f
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}])<>1 and (last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}],#1)<>last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}])=1'
+                  name: 'Fan3 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: 09b99c9e9179423f87f1e388af7c4f7e
+              name: 'StackUnit-{#SNMPVALUE} Fan4 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.7.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: 9539233598a14161a48e8a0da7c55b6b
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}])<>1 and (last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}],#1)<>last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}])=1'
+                  name: 'Fan4 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: 9039a32cc9ea46dbad89aa1fd00cf6ea
+              name: 'StackUnit-{#SNMPVALUE} Fan5 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.8.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan5Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+            - uuid: 25068205b44748a7a27e70b5baa7a2fb
+              name: 'StackUnit-{#SNMPVALUE} Fan6 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.9.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: 3d9e8c431e9040689dc546057bf7e50b
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}])<>1 and (last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}],#1)<>last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}])=1'
+                  name: 'Fan6 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: 72b6d30265534fdf85fb1e7dc85e9efa
+              name: 'StackUnit-{#SNMPVALUE} Main PS Status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.2.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamMainPSStatus[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: e346642ad5da44cba2f4a0d7813b1fd5
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamMainPSStatus[{#SNMPVALUE}])<>1'
+                  name: 'Main power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: 55a2df3507f2452b8dc891f6f1ccfd74
+              name: 'StackUnit-{#SNMPVALUE} Redundant PS Status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.3.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: Application
+                  value: 'Eltex chassis'
+              trigger_prototypes:
+                - uuid: ee2d0bfb2bda4971bcbcef2b7f9790da
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}])<>1 and last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}])<>5'
+                  name: 'Redundant power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: 302251897b564e30bb245f32326997bb
+              name: 'StackUnit-{#SNMPVALUE} Temperature sensor status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.11.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamTempSensorStatus[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: 'ENTITY-SENSORS-MIB::EntitySensorStatus'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: Application
+                  value: 'Eltex chassis'
+              trigger_prototypes:
+                - uuid: 9c7b5bb54637495083471dfdb519b428
+                  expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamTempSensorStatus[{#SNMPVALUE}],#2)<>1'
+                  name: 'Temperature status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+            - uuid: 5b7164456f604d35a5b4b9dc539f8090
+              name: 'StackUnit-{#SNMPVALUE} Temperature sensor value'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.10.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              units: C`
+              tags:
+                - tag: Application
+                  value: 'Eltex chassis'
+            - uuid: e56f6e3e107f46c5b66d49b147c4d4f5
+              name: 'StackUnit-{#SNMPVALUE} Temperature sensor Warning Threshold Value'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.12.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}]'
+              delay: 1h
+              history: 2d
+              trends: '0'
+              units: C`
+              preprocessing:
+                - type: DISCARD_UNCHANGED
+                  parameters:
+                    - ''
+              tags:
+                - tag: Application
+                  value: 'Eltex chassis'
+            - uuid: 82fb634e0aa24f5a8ed723b8d42693e7
+              name: 'StackUnit-{#SNMPVALUE} FirmwareVersion'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.3.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamFirmwareVersion[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: system
+            - uuid: ae899d83fb80480692e9a83aebd736eb
+              name: 'StackUnit-{#SNMPVALUE} HardwareVersion'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.4.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamHardwareVersion[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: system
+            - uuid: 0be4d2d5b4114867aeb8d285e4753698
+              name: 'StackUnit-{#SNMPVALUE} SerialNum'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.5.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamSerialNum[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: Application
+                  value: 'Eltex chassis'
+            - uuid: b8d7e5a7a36d4111a5fa884d1b311151
+              name: 'StackUnit-{#SNMPVALUE} SoftwareVersion'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.2.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamSoftwareVersion[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: Application
+                  value: 'Eltex chassis'
+          trigger_prototypes:
+            - uuid: 4c5810fa188e4adfb4f7006b977a6197
+              expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}])>last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}])'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}])<last(/Template Eltex MES SNMPv2/rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}])-5'
+              name: 'Check {HOST.NAME} StackUnit-{#SNMPVALUE} temperature'
+              priority: HIGH
+      tags:
+        - tag: class
+          value: network
+        - tag: target
+          value: eltex
+        - tag: target
+          value: eltex-mes
+      macros:
+        - macro: '{$CPU.MAX.USAGE}'
+          value: '70'
+        - macro: '{$MEM.MAX.USAGE}'
+          value: '70'
+      dashboards:
+        - uuid: 5cd9538be36c47948690ec5fc3b2e110
+          name: 'Network interfaces'
+          pages:
+            - {  }
+      valuemaps:
+        - uuid: 9a470030669d43c4bb8604ff8ae350ff
+          name: 'ENTITY-SENSORS-MIB::EntitySensorStatus'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: unavailable
+            - value: '3'
+              newvalue: nonoperational
+        - uuid: 6317003694d642318022b34464dcd006
+          name: RlEnvMonState
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning
+            - value: '7'
+              newvalue: readingFailed
+            - value: '8'
+              newvalue: notAvailable
+            - value: '9'
+              newvalue: backingUp
+            - value: '10'
+              newvalue: readingFailed

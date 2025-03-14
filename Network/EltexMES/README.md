@@ -1,6 +1,6 @@
 # EltexMES
 
-Шаблоны для коммутаторов Eltex серии MES для версии Zabbix 4 и 6.
+Шаблоны для коммутаторов Eltex серии MES для версии Zabbix 4,6,7.
 
 
 Реализовано автообнаружение:
@@ -37,7 +37,7 @@
 
 
 ## Howto:
-1. Импорт модулей **Module Eltex OSPF SNMPv2**, **Module Eltex MES Interfaces SNMPv2**.
+1. Импорт **Generic SNMP**, **Module Eltex OSPF SNMPv2**, **Module Eltex MES Interfaces SNMPv2**.
 2. Импорт шаблона **Template Eltex MES SNMPv2**.
 
 
