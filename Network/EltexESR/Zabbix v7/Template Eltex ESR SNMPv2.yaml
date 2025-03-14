@@ -1,0 +1,742 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: 0a5ec3a5cdb54effbec5c1b9f7bfc6e1
+      template: 'Template Eltex ESR SNMPv2'
+      name: 'Template Eltex ESR SNMPv2'
+      description: |
+        https://github.com/AndAndr
+        Мониторинг по SNMPv2 маршрутизаторов Eltex ESR.
+        Тестировалось на ESR1000, ESR1500.
+      templates:
+        - name: 'Generic SNMP'
+        - name: 'Module Eltex ESR BGP4 SNMPv2'
+        - name: 'Module Eltex ESR OSPF SNMPv2'
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: 30816a4ba56b4d0f94ccabf038bdb292
+          name: 'ESR Hardware Version'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.47.1.1.1.1.8.680000
+          key: esrHardwareVersion
+          delay: 3h
+          history: 14d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: HARDWARE
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 31124cbcc907483e86750b5765e14ee2
+          name: 'Memory Free'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.9.48.1.1.1.6.1
+          key: esrMemoryFree
+          history: 14d
+          trends: 60d
+          units: B
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 081682c65354446ab592c5170dde7a82
+          name: 'Memory Free %'
+          type: CALCULATED
+          key: esrMemoryFreePercent
+          history: 14d
+          trends: '0'
+          units: '%'
+          params: '100*last(//esrMemoryFree)/last(//esrMemoryTotal)'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: memory
+          triggers:
+            - uuid: 07d043bbab6c4c079ed773c003863641
+              expression: 'last(/Template Eltex ESR SNMPv2/esrMemoryFreePercent)<{$MEM.FREE.CRIT}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template Eltex ESR SNMPv2/esrMemoryFreePercent)>{$MEM.FREE.CRIT}+5'
+              name: 'Free memory low on {HOST.NAME}'
+              opdata: 'Free mem percent: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: capacity
+                - tag: scope
+                  value: performance
+        - uuid: c9be37d7f77f4e67a37b244a3ebfd35c
+          name: 'Memory Total'
+          type: CALCULATED
+          key: esrMemoryTotal
+          history: 14d
+          trends: '0'
+          units: B
+          params: 'last(//esrMemoryUsed) + last(//esrMemoryFree)'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 66c3f745747c40b5b202aaad2908e39a
+          name: 'Memory Used'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.9.48.1.1.1.5.1
+          key: esrMemoryUsed
+          history: 14d
+          trends: 60d
+          units: B
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 01b7045c14534793ba1084121f354cff
+          name: 'ESR ModelName'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.47.1.1.1.1.13.680000
+          key: esrModelName
+          delay: 3h
+          history: 14d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: MODEL
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: fc4ba9de264f446f996d71b6d262f43a
+          name: 'ESR Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.11.680000
+          key: esrSerialNumber
+          delay: 3h
+          history: 14d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SERIALNO_A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: e70be421330743659c2f3a19b53f5dc5
+          name: 'ESR Software Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.10.680000
+          key: esrSoftwareVersion
+          delay: 3h
+          history: 14d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 5aa101c34d0e458cbe895f3fb77b08e4
+          name: Fan1Status
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.53.15.1.4.0
+          key: rlPhdUnitEnvParamFan1Status
+          history: 14d
+          trends: 60d
+          description: 'Состояние вентилятора №1'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: fan
+          triggers:
+            - uuid: 9c78f1efa5cf41368a78007c153ae992
+              expression: 'last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamFan1Status)<>1'
+              name: 'Fan1 status is not OK on {HOST.NAME}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: e6162ef4d348439d82314a23ae676584
+          name: Fan2Status
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.53.15.1.5.0
+          key: rlPhdUnitEnvParamFan2Status
+          history: 14d
+          trends: 60d
+          description: 'Состояние вентилятора №2'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: fan
+          triggers:
+            - uuid: a365ebc0cb6f4c91979718e3a1f658f8
+              expression: 'last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamFan2Status)<>1'
+              name: 'Fan2 status is not OK on {HOST.NAME}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 82650d35433241b287dd8a22b0e90d36
+          name: Fan3Status
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.53.15.1.6.0
+          key: rlPhdUnitEnvParamFan3Status
+          history: 14d
+          trends: 60d
+          description: 'Состояние вентилятора №3'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: fan
+          triggers:
+            - uuid: d8e32d994e1949ceb9bc29b210a0af66
+              expression: 'last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamFan3Status)<>1'
+              name: 'Fan3 status is not OK on {HOST.NAME}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 792345255b6f4d3492da9c9bf54b59fc
+          name: Fan4Status
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.53.15.1.7.0
+          key: rlPhdUnitEnvParamFan4Status
+          history: 14d
+          trends: 60d
+          description: 'Состояние вентилятора №4'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: fan
+          triggers:
+            - uuid: b1fbe7eec9714b78ad7f56ec263e263b
+              expression: 'last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamFan4Status)<>1'
+              name: 'Fan4 status is not OK on {HOST.NAME}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 0690c9f758404ef19f83da2d460cb5dc
+          name: 'PowerSupply Main status'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.53.15.1.2.0
+          key: rlPhdUnitEnvParamMainPSStatus
+          history: 14d
+          trends: 60d
+          description: 'Состояние главного блока питания.'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: 4639d42203994076bfe0aab9293270a1
+              expression: 'last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamMainPSStatus)<>1'
+              name: 'PowerSupply MAIN failure on {HOST.NAME}'
+              opdata: 'Неисправность главного источника питания.'
+              priority: AVERAGE
+              description: 'Неисправность главного источника питания.'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: b514c402aadd4c03a1b9859070e5889b
+          name: 'PowerSupply Redundant status'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.53.15.1.3.0
+          key: rlPhdUnitEnvParamRedundantPSStatus
+          history: 14d
+          trends: 60d
+          description: 'Состояние резервного блока питания.'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: 4f287a09d7b443bab166d7cc0c3db2d8
+              expression: 'last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamRedundantPSStatus,#2)=1 and last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamRedundantPSStatus,#1)<>1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template Eltex ESR SNMPv2/rlPhdUnitEnvParamRedundantPSStatus,#1:now-5m)=1'
+              name: 'PowerSupply REDUNDANT failure on {HOST.NAME}'
+              opdata: 'Неисправность резервного источника питания.'
+              priority: AVERAGE
+              description: 'Неисправность резервного источника питания.'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 9684ee6ee8944cd8bf9c0991ed8956a8
+          name: 'Temperature BOARD'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.89.53.15.1.12.0
+          key: temp.BOARD
+          history: 14d
+          trends: 60d
+          units: '`C'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: temperature
+          triggers:
+            - uuid: 57e0ea3857e24be6b6a0805201b14ecd
+              expression: 'last(/Template Eltex ESR SNMPv2/temp.BOARD)>{$TEMP.CRIT}'
+              name: 'Temperature BOARD is gt {$TEMP.CRIT} on {HOST.NAME}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: da4a879acd9b4199947618b8046e1fba
+          name: 'Temperature CPU'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.89.53.15.1.9.0
+          key: temp.CPU
+          history: 14d
+          trends: 60d
+          units: '`C'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: temperature
+          triggers:
+            - uuid: 7eebee5c2fc8451186d832a92add4e0f
+              expression: 'last(/Template Eltex ESR SNMPv2/temp.CPU)>{$TEMP.CRIT}'
+              name: 'Temperature CPU is gt {$TEMP.CRIT} on {HOST.NAME}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 332ab0d0b4d34190b990f9dec3f74687
+          name: 'Temperature SFP'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.89.53.15.1.14.0
+          key: temp.SFP
+          history: 14d
+          trends: 60d
+          units: '`C'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: temperature
+          triggers:
+            - uuid: bcc6312149b4497c9dde9ea934d5576d
+              expression: 'last(/Template Eltex ESR SNMPv2/temp.SFP)>{$TEMP.CRIT}'
+              name: 'Temperature SFP is gt {$TEMP.CRIT} on {HOST.NAME}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 9a5af8d6f66c46ea8dc14fb5bf090188
+          name: 'Temperature SWITCH'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.89.53.15.1.16.0
+          key: temp.SWITCH
+          history: 14d
+          trends: 60d
+          units: '`C'
+          valuemap:
+            name: RlEnvMonState
+          tags:
+            - tag: component
+              value: temperature
+          triggers:
+            - uuid: 05012bcb53ba4fa2ba160ed80f1a4073
+              expression: 'last(/Template Eltex ESR SNMPv2/temp.SWITCH)>{$TEMP.CRIT}'
+              name: 'Temperature SWITCH is gt {$TEMP.CRIT} on {HOST.NAME}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+      discovery_rules:
+        - uuid: 686b3fcba7cd45999e05ae482a355626
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.4.1.9.9.109.1.1.1.1.5]'
+          key: cpu.discovery
+          delay: 1h
+          lifetime: 3d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: be2db1e57e56494c83c1dacc40c8c3ea
+              name: 'CPU-{#SNMPINDEX} utilization'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.8.{#SNMPINDEX}'
+              key: 'cpu.utl.[CPU.{#SNMPINDEX}]'
+              delay: 10m
+              history: 14d
+              value_type: FLOAT
+              trends: 60d
+              units: '%'
+              tags:
+                - tag: component
+                  value: cpu
+              trigger_prototypes:
+                - uuid: 8c5aa99976cb441bbc971335f4c8d3d0
+                  expression: 'last(/Template Eltex ESR SNMPv2/cpu.utl.[CPU.{#SNMPINDEX}])>{$CPU.UTIL.CRIT}'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Eltex ESR SNMPv2/cpu.utl.[CPU.{#SNMPINDEX}])<{$CPU.UTIL.CRIT}-10'
+                  name: 'CPU: High CPU-{#SNMPINDEX}'
+                  opdata: 'Current utilization: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: performance
+        - uuid: 7956cdbf3eb54bda80f0ed29ae5d5ae8
+          name: 'Network interfaces discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1]'
+          key: net.if.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+                formulaid: A
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.MATCHES}'
+                formulaid: C
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
+                formulaid: E
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: F
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+                formulaid: G
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: H
+          lifetime: 3h
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovering network interfaces.'
+          item_prototypes:
+            - uuid: 86e424f641df42958c276e714761cbe1
+              name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
+              key: 'net.if.in.errors[ifInErrors.{#IFNAME}]'
+              delay: 3m
+              history: 14d
+              trends: 60d
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: b8ba39eadff040c39a4f40d1873d7f1e
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
+              key: 'net.if.in[ifHCInOctets.{#IFNAME}]'
+              history: 14d
+              trends: 60d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: b7c40e54d8cd46cf85080fd38c013251
+              name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
+              key: 'net.if.out.errors[ifOutErrors.{#IFNAME}]'
+              delay: 3m
+              history: 14d
+              trends: 60d
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: ba209841081a4f4e99494ae7d2c0cc01
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
+              key: 'net.if.out[ifHCOutOctets.{#IFNAME}]'
+              history: 14d
+              trends: 60d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: e0246722d60440c8a212e5945f2a85e4
+              name: 'Interface {#IFNAME}({#IFALIAS}): Speed'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
+              key: 'net.if.speed[ifHighSpeed.{#IFNAME}]'
+              delay: 5m
+              history: 14d
+              trends: '0'
+              units: bps
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000000'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 34c9dafd0c9a4b1b9c76d87922f9f244
+              name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+              key: 'net.if.status[ifOperStatus.{#IFNAME}]'
+              history: 14d
+              trends: '0'
+              valuemap:
+                name: 'IF-MIB::ifOperStatus'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+              trigger_prototypes:
+                - uuid: 4a1779c503264d57a979268f656642b0
+                  expression: 'last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}])=2 and (last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}],#1)<>last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}])<>2'
+                  name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: 'Триггер работает следующим образом: стреляет, если "Operation status" интерфейса уходит в состояние "Down(2)" и до этого был в состоянии "Up(1)",триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что diff.'
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+          trigger_prototypes:
+            - uuid: 63b2372a037f4133b3be8f838f1a9a6b
+              expression: |
+                (avg(/Template Eltex ESR SNMPv2/net.if.in[ifHCInOctets.{#IFNAME}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Template Eltex ESR SNMPv2/net.if.speed[ifHighSpeed.{#IFNAME}]) or
+                avg(/Template Eltex ESR SNMPv2/net.if.out[ifHCOutOctets.{#IFNAME}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Template Eltex ESR SNMPv2/net.if.speed[ifHighSpeed.{#IFNAME}])) and
+                last(/Template Eltex ESR SNMPv2/net.if.speed[ifHighSpeed.{#IFNAME}])>0
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                avg(/Template Eltex ESR SNMPv2/net.if.in[ifHCInOctets.{#IFNAME}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Template Eltex ESR SNMPv2/net.if.speed[ifHighSpeed.{#IFNAME}]) and
+                avg(/Template Eltex ESR SNMPv2/net.if.out[ifHCOutOctets.{#IFNAME}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Template Eltex ESR SNMPv2/net.if.speed[ifHighSpeed.{#IFNAME}])
+              name: 'Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( > {$IF.UTIL.MAX:"{#IFNAME}"}% )'
+              opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
+              priority: INFO
+              description: 'The network interface utilization is close to its estimated maximum bandwidth.'
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  expression: 'last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}])=2 and (last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}],#1)<>last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}],#2))=1'
+                  recovery_expression: 'last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}])<>2'
+              tags:
+                - tag: scope
+                  value: performance
+            - uuid: 6fe8e8c0640b48f7af0ecda203f6e00e
+              expression: |
+                min(/Template Eltex ESR SNMPv2/net.if.in.errors[ifInErrors.{#IFNAME}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/Template Eltex ESR SNMPv2/net.if.out.errors[ifOutErrors.{#IFNAME}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                max(/Template Eltex ESR SNMPv2/net.if.in.errors[ifInErrors.{#IFNAME}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/Template Eltex ESR SNMPv2/net.if.out.errors[ifOutErrors.{#IFNAME}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+              name: 'Interface {#IFNAME}({#IFALIAS}): High error rate ( > {$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  expression: 'last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}])=2 and (last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}],#1)<>last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}],#2))=1'
+                  recovery_expression: 'last(/Template Eltex ESR SNMPv2/net.if.status[ifOperStatus.{#IFNAME}])<>2'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+          graph_prototypes:
+            - uuid: 5e89919a82d946a9b165267dd950fabe
+              name: 'Interface {#IFNAME}({#IFALIAS}): Network traffic'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 1A7C11
+                  item:
+                    host: 'Template Eltex ESR SNMPv2'
+                    key: 'net.if.in[ifHCInOctets.{#IFNAME}]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: 2774A4
+                  item:
+                    host: 'Template Eltex ESR SNMPv2'
+                    key: 'net.if.out[ifHCOutOctets.{#IFNAME}]'
+                - sortorder: '2'
+                  color: F63100
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Template Eltex ESR SNMPv2'
+                    key: 'net.if.out.errors[ifOutErrors.{#IFNAME}]'
+                - sortorder: '3'
+                  color: A54F10
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Template Eltex ESR SNMPv2'
+                    key: 'net.if.in.errors[ifInErrors.{#IFNAME}]'
+      tags:
+        - tag: class
+          value: network
+        - tag: target
+          value: eltex
+        - tag: target
+          value: eltex-esr
+      macros:
+        - macro: '{$CPU.UTIL.CRIT}'
+          value: '80'
+        - macro: '{$IF.ERRORS.WARN}'
+          value: '10'
+        - macro: '{$IF.UTIL.MAX}'
+          value: '90'
+        - macro: '{$MEM.FREE.CRIT}'
+          value: '20'
+          description: 'Free memory %'
+        - macro: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+          value: '^.*'
+        - macro: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+          value: ^2$
+          description: 'Ignore down(2) administrative status'
+        - macro: '{$NET.IF.IFALIAS.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+        - macro: '{$NET.IF.IFNAME.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFNAME.NOT_MATCHES}'
+          value: ^loop
+        - macro: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+          value: ^6$
+          description: 'Ignore notPresent(6)'
+        - macro: '{$TEMP.CRIT}'
+          value: '50'
+      valuemaps:
+        - uuid: 117adc01ca1e4d148797bdebe0e7b9a9
+          name: 'IF-MIB::ifOperStatus'
+          mappings:
+            - value: '1'
+              newvalue: up
+            - value: '2'
+              newvalue: down
+            - value: '4'
+              newvalue: unknown
+            - value: '5'
+              newvalue: dormant
+            - value: '6'
+              newvalue: notPresent
+            - value: '7'
+              newvalue: lowerLayerDown
+        - uuid: 29c2322d70b3469ab30aab11f55ae3f6
+          name: RlEnvMonState
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning
+            - value: '7'
+              newvalue: readingFailed
+            - value: '8'
+              newvalue: notAvailable
+            - value: '9'
+              newvalue: backingUp
+            - value: '10'
+              newvalue: readingFailed

@@ -22,7 +22,7 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 **EltexMES** Шаблоны и модули Zabbix 4,6,7 для мониторинга коммутаторов Eltex серии MES по SNMPv2.
 
-**EltexESR** Шаблоны и модули Zabbix 4 и 6 для мониторинга маршрутизаторов Eltex ESR  по SNMPv2.
+**EltexESR** Шаблоны и модули Zabbix 4,6,7 для мониторинга маршрутизаторов Eltex ESR  по SNMPv2.
 
 **Eltex SBC** Шаблон Zabbix 7.2 для мониторинга функционала SBC Eltex по SNMPv2.
 
