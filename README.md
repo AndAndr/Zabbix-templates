@@ -46,6 +46,12 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 **NVS** SNMP Мониторинг сервера времени NVS-GNSS для Zabbix 7.0.
 
 
+
+## SAN
+**FC_HBA_stats_Linux_by_Zabbix_agent_zbxv4.xml** Мониторинг FC HBA (в том числе fc_host_statistics) Linux для Zabbix 4.4.
+
+
+
 ## Server_hardware
 **YADRO_Vegman_V4-4.xml** Мониторинг BMC серверов YADRO Vegman для Zabbix 4.4.
 
