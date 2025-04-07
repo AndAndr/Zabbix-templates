@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2025-04-07T12:34:11Z</date>
+    <groups>
+        <group>
+            <name>Templates/Modules</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Module Eltex ESR BGP4 ver gt 1_28</template>
+            <name>Template Module Eltex ESR BGP4 ver gt 1_28</name>
+            <description>https://github.com/AndAndr&#13;
+BGP peer state for Eltex ESR software version &gt; 1.28</description>
+            <groups>
+                <group>
+                    <name>Templates/Modules</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>BGP4 Peer(s)</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Eltex BGP4 Peer(s)</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#BGPPEER},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.15,{#BGPPEERDESC},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13]</snmp_oid>
+                    <key>eltEsrBgp4V2PeerRemoteAddrStr</key>
+                    <delay>1h</delay>
+                    <port>{$SNMP_PORT}</port>
+                    <lifetime>7d</lifetime>
+                    <description>Обнаружение BGP пиров</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>BGP Admin status for peer {#BGPPEERDESC}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.14.{#SNMPINDEX}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerAdminStatus[{#BGPPEER}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <description>Whether or not the BGP FSM for this remote peer is halted or running. The BGP FSM for a remote peer is halted after processing a Stop event. Likewise, it is in the running state after a Start event.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>eltEsrBgp4V2PeerAdminStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEER} description</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13.{#SNMPINDEX}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerDescription[{#BGPPEER}]</key>
+                            <delay>10m</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <description>A user configured description identifying this peer.  When this object is not the empty string, this object SHOULD contain a description that is unique within a given BGP instance for this peer.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEERDESC} accepted routes</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.18.{#SNMPINDEX}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerImpRouteCount[{#BGPPEER}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <description>The number of accepted routes.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEERDESC} last state change</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.17.{#SNMPINDEX}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerLastStateChange[{#BGPPEER}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <units>s</units>
+                            <port>{$SNMP_PORT}</port>
+                            <description>Time since last state change for this BGP entry in seconds.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEERDESC} remote AS</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.10.{#SNMPINDEX}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerRemoteAs[{#BGPPEER}]</key>
+                            <delay>10m</delay>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <value_type>FLOAT</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <description>The remote autonomous system number received in the BGP OPEN message.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEERDESC} remote ID</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.11.{#SNMPINDEX}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerRemoteIdentifier[{#BGPPEER}]</key>
+                            <delay>10m</delay>
+                            <history>14d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <port>{$SNMP_PORT}</port>
+                            <description>The BGP Identifier of this entry's remote BGP peer. This entry should be 0.0.0.0 unless the bgp4V2PeerState is in the openconfirm or the established state. The bgp4V2PeerState will generally be in the idle state when the FSM is halted.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1d</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>BGP peer {#BGPPEERDESC} state</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.12.{#SNMPINDEX}</snmp_oid>
+                            <key>eltEsrBgp4V2PeerState[{#BGPPEER}]</key>
+                            <history>14d</history>
+                            <trends>60d</trends>
+                            <port>{$SNMP_PORT}</port>
+                            <description>The BGP peer connection state.</description>
+                            <applications>
+                                <application>
+                                    <name>BGP4 Peer(s)</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>BgpPeerState</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;6</expression>
+                                    <name>BGP session is not established with peer {#BGPPEERDESC}</name>
+                                    <opdata>Peer IP={#BGPPEER}; Peer ID={#BGPPEERDESC}</opdata>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>BgpPeerState</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>idle</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>connect</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>active</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>opensent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>openconfirm</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>established</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>eltEsrBgp4V2PeerAdminStatus</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>halted</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>running</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

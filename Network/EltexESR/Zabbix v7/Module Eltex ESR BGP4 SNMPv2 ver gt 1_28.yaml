@@ -4,27 +4,27 @@ zabbix_export:
     - uuid: 57b7ae836ca64446ba2c296389c009b7
       name: Templates/Modules
   templates:
-    - uuid: 5b17167987844880beb89725c1ddef58
-      template: 'Module Eltex ESR BGP4 SNMPv2'
-      name: 'Module Eltex ESR BGP4 SNMPv2'
+    - uuid: 8baa1eab5a4d427c8973a3bb7d31e5e4
+      template: 'Module Eltex ESR BGP4 SNMPv2 ver gt 1_28'
+      name: 'Module Eltex ESR BGP4 SNMPv2 ver gt 1_28'
       description: |
         https://github.com/AndAndr
-        BGP peer state for Eltex ESR
+        BGP peer state for Eltex ESR software version > 1.28
       groups:
         - name: Templates/Modules
       discovery_rules:
-        - uuid: dcbc3afd6a7946329b408bd3a2df3ade
+        - uuid: 55ba5b1c6e344aed95191db73e4c9038
           name: 'Eltex BGP4 Peer(s)'
           type: SNMP_AGENT
-          snmp_oid: 'discovery[{#BGPPEER},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.15.1.49.1.4,{#BGPPEERDESC},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13.1.49.1.4]'
+          snmp_oid: 'discovery[{#BGPPEER},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.15,{#BGPPEERDESC},.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13]'
           key: eltEsrBgp4V2PeerRemoteAddrStr
           delay: 1h
           description: 'Обнаружение BGP пиров'
           item_prototypes:
-            - uuid: 6f891842bb5646e6b4e442c0d96ba65b
+            - uuid: 384f6c77b4f44435b8c5469c9f58708e
               name: 'BGP Admin status for peer {#BGPPEERDESC}'
               type: SNMP_AGENT
-              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.14.1.49.1.4.{#BGPPEER}'
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.14.{#SNMPINDEX}'
               key: 'eltEsrBgp4V2PeerAdminStatus[{#BGPPEER}]'
               history: 14d
               trends: 60d
@@ -38,10 +38,10 @@ zabbix_export:
               tags:
                 - tag: 'bgp peer'
                   value: '{#BGPPEERDESC}'
-            - uuid: 75f8869b88ba4ea7a1fbf5c92abe8c25
+            - uuid: 95f7cd4f3e6941eaa2b3bf205a5ec79e
               name: 'BGP peer {#BGPPEER} description'
               type: SNMP_AGENT
-              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13.1.49.1.4.{#BGPPEER}'
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.13.{#SNMPINDEX}'
               key: 'eltEsrBgp4V2PeerDescription[{#BGPPEER}]'
               delay: 10m
               history: 14d
@@ -55,10 +55,10 @@ zabbix_export:
               tags:
                 - tag: 'bgp peer'
                   value: '{#BGPPEERDESC}'
-            - uuid: 161ab60108504a2fb6e072c9956a230b
+            - uuid: 9b552f4d7fba4aea84f16b89a52a7f2d
               name: 'BGP peer {#BGPPEERDESC} accepted routes'
               type: SNMP_AGENT
-              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.18.1.49.1.4.{#BGPPEER}'
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.18.{#SNMPINDEX}'
               key: 'eltEsrBgp4V2PeerImpRouteCount[{#BGPPEER}]'
               history: 14d
               trends: 60d
@@ -70,10 +70,10 @@ zabbix_export:
               tags:
                 - tag: 'bgp peer'
                   value: '{#BGPPEERDESC}'
-            - uuid: 43fbccddcab24b6f8361ba347de6c880
+            - uuid: 3059f3f852cf482896df05318bb788db
               name: 'BGP peer {#BGPPEERDESC} last state change'
               type: SNMP_AGENT
-              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.17.1.49.1.4.{#BGPPEER}'
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.17.{#SNMPINDEX}'
               key: 'eltEsrBgp4V2PeerLastStateChange[{#BGPPEER}]'
               history: 14d
               trends: 60d
@@ -82,10 +82,10 @@ zabbix_export:
               tags:
                 - tag: 'bgp peer'
                   value: '{#BGPPEERDESC}'
-            - uuid: 89cb526570914dc2bd6b0238a365baf2
+            - uuid: 778ae0bd5cd548e5a2c4c6811a54d4d9
               name: 'BGP peer {#BGPPEERDESC} remote AS'
               type: SNMP_AGENT
-              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.10.1.49.1.4.{#BGPPEER}'
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.10.{#SNMPINDEX}'
               key: 'eltEsrBgp4V2PeerRemoteAs[{#BGPPEER}]'
               delay: 10m
               history: 14d
@@ -99,10 +99,10 @@ zabbix_export:
               tags:
                 - tag: 'bgp peer'
                   value: '{#BGPPEERDESC}'
-            - uuid: 7875e774f3e24adcacd696c0aed5961e
+            - uuid: 262278e4574e4641a070abbbb4982b1d
               name: 'BGP peer {#BGPPEERDESC} remote ID'
               type: SNMP_AGENT
-              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.11.1.49.1.4.{#BGPPEER}'
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.11.{#SNMPINDEX}'
               key: 'eltEsrBgp4V2PeerRemoteIdentifier[{#BGPPEER}]'
               delay: 10m
               history: 14d
@@ -116,10 +116,10 @@ zabbix_export:
               tags:
                 - tag: 'bgp peer'
                   value: '{#BGPPEERDESC}'
-            - uuid: 50fea1345ff446c1baad477ddefb6819
+            - uuid: 212044a72fce4d949d993f7841992a59
               name: 'BGP peer {#BGPPEERDESC} state'
               type: SNMP_AGENT
-              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.12.1.49.1.4.{#BGPPEER}'
+              snmp_oid: '.1.3.6.1.4.1.35265.1.147.2.4.1.3.1.1.12.{#SNMPINDEX}'
               key: 'eltEsrBgp4V2PeerState[{#BGPPEER}]'
               history: 14d
               trends: 60d
@@ -134,8 +134,8 @@ zabbix_export:
                 - tag: 'bgp peer'
                   value: '{#BGPPEERDESC}'
               trigger_prototypes:
-                - uuid: 703197a01429441eb5ff8bf2ebdeab15
-                  expression: 'last(/Module Eltex ESR BGP4 SNMPv2/eltEsrBgp4V2PeerState[{#BGPPEER}])<>6'
+                - uuid: 8bcbed1749de4b24b19d6d7a31c637e8
+                  expression: 'last(/Module Eltex ESR BGP4 SNMPv2 ver gt 1_28/eltEsrBgp4V2PeerState[{#BGPPEER}])<>6'
                   name: 'BGP session is not established with peer {#BGPPEERDESC}'
                   opdata: 'Peer IP={#BGPPEER}; Peer ID={#BGPPEERDESC}'
                   priority: AVERAGE
@@ -152,7 +152,7 @@ zabbix_export:
         - tag: target
           value: eltex-esr
       valuemaps:
-        - uuid: 64b2ca78774c452fa2097720bfb2e7d2
+        - uuid: 08859959df0e4797881ea76d2a7519eb
           name: BgpPeerState
           mappings:
             - value: '1'
@@ -167,7 +167,7 @@ zabbix_export:
               newvalue: openconfirm
             - value: '6'
               newvalue: established
-        - uuid: f690ff3c505244bdbcb310630c7dc062
+        - uuid: c115e140c32a4e3eb8ef0192766f74f6
           name: eltEsrBgp4V2PeerAdminStatus
           mappings:
             - value: '1'
