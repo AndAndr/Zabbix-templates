@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2025-04-07T09:51:46Z</date>
+    <date>2025-04-07T10:01:33Z</date>
     <groups>
         <group>
-            <name>Templates/Modules</name>
+            <name>Network</name>
         </group>
     </groups>
     <templates>
@@ -17,7 +17,7 @@
 На старых версиях прошивок ветка &quot;eltexCpuProcessesStatTable&quot; не поддерживается.</description>
             <groups>
                 <group>
-                    <name>Templates/Modules</name>
+                    <name>Network</name>
                 </group>
             </groups>
             <discovery_rules>
