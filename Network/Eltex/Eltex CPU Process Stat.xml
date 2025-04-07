@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2025-04-07T09:51:46Z</date>
+    <groups>
+        <group>
+            <name>Templates/Modules</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Eltex CPU Process Stat</template>
+            <name>Eltex CPU Process Stat</name>
+            <description>https://github.com/AndAndr&#13;
+Статистика ЦПУ для каждого активного процесса Eltex.&#13;
+Тестировалось на ESR версии 1.28.1.&#13;
+На старых версиях прошивок ветка &quot;eltexCpuProcessesStatTable&quot; не поддерживается.</description>
+            <groups>
+                <group>
+                    <name>Templates/Modules</name>
+                </group>
+            </groups>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Eltex CPU Processes</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>discovery[{#SNMPVALUE},.1.3.6.1.4.1.35265.38.130.1.1.3]</snmp_oid>
+                    <key>eltexCpuProcessStatNameDiscovery</key>
+                    <delay>30m</delay>
+                    <description>Обнаружение процессов</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>CPU1m {#SNMPVALUE}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.38.130.1.1.5.{#SNMPINDEX}</snmp_oid>
+                            <key>eltexCpuProcessStatCpu1m[{#SNMPVALUE}]</key>
+                            <units>%</units>
+                            <description>The total percentage of CPU usage by the running process in the last 1 minute period.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>CPU Processes</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>StatMem {#SNMPVALUE}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.38.130.1.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>eltexCpuProcessStatMem[{#SNMPVALUE}]</key>
+                            <units>%</units>
+                            <description>The memory of a process.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>CPU Processes</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>PID {#SNMPVALUE}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.38.130.1.1.2.{#SNMPINDEX}</snmp_oid>
+                            <key>eltexCpuProcessStatPid[{#SNMPVALUE}]</key>
+                            <delay>3m</delay>
+                            <description>The PID of a process</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>CPU Processes</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>ProcessStatTime {#SNMPVALUE}</name>
+                            <type>SNMPV2</type>
+                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <snmp_oid>.1.3.6.1.4.1.35265.38.130.1.1.8.{#SNMPINDEX}</snmp_oid>
+                            <key>eltexCpuProcessStatTime[{#SNMPVALUE}]</key>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <description>Amount of time that a process has been scheduled in kernel and user modes (in seconds).</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>CPU Processes</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+</zabbix_export>

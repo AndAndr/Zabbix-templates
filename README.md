@@ -26,6 +26,7 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 **Eltex SBC** Шаблон Zabbix 7.2 для мониторинга функционала SBC Eltex по SNMPv2.
 
+**Eltex** Прочие шаблоны для мониторинга Eltex.
 
 
 ## Other_hardware
