@@ -9,9 +9,9 @@ zabbix_export:
       name: 'UserGateUTM by SNMPv2'
       description: |
         https://github.com/AndAndr
+        Шаблон для Usergate UTM с поддержкой трапов.
         Часть триггеров уровня инф. закрываются сами через 5 минут (см. макрос {$TRAPPEDTRIGGER_TTL}), остальные критичные - закрываются вручную, но не ранее значения этого макроса.
         Howto:
-         Выполнить импорт файлов .mib.
          Импортировать и прикрепить шаблон к хосту.
          Настроить устройство на отправку трапов, разрешить SNMP-запросы.
          Настроить отправку всех событий, кроме событий сработки правил МЭ.
@@ -99,13 +99,37 @@ zabbix_export:
                   value: capacity
                 - tag: scope
                   value: performance
+        - uuid: 64f4298d37534461bc330930f807cafb
+          name: trapAttackDetected
+          type: SNMP_TRAP
+          key: 'snmptrap[.*trapAttackDetected|.*45741\.2\.10\.1\.3\.1]'
+          delay: '0'
+          history: 2w
+          value_type: TEXT
+          trends: '0'
+          description: 'Notification about IDPS attack'
+          tags:
+            - tag: component
+              value: idps
+          triggers:
+            - uuid: 93964985487640e99a1c8dcf47484e04
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapAttackDetected|.*45741\.2\.10\.1\.3\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: Notification about IDPS attack'
+              priority: INFO
+              description: 'Notification about IDPS attack'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
         - uuid: ff6d805e02bb4c8e818b68516923fb4f
           name: trapCableStatus
           type: SNMP_TRAP
-          key: 'snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7$]'
+          key: 'snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Cable was plugged/unplugged from interface'
           tags:
@@ -115,48 +139,23 @@ zabbix_export:
               value: network
           triggers:
             - uuid: 448d30a764b04558844a23fe7d304bd2
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7$],{$TRAPPEDTRIGGER_TTL})=0'
-              recovery_mode: NONE
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7],{$TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMPTrap: Cable was plugged/unplugged'
-              priority: AVERAGE
+              priority: INFO
               description: 'Cable was plugged/unplugged from interface'
               manual_close: 'YES'
               tags:
                 - tag: scope
                   value: availability
-        - uuid: 64f4298d37534461bc330930f807cafb
-          name: trapAttackDetected
-          type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapAttackDetected|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.3\.1]'
-          delay: '0'
-          history: 2w
-          value_type: LOG
-          trends: '0'
-          description: 'Notification about IDPS attack'
-          tags:
-            - tag: component
-              value: idps
-          triggers:
-            - uuid: 93964985487640e99a1c8dcf47484e04
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapAttackDetected|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.3\.1],{$TRAPPEDTRIGGER_TTL})=0'
-              recovery_mode: NONE
-              name: 'SNMPTrap: Notification about IDPS attack'
-              opdata: 'Проверь, если ОК - закрой вручную.'
-              priority: WARNING
-              description: 'Notification about IDPS attack'
-              manual_close: 'YES'
-              tags:
                 - tag: scope
                   value: notice
-                - tag: scope
-                  value: security
         - uuid: 5b77ca0775f34755bd73033fc390c552
           name: trapChecksumFailed
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapChecksumFailed|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.1]'
+          key: 'snmptrap[.*trapChecksumFailed|.*45741\.2\.10\.1\.4\.1]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Some files checksum failed'
           tags:
@@ -164,7 +163,7 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 23b7d003de9e4256a3ffe815750a3a4f
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapChecksumFailed|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapChecksumFailed|.*45741\.2\.10\.1\.4\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: Files checksum failed'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -177,10 +176,10 @@ zabbix_export:
         - uuid: 2a1027fe952b4ae981ef909111b5456c
           name: trapCoreBootstrapEnd
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapCoreBootstrapEnd|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.3]'
+          key: 'snmptrap[.*trapCoreBootstrapEnd|.*45741\.2\.10\.1\.1\.3]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Notification about utm-core boot finished'
           tags:
@@ -188,7 +187,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: bd9e86dbbace483ba0c1d01ee2b7ef20
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapCoreBootstrapEnd|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.3],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapCoreBootstrapEnd|.*45741\.2\.10\.1\.1\.3],{$TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMPTrap: Utm-core boot finished'
               priority: INFO
               description: 'Notification about utm-core boot finished'
@@ -199,10 +198,10 @@ zabbix_export:
         - uuid: 118a213b2795455193e9b6aaa93e80b2
           name: trapCoreCrush
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapCoreCrush|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.1]'
+          key: 'snmptrap[.*trapCoreCrush|.*45741\.2\.10\.1\.1\.1]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Notification about core crushing'
           tags:
@@ -210,7 +209,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 555bf01f1ee347dbb1d1e21a664be255
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapCoreCrush|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapCoreCrush|.*45741\.2\.10\.1\.1\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: Core crushing'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -223,10 +222,10 @@ zabbix_export:
         - uuid: 6572bcd138724c0a8ab938d98ef378f9
           name: trapDefaultGatewayChanged
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapDefaultGatewayChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.4]'
+          key: 'snmptrap[.*trapDefaultGatewayChanged|.*45741\.2\.10\.1\.1\.4]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Default gateway IP changed'
           tags:
@@ -234,7 +233,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: ac2f3bd5e21c44429e288aba5b096d81
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapDefaultGatewayChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.4],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapDefaultGatewayChanged|.*45741\.2\.10\.1\.1\.4],{$TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMPTrap: Default gateway IP changed'
               priority: INFO
               description: 'Default gateway IP changed'
@@ -245,10 +244,10 @@ zabbix_export:
         - uuid: 60656bde006e4d439680a3367fb91ec9
           name: trapHighCPUUsage
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapHighCPUUsage|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.2]'
+          key: 'snmptrap[.*trapHighCPUUsage|.*45741\.2\.10\.1\.4\.2]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'High CPU usage notification'
           tags:
@@ -256,21 +255,23 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 169f438ba021440e98816de0a6c1c757
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapHighCPUUsage|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.2],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapHighCPUUsage|.*45741\.2\.10\.1\.4\.2],{$TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMPTrap: High CPU usage notification'
-              priority: WARNING
+              priority: INFO
               description: 'High CPU usage notification'
               manual_close: 'YES'
               tags:
+                - tag: scope
+                  value: notice
                 - tag: scope
                   value: performance
         - uuid: e910295d60784381b361ab8f2caa70a6
           name: trapHighSessionsCounter
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapHighSessionsCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.5]'
+          key: 'snmptrap[.*trapHighSessionsCounter|.*45741\.2\.10\.1\.1\.5]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Active sessions number are near the limit'
           tags:
@@ -278,21 +279,23 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 40d8ef3413fc436c970d4e45fa6b2348
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapHighSessionsCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.5],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapHighSessionsCounter|.*45741\.2\.10\.1\.1\.5],{$TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMPTrap: Active sessions number are near the limit'
-              priority: WARNING
+              priority: INFO
               description: 'Active sessions number are near the limit'
               manual_close: 'YES'
               tags:
                 - tag: scope
                   value: availability
+                - tag: scope
+                  value: notice
         - uuid: 4eb71f29f15b452f90307cf91ce5ee10
           name: trapHighUsersCounter
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapHighUsersCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.6]'
+          key: 'snmptrap[.*trapHighUsersCounter|.*45741\.2\.10\.1\.1\.6]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Active users number are near the limit'
           tags:
@@ -300,21 +303,23 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 4a6fc9efb94f4e2783b27e0bb4cd63f7
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapHighUsersCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.6],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapHighUsersCounter|.*45741\.2\.10\.1\.1\.6],{$TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMPTrap: Active users number are near the limit'
-              priority: WARNING
+              priority: INFO
               description: 'Active users number are near the limit'
               manual_close: 'YES'
               tags:
                 - tag: scope
                   value: availability
+                - tag: scope
+                  value: notice
         - uuid: cdac452c4e694181ab69879a6e82d4f5
           name: trapLDAPServerDown
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapLDAPServerDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.6\.1]'
+          key: 'snmptrap[.*trapLDAPServerDown|.*45741\.2\.10\.1\.6\.1]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'LDAP Server is not responding'
           tags:
@@ -324,7 +329,7 @@ zabbix_export:
               value: network
           triggers:
             - uuid: 364faa824eb544b79d5933e92cecc240
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapLDAPServerDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.6\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapLDAPServerDown|.*45741\.2\.10\.1\.6\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: LDAP Server is not responding'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -337,10 +342,10 @@ zabbix_export:
         - uuid: 17de35e59dac40e99e6545d72e30c5e5
           name: trapLowLogdiskSpace
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapLowLogdiskSpace|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.4]'
+          key: 'snmptrap[.*trapLowLogdiskSpace|.*45741\.2\.10\.1\.4\.4]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Low log disk space notification'
           tags:
@@ -348,7 +353,7 @@ zabbix_export:
               value: device
           triggers:
             - uuid: cb38a4dd59e04beea4fbfb0a469a7230
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapLowLogdiskSpace|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.4],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapLowLogdiskSpace|.*45741\.2\.10\.1\.4\.4],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: Low log disk space'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -363,10 +368,10 @@ zabbix_export:
         - uuid: 889bcb0f64394713bf2f251b48a26e5e
           name: trapLowMemory
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapLowMemory|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.3]'
+          key: 'snmptrap[.*trapLowMemory|.*45741\.2\.10\.1\.4\.3]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Low memory notification'
           tags:
@@ -374,7 +379,7 @@ zabbix_export:
               value: device
           triggers:
             - uuid: adffd1272d2a4b6c8cfc6f4229d97191
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapLowMemory|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.3],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapLowMemory|.*45741\.2\.10\.1\.4\.3],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: Low memory'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -389,10 +394,10 @@ zabbix_export:
         - uuid: 87613e4123a344df824311090478da40
           name: trapMemberDown
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapMemberDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.3]'
+          key: 'snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'HA cluster node offline'
           tags:
@@ -400,32 +405,12 @@ zabbix_export:
               value: 'ha cluster'
           triggers:
             - uuid: 9bfbae0121ea409bad915546322a10c8
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapMemberDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.3],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","10.1.2.3")=1 or find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","trapMemberDown")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","10.1.2.2")=1 or find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","trapMemberUp")=1'
               name: 'SNMPTrap: HA cluster node offline'
-              priority: AVERAGE
+              priority: WARNING
               description: 'HA cluster node offline'
-              manual_close: 'YES'
-              tags:
-                - tag: scope
-                  value: availability
-        - uuid: 15bbd01f7fac49978f4e3b45ed548e21
-          name: trapMemberUp
-          type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapMemberUp|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.2]'
-          delay: '0'
-          history: 2w
-          value_type: LOG
-          trends: '0'
-          description: 'HA cluster node online'
-          tags:
-            - tag: component
-              value: 'ha cluster'
-          triggers:
-            - uuid: ab6fff1abd8741c5aa56cd83a4de0440
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapMemberUp|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.2],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: HA cluster node online'
-              priority: INFO
-              description: 'HA cluster node online'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -433,10 +418,10 @@ zabbix_export:
         - uuid: eae4da488b2a414d9f86705bb0a769ef
           name: trapPowerSupply
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapPowerSupply|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.6]'
+          key: 'snmptrap[.*trapPowerSupply|.*45741\.2\.10\.1\.4\.6]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Power supply unit 1 switched off'
           tags:
@@ -444,7 +429,7 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 7cf3c083cfa441948fda25ea922eda7a
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapPowerSupply|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.6],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapPowerSupply|.*45741\.2\.10\.1\.4\.6],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: Power supply unit switched off'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -459,10 +444,10 @@ zabbix_export:
         - uuid: ec09cc3d8a444e099b55f0cff52ea258
           name: trapRaidStatus
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapRaidStatus|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.5]'
+          key: 'snmptrap[.*trapRaidStatus|.*45741\.2\.10\.1\.4\.5]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Raid status is changed'
           tags:
@@ -470,7 +455,7 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 54dc57f76b6340cb91e15195bbcb456b
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapRaidStatus|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.5],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapRaidStatus|.*45741\.2\.10\.1\.4\.5],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: Raid status is changed'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -483,10 +468,10 @@ zabbix_export:
         - uuid: a973d96908fa4d9eab8ec321b7b9ca16
           name: trapStatDown
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapStatDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.2]'
+          key: 'snmptrap[.*trapStatDown|.*45741\.2\.10\.1\.1\.2]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Notification about statistics server shutting down'
           tags:
@@ -496,7 +481,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: d946e3539c43466ab3807dba0e0e0cfa
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapStatDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.2],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapStatDown|.*45741\.2\.10\.1\.1\.2],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: Notification about statistics server shutting down'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -511,10 +496,10 @@ zabbix_export:
         - uuid: 8999e8e99b7e4f1ea731461f27d48af6
           name: trapStatusChanged
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapStatusChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.1]'
+          key: 'snmptrap[.*trapStatusChanged|.*45741\.2\.10\.1\.2\.1]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'HA cluster node status changed notification'
           tags:
@@ -522,7 +507,7 @@ zabbix_export:
               value: 'ha cluster'
           triggers:
             - uuid: 855749cbdf5e4aef83a6820c638f7cf1
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapStatusChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapStatusChanged|.*45741\.2\.10\.1\.2\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
               name: 'SNMPTrap: HA cluster node status changed'
               opdata: 'Проверь, если ОК - закрой вручную.'
@@ -535,10 +520,10 @@ zabbix_export:
         - uuid: 3d285b34e5a946e8bcd7878a0718ec16
           name: trapTrafficDrop
           type: SNMP_TRAP
-          key: 'snmptrap[UTM-TRAPS-MIB::trapTrafficDrop|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.5\.1]'
+          key: 'snmptrap[.*trapTrafficDrop|.*45741\.2\.10\.1\.5\.1]'
           delay: '0'
           history: 2w
-          value_type: LOG
+          value_type: TEXT
           trends: '0'
           description: 'Firewall DENY rule triggered'
           tags:
@@ -548,7 +533,7 @@ zabbix_export:
               value: traffic
           triggers:
             - uuid: 23ebd9b08a5444a7a0470e1fb7c1319b
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[UTM-TRAPS-MIB::trapTrafficDrop|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.5\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapTrafficDrop|.*45741\.2\.10\.1\.5\.1],{$TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMPTrap: Firewall DENY rule triggered on'
               priority: INFO
               description: 'Сработало запрещающее правило межсетевого экрана.'

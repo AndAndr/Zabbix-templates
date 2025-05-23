@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2025-05-23T10:01:30Z</date>
+    <date>2025-05-23T12:04:21Z</date>
     <groups>
         <group>
             <name>Templates/Network devices</name>
@@ -206,7 +206,7 @@
                     <delay>0</delay>
                     <history>7d</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <applications>
                         <application>
                             <name>Traps</name>
@@ -216,9 +216,9 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Unknown event on {HOST.NAME}</name>
-                            <opdata>SNMPTrap: Неизвестное событие</opdata>
+                            <name>SNMPTrap: Unknown event.</name>
                             <priority>AVERAGE</priority>
+                            <description>Неизвестное событие.</description>
                             <manual_close>YES</manual_close>
                         </trigger>
                     </triggers>
@@ -240,10 +240,8 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Notification about IDPS attack on {HOST.NAME}</name>
-                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
-                            <priority>WARNING</priority>
+                            <name>SNMPTrap: Notification about IDPS attack.</name>
+                            <priority>INFO</priority>
                             <description>Notification about IDPS attack</description>
                             <manual_close>YES</manual_close>
                         </trigger>
@@ -266,9 +264,8 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Cable was plugged/unplugged on {HOST.NAME}</name>
-                            <priority>AVERAGE</priority>
+                            <name>SNMPTrap: Cable was plugged/unplugged on.</name>
+                            <priority>INFO</priority>
                             <description>Cable was plugged/unplugged from interface</description>
                             <manual_close>YES</manual_close>
                         </trigger>
@@ -292,7 +289,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Files checksum failed on {HOST.NAME}</name>
+                            <name>SNMPTrap: Files checksum failed.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>AVERAGE</priority>
                             <description>Some files checksum failed</description>
@@ -317,7 +314,7 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: Utm-core boot finished on {HOST.NAME}</name>
+                            <name>SNMPTrap: Utm-core boot finished.</name>
                             <priority>INFO</priority>
                             <description>Notification about utm-core boot finished</description>
                             <manual_close>YES</manual_close>
@@ -342,7 +339,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Core crushing on {HOST.NAME}</name>
+                            <name>SNMPTrap: Core crushing.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>HIGH</priority>
                             <description>Notification about core crushing</description>
@@ -367,7 +364,7 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: Default gateway IP changed on {HOST.NAME}</name>
+                            <name>SNMPTrap: Default gateway IP changed.</name>
                             <priority>INFO</priority>
                             <description>Default gateway IP changed</description>
                             <manual_close>YES</manual_close>
@@ -391,8 +388,8 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: High CPU usage notification on {HOST.NAME}</name>
-                            <priority>WARNING</priority>
+                            <name>SNMPTrap: High CPU usage notification.</name>
+                            <priority>INFO</priority>
                             <description>High CPU usage notification</description>
                             <manual_close>YES</manual_close>
                         </trigger>
@@ -415,8 +412,8 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: Active sessions number are near the limit on {HOST.NAME}</name>
-                            <priority>WARNING</priority>
+                            <name>SNMPTrap: Active sessions number are near the limit.</name>
+                            <priority>INFO</priority>
                             <description>Active sessions number are near the limit</description>
                             <manual_close>YES</manual_close>
                         </trigger>
@@ -439,8 +436,8 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: Active users number are near the limit on {HOST.NAME}</name>
-                            <priority>WARNING</priority>
+                            <name>SNMPTrap: Active users number are near the limit.</name>
+                            <priority>INFO</priority>
                             <description>Active users number are near the limit</description>
                             <manual_close>YES</manual_close>
                         </trigger>
@@ -464,7 +461,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: LDAP Server is not responding on {HOST.NAME}</name>
+                            <name>SNMPTrap: LDAP Server is not responding.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>WARNING</priority>
                             <description>LDAP Server is not responding</description>
@@ -490,7 +487,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Low log disk space on {HOST.NAME}</name>
+                            <name>SNMPTrap: Low log disk space.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>AVERAGE</priority>
                             <description>Low log disk space notification</description>
@@ -516,7 +513,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Low memory on {HOST.NAME}</name>
+                            <name>SNMPTrap: Low memory.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>AVERAGE</priority>
                             <description>Low memory notification</description>
@@ -527,7 +524,7 @@
                 <item>
                     <name>trapMemberDown</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[.*trapMemberDown|.*45741\.2\.10\.1\.2\.3]</key>
+                    <key>snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
@@ -540,34 +537,12 @@
                     </applications>
                     <triggers>
                         <trigger>
-                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: HA cluster node offline on {HOST.NAME}</name>
-                            <priority>AVERAGE</priority>
+                            <expression>{str(10.1.2.3,#1)}=1 or {str(trapMemberDown,#1)}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(10.1.2.2,#1)}=1 or {str(trapMemberUp,#1)}=1</recovery_expression>
+                            <name>SNMPTrap: HA cluster node offline.</name>
+                            <priority>WARNING</priority>
                             <description>HA cluster node offline</description>
-                            <manual_close>YES</manual_close>
-                        </trigger>
-                    </triggers>
-                </item>
-                <item>
-                    <name>trapMemberUp</name>
-                    <type>SNMP_TRAP</type>
-                    <key>snmptrap[.*trapMemberUp|.*45741\.2\.10\.1\.2\.2]</key>
-                    <delay>0</delay>
-                    <history>2w</history>
-                    <trends>0</trends>
-                    <value_type>TEXT</value_type>
-                    <description>HA cluster node online</description>
-                    <applications>
-                        <application>
-                            <name>Traps</name>
-                        </application>
-                    </applications>
-                    <triggers>
-                        <trigger>
-                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: HA cluster node online on {HOST.NAME}</name>
-                            <priority>INFO</priority>
-                            <description>HA cluster node online</description>
                             <manual_close>YES</manual_close>
                         </trigger>
                     </triggers>
@@ -590,7 +565,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Power supply unit switched off on {HOST.NAME}</name>
+                            <name>SNMPTrap: Power supply unit switched off.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>AVERAGE</priority>
                             <description>Power supply unit switched off</description>
@@ -616,7 +591,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Raid status is changed on {HOST.NAME}</name>
+                            <name>SNMPTrap: Raid status is changed.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>AVERAGE</priority>
                             <description>Raid status is changed</description>
@@ -642,7 +617,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Notification about statistics server shutting down on {HOST.NAME}</name>
+                            <name>SNMPTrap: Notification about statistics server shutting down.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>AVERAGE</priority>
                             <description>Notification about statistics server shutting down</description>
@@ -668,7 +643,7 @@
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
                             <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: HA cluster node status changed on {HOST.NAME}</name>
+                            <name>SNMPTrap: HA cluster node status changed.</name>
                             <opdata>Проверь, если ОК - закрой вручную.</opdata>
                             <priority>AVERAGE</priority>
                             <description>HA cluster node status changed notification</description>
@@ -693,7 +668,7 @@
                     <triggers>
                         <trigger>
                             <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <name>SNMPTrap: Firewall DENY rule triggered on {HOST.NAME}</name>
+                            <name>SNMPTrap: Firewall DENY rule triggered.</name>
                             <priority>INFO</priority>
                             <description>Сработало запрещающее правило межсетевого экрана.</description>
                             <manual_close>YES</manual_close>
