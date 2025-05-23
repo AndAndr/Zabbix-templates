@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2025-02-03T08:56:01Z</date>
+    <date>2025-05-23T10:01:30Z</date>
     <groups>
         <group>
             <name>Templates/Network devices</name>
@@ -11,12 +11,8 @@
         <template>
             <template>Template UserGateUTM</template>
             <name>Template UserGateUTM</name>
-            <description>https://github.com/AndAndr</description>
-            <templates>
-                <template>
-                    <name>Template Module ICMP Ping</name>
-                </template>
-            </templates>
+            <description>https://github.com/AndAndr&#13;
+Мониторинг Usergate D200 SNMPv2.</description>
             <groups>
                 <group>
                     <name>Templates/Network devices</name>
@@ -25,6 +21,9 @@
             <applications>
                 <application>
                     <name>Interface(s)</name>
+                </application>
+                <application>
+                    <name>Status</name>
                 </application>
                 <application>
                     <name>System</name>
@@ -57,6 +56,89 @@
                             <recovery_expression>{max(5m)}&lt;{$CPU_USED_MAX}-5</recovery_expression>
                             <name>CPU load is too high!</name>
                             <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP ping</name>
+                    <type>SIMPLE</type>
+                    <key>icmpping</key>
+                    <history>1w</history>
+                    <trends>20d</trends>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{max(#3)}=0</expression>
+                            <name>Unavailable by ICMP ping</name>
+                            <priority>WARNING</priority>
+                            <description>Last three attempts returned timeout.  Please check device connectivity.</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP loss</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingloss</key>
+                    <history>1w</history>
+                    <trends>20d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{min(5m)}&gt;{$ICMP_LOSS_WARN} and {min(5m)}&lt;100</expression>
+                            <name>High ICMP ping loss</name>
+                            <opdata>Loss: {ITEM.LASTVALUE1}</opdata>
+                            <priority>INFO</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{Template UserGateUTM:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP response time</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingsec</key>
+                    <history>1w</history>
+                    <trends>20d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>s</units>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{avg(5m)}&gt;{$ICMP_RESPONSE_TIME_WARN}</expression>
+                            <name>High ICMP ping response time</name>
+                            <opdata>Value: {ITEM.LASTVALUE1}</opdata>
+                            <priority>INFO</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>High ICMP ping loss</name>
+                                    <expression>{Template UserGateUTM:icmppingloss.min(5m)}&gt;{$ICMP_LOSS_WARN} and {Template UserGateUTM:icmppingloss.min(5m)}&lt;100</expression>
+                                </dependency>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{Template UserGateUTM:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
                         </trigger>
                     </triggers>
                 </item>
@@ -142,9 +224,35 @@
                     </triggers>
                 </item>
                 <item>
+                    <name>trapAttackDetected</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[.*trapAttackDetected|.*45741\.2\.10\.1\.3\.1]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>Notification about IDPS attack</description>
+                    <applications>
+                        <application>
+                            <name>Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMPTrap: Notification about IDPS attack on {HOST.NAME}</name>
+                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
+                            <priority>WARNING</priority>
+                            <description>Notification about IDPS attack</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
                     <name>trapCableStatus</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7$]</key>
+                    <key>snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
@@ -167,39 +275,13 @@
                     </triggers>
                 </item>
                 <item>
-                    <name>trapAttackDetected</name>
-                    <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapAttackDetected|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.3\.1]</key>
-                    <delay>0</delay>
-                    <history>2w</history>
-                    <trends>0</trends>
-                    <value_type>LOG</value_type>
-                    <description>Notification about IDPS attack</description>
-                    <applications>
-                        <application>
-                            <name>Traps</name>
-                        </application>
-                    </applications>
-                    <triggers>
-                        <trigger>
-                            <expression>{nodata({$TRAPPEDTRIGGER_TTL})}=0</expression>
-                            <recovery_mode>NONE</recovery_mode>
-                            <name>SNMPTrap: Notification about IDPS attack on {HOST.NAME}</name>
-                            <opdata>Проверь, если ОК - закрой вручную.</opdata>
-                            <priority>WARNING</priority>
-                            <description>Notification about IDPS attack</description>
-                            <manual_close>YES</manual_close>
-                        </trigger>
-                    </triggers>
-                </item>
-                <item>
                     <name>trapChecksumFailed</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapChecksumFailed|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.1]</key>
+                    <key>snmptrap[.*trapChecksumFailed|.*45741\.2\.10\.1\.4\.1]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Some files checksum failed</description>
                     <applications>
                         <application>
@@ -221,11 +303,11 @@
                 <item>
                     <name>trapCoreBootstrapEnd</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapCoreBootstrapEnd|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.3]</key>
+                    <key>snmptrap[.*trapCoreBootstrapEnd|.*45741\.2\.10\.1\.1\.3]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Notification about utm-core boot finished</description>
                     <applications>
                         <application>
@@ -245,11 +327,11 @@
                 <item>
                     <name>trapCoreCrush</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapCoreCrush|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.1]</key>
+                    <key>snmptrap[.*trapCoreCrush|.*45741\.2\.10\.1\.1\.1]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Notification about core crushing</description>
                     <applications>
                         <application>
@@ -271,11 +353,11 @@
                 <item>
                     <name>trapDefaultGatewayChanged</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapDefaultGatewayChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.4]</key>
+                    <key>snmptrap[.*trapDefaultGatewayChanged|.*45741\.2\.10\.1\.1\.4]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Default gateway IP changed</description>
                     <applications>
                         <application>
@@ -295,11 +377,11 @@
                 <item>
                     <name>trapHighCPUUsage</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapHighCPUUsage|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.2]</key>
+                    <key>snmptrap[.*trapHighCPUUsage|.*45741\.2\.10\.1\.4\.2]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>High CPU usage notification</description>
                     <applications>
                         <application>
@@ -319,11 +401,11 @@
                 <item>
                     <name>trapHighSessionsCounter</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapHighSessionsCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.5]</key>
+                    <key>snmptrap[.*trapHighSessionsCounter|.*45741\.2\.10\.1\.1\.5]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Active sessions number are near the limit</description>
                     <applications>
                         <application>
@@ -343,11 +425,11 @@
                 <item>
                     <name>trapHighUsersCounter</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapHighUsersCounter|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.6]</key>
+                    <key>snmptrap[.*trapHighUsersCounter|.*45741\.2\.10\.1\.1\.6]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Active users number are near the limit</description>
                     <applications>
                         <application>
@@ -367,11 +449,11 @@
                 <item>
                     <name>trapLDAPServerDown</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapLDAPServerDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.6\.1]</key>
+                    <key>snmptrap[.*trapLDAPServerDown|.*45741\.2\.10\.1\.6\.1]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>LDAP Server is not responding</description>
                     <applications>
                         <application>
@@ -393,11 +475,11 @@
                 <item>
                     <name>trapLowLogdiskSpace</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapLowLogdiskSpace|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.4]</key>
+                    <key>snmptrap[.*trapLowLogdiskSpace|.*45741\.2\.10\.1\.4\.4]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Low log disk space notification</description>
                     <applications>
                         <application>
@@ -419,11 +501,11 @@
                 <item>
                     <name>trapLowMemory</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapLowMemory|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.3]</key>
+                    <key>snmptrap[.*trapLowMemory|.*45741\.2\.10\.1\.4\.3]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Low memory notification</description>
                     <applications>
                         <application>
@@ -445,11 +527,11 @@
                 <item>
                     <name>trapMemberDown</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapMemberDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.3]</key>
+                    <key>snmptrap[.*trapMemberDown|.*45741\.2\.10\.1\.2\.3]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>HA cluster node offline</description>
                     <applications>
                         <application>
@@ -469,11 +551,11 @@
                 <item>
                     <name>trapMemberUp</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapMemberUp|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.2]</key>
+                    <key>snmptrap[.*trapMemberUp|.*45741\.2\.10\.1\.2\.2]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>HA cluster node online</description>
                     <applications>
                         <application>
@@ -493,11 +575,11 @@
                 <item>
                     <name>trapPowerSupply</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapPowerSupply|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.6]</key>
+                    <key>snmptrap[.*trapPowerSupply|.*45741\.2\.10\.1\.4\.6]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Power supply unit 1 switched off</description>
                     <applications>
                         <application>
@@ -519,11 +601,11 @@
                 <item>
                     <name>trapRaidStatus</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapRaidStatus|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.4\.5]</key>
+                    <key>snmptrap[.*trapRaidStatus|.*45741\.2\.10\.1\.4\.5]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Raid status is changed</description>
                     <applications>
                         <application>
@@ -545,11 +627,11 @@
                 <item>
                     <name>trapStatDown</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapStatDown|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.1\.2]</key>
+                    <key>snmptrap[.*trapStatDown|.*45741\.2\.10\.1\.1\.2]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Notification about statistics server shutting down</description>
                     <applications>
                         <application>
@@ -571,11 +653,11 @@
                 <item>
                     <name>trapStatusChanged</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapStatusChanged|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.2\.1]</key>
+                    <key>snmptrap[.*trapStatusChanged|.*45741\.2\.10\.1\.2\.1]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>HA cluster node status changed notification</description>
                     <applications>
                         <application>
@@ -597,11 +679,11 @@
                 <item>
                     <name>trapTrafficDrop</name>
                     <type>SNMP_TRAP</type>
-                    <key>snmptrap[UTM-TRAPS-MIB::trapTrafficDrop|SNMPv2-SMI::enterprises\.45741\.2\.10\.1\.5\.1]</key>
+                    <key>snmptrap[.*trapTrafficDrop|.*45741\.2\.10\.1\.5\.1]</key>
                     <delay>0</delay>
                     <history>2w</history>
                     <trends>0</trends>
-                    <value_type>LOG</value_type>
+                    <value_type>TEXT</value_type>
                     <description>Firewall DENY rule triggered</description>
                     <applications>
                         <application>
@@ -1108,6 +1190,19 @@
         </graph>
     </graphs>
     <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
         <value_map>
             <name>SNMP interface status (ifAdminStatus)</name>
             <mappings>
