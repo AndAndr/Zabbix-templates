@@ -46,6 +46,8 @@ Collecting data from **"selected source"** of `ntpq -p` output.
 
 **NVS** SNMP Мониторинг сервера времени NVS-GNSS для Zabbix 7.0.
 
+**SensatronicsEM1** Мониторинг по SNMPv1 контроллера температуры/влажности Sensatronics EM1. Для Zabbix 4.4.
+
 
 
 ## SAN
