@@ -26,6 +26,7 @@ zabbix_export:
           name: 'Chrony "current best"'
           key: 'system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*'']'
           delay: 5m
+          history: 60d
           value_type: CHAR
           trends: '0'
           preprocessing:
@@ -41,7 +42,7 @@ zabbix_export:
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: 'find(/Chrony by Zabbix agent/system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*''],,"like","nobest")=0'
               name: 'No "current best" is selected'
-              priority: WARNING
+              priority: AVERAGE
               tags:
                 - tag: scope
                   value: notice
@@ -110,7 +111,7 @@ zabbix_export:
                   value: '{#ADDRESS}'
               trigger_prototypes:
                 - uuid: a288481b8e564e8f98b548214d832c2f
-                  expression: 'last(/Chrony by Zabbix agent/leapstatus.[{#ADDRESS}])=3'
+                  expression: 'last(/Chrony by Zabbix agent/leapstatus.[{#ADDRESS}])=4'
                   name: 'Chrony: Leap second parse error for {#ADDRESS}'
                   priority: WARNING
                   tags:
@@ -310,8 +311,8 @@ zabbix_export:
                       value: availability
                 - uuid: bf4fdff555ab447a8710d2c4ff671366
                   expression: 'last(/Chrony by Zabbix agent/offset.[{#ADDRESS}])>{$CHRONY.MAX.OFFSET} or last(/Chrony by Zabbix agent/offset.[{#ADDRESS}])<-{$CHRONY.MAX.OFFSET}'
-                  name: 'Chrony: Offset is hoo high for {#ADDRESS}'
-                  priority: WARNING
+                  name: 'Chrony: Offset is too high for {#ADDRESS}'
+                  priority: INFO
                   tags:
                     - tag: scope
                       value: notice
@@ -428,8 +429,8 @@ zabbix_export:
               trigger_prototypes:
                 - uuid: c60e572ddcae40a99e7229fdac3474cd
                   expression: 'last(/Chrony by Zabbix agent/root.dispersion.[{#ADDRESS}])>{$CHRONY.MAX.ROOT.DISP}'
-                  name: 'Chrony: Root dispersion is hoo high for {#ADDRESS}'
-                  priority: WARNING
+                  name: 'Chrony: Root dispersion is too high for {#ADDRESS}'
+                  priority: INFO
                   tags:
                     - tag: scope
                       value: notice
@@ -461,7 +462,7 @@ zabbix_export:
                   value: '{#ADDRESS}'
               trigger_prototypes:
                 - uuid: 802d4184c7034bd7a171bda557852f96
-                  expression: 'last(/Chrony by Zabbix agent/stratum.[{#ADDRESS}])>{$CHRONY.STRATUM.THRESHOLD}'
+                  expression: 'last(/Chrony by Zabbix agent/stratum.[{#ADDRESS}],#1)>{$CHRONY.STRATUM.THRESHOLD} and last(/Chrony by Zabbix agent/stratum.[{#ADDRESS}],#2)>{$CHRONY.STRATUM.THRESHOLD}'
                   name: 'Chrony: Stratum too low {#ADDRESS}'
                   priority: HIGH
                   tags:
@@ -634,7 +635,7 @@ zabbix_export:
           value: '30'
           description: ms
         - macro: '{$CHRONY.MAX.ROOT.DISP}'
-          value: '10'
+          value: '15'
           description: ms
         - macro: '{$CHRONY.MAX.TX.GOODRX.DIFF}'
           value: '10'
