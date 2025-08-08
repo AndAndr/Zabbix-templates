@@ -1,0 +1,1651 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: c1a25fc5beb6433d8338017a3b063be7
+      template: 'Eltex MES by SNMP export'
+      name: 'Eltex MES by SNMP export'
+      description: |
+        https://github.com/AndAndr
+        Шаблон для коммутаторов Eltex серии MES
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: 59a2011a71564b9785afef1caf50b349
+          name: 'Memory Utilization Free'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.7.0
+          key: eltexProcessMemoryFree
+          delay: 5m
+          history: 2w
+          trends: 30d
+          status: DISABLED
+          units: b
+          description: 'The overall CPU wide system memory which is currently free in bytes.'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 3a9c2ffab2bc43fb8e7c52cf207c553c
+          name: 'Memory Utilization Free Percent'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.6.0
+          key: eltexProcessMemoryFreePercent
+          delay: 5m
+          history: 2w
+          trends: 30d
+          units: '%'
+          description: 'The overall CPU wide system memory which is currently free in percents.'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 02736aaf22344f99ab42d2f47e5bf74f
+              expression: 'last(/Eltex MES by SNMP export/eltexProcessMemoryFreePercent)>{$MEM.MAX.USAGE}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Eltex MES by SNMP export/eltexProcessMemoryFreePercent)<{$MEM.MAX.USAGE}-5'
+              name: 'High memory usage'
+              opdata: 'Memory Usage: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: capacity
+                - tag: scope
+                  value: performance
+        - uuid: c7f56fd3f3464db1b5cbb09ffe93ff0c
+          name: 'Memory Total'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.3.0
+          key: eltexProcessMemoryTotal
+          delay: 5m
+          history: 2w
+          trends: 30d
+          status: DISABLED
+          units: b
+          description: 'The overall CPU wide system memory size which is currently in system.'
+          tags:
+            - tag: component
+              value: system
+        - uuid: bfd8a38ed0b14e30a18ec019a71d77d2
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: e6d86adf1f67423d86dae1b8b1ea464d
+              expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=1'
+              name: 'Unavailable by ICMP ping'
+              priority: HIGH
+              description: |
+                Last value: {ITEM.LASTVALUE1}.
+                Last three attempts returned timeout.  Please check device connectivity.
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 3630528148a34fa699aedf7f43c25108
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 20a122b35c8a46d9af00fcd7c1338170
+              expression: 'min(/Eltex MES by SNMP export/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Eltex MES by SNMP export/icmppingloss,5m)<100'
+              name: 'High ICMP ping loss'
+              priority: WARNING
+              dependencies:
+                - name: 'Unavailable by ICMP ping'
+                  expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=0'
+                  recovery_expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: de9307656af245b48abafdc89cd1c508
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 9484c9ee92fd442c949babafedc2f8d7
+              expression: 'avg(/Eltex MES by SNMP export/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'High ICMP ping response time'
+              priority: WARNING
+              dependencies:
+                - name: 'High ICMP ping loss'
+                  expression: 'min(/Eltex MES by SNMP export/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Eltex MES by SNMP export/icmppingloss,5m)<100'
+                - name: 'Unavailable by ICMP ping'
+                  expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=0'
+                  recovery_expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: ef0c81344eb648988ac1bf0a657b36f4
+          name: 'CPU Utilization 1min'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.89.1.8.0
+          key: rlCpuUtilDuringLastMinute
+          delay: 3m
+          history: 14d
+          trends: 60d
+          units: '%'
+          description: 'Percentage of the device CPU utilization during last minute. The value 101 is a dummy value, indicating that the CPU utilization was not measured (since measurement is disabled or was disabled during last minute).'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 2545216f8d024bd68ff861fb233222a6
+              expression: 'last(/Eltex MES by SNMP export/rlCpuUtilDuringLastMinute)>{$CPU.MAX.USAGE} and last(/Eltex MES by SNMP export/rlCpuUtilDuringLastMinute)<=100'
+              name: 'High CPU usage'
+              opdata: 'CPU Usage: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: a2c67f000673493ca3dae11cfff86f1e
+          name: 'SNMP traps (fallback)'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          value_type: LOG
+          trends: '0'
+          description: 'The item is used to collect all SNMP traps unmatched by other snmptrap items'
+          logtimefmt: 'hh:mm:sszyyyy/MM/dd'
+          tags:
+            - tag: component
+              value: network
+        - uuid: 9f222360526241fbb22de7a083404efa
+          name: 'System contact details'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: 'system.contact[sysContact.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The textual identification of the contact person for this managed node, together with information on how to contact this person.  If no contact information is known, the value is the zero-length string.
+          inventory_link: CONTACT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: e7dda035ca474807a616e62c1ecdaa7c
+          name: 'System description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: 'system.descr[sysDescr.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            A textual description of the entity. This value should
+            include the full name and version identification of the system's hardware type, software operating-system, and
+            networking software.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 2fd8f35d2e96471eb7dac6e4b1a33b32
+          name: 'System location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: 'system.location[sysLocation.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            Physical location of the node (e.g., `equipment room`, `3rd floor`). If not provided, the value is a zero-length string.
+          inventory_link: LOCATION
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: cc4ff870c7484229a7329813dcd2231b
+          name: 'System name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: system.name
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            An administratively-assigned name for this managed node.By convention, this is the node's fully-qualified domain name.  If the name is unknown, the value is the zero-length string.
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 030221cefb2f4abcb0ee60e9bfce7d00
+              expression: 'last(/Eltex MES by SNMP export/system.name,#1)<>last(/Eltex MES by SNMP export/system.name,#2) and length(last(/Eltex MES by SNMP export/system.name))>0'
+              name: 'System name has changed'
+              event_name: 'System name has changed (new name: {ITEM.VALUE})'
+              priority: INFO
+              description: 'The name of the system has changed. Acknowledge to close the problem manually.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: b6e7448d4f7b4439a252dd7d5aa55faa
+          name: Uptime
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: 'system.net.uptime[sysUpTime.0]'
+          trends: '0'
+          units: uptime
+          description: |
+            MIB: SNMPv2-MIB
+            Time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 3e30fe266e5046ebb4a871b392631270
+          name: 'System object ID'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.2.0
+          key: 'system.objectid[sysObjectID.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The vendor's authoritative identification of the network management subsystem contained in the entity.  This value is allocated within the SMI enterprises subtree (1.3.6.1.4.1) and provides an easy and unambiguous means for determining`what kind of box' is being managed.  For example, if vendor`Flintstones, Inc.' was assigned the subtree1.3.6.1.4.1.4242, it could assign the identifier 1.3.6.1.4.1.4242.1.1 to its `Fred Router'.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: bdbf3a6824d441adb0164c121866df68
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          delay: 5m
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: c7ed618cf4dd4f23b33f6ecb2abd3943
+              expression: 'max(/Eltex MES by SNMP export/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              tags:
+                - tag: scope
+                  value: availability
+      discovery_rules:
+        - uuid: 7a491b84c77d4428b25ba6f4f298ed53
+          name: 'Copper network interfaces discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#MEDIATYPE},1.3.6.1.4.1.89.53.3.1.3]'
+          key: copper.net.if.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+                formulaid: A
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.MATCHES}'
+                formulaid: C
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
+                formulaid: E
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: F
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+                formulaid: G
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: H
+              - macro: '{#MEDIATYPE}'
+                value: '^.*$'
+                formulaid: I
+              - macro: '{#MEDIATYPE}'
+                value: '^[2-3]$'
+                operator: NOT_MATCHES_REGEX
+                formulaid: J
+          lifetime: 3d
+          description: 'Discovering copper interfaces.'
+          item_prototypes:
+            - uuid: 6624bae4b99a4265a865ee2f6851d3a3
+              name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets discarded'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}'
+              key: 'net.if.in.discards[ifInDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                The number of inbound packets which were chosen to be discarded
+                even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.
+                One possible reason for discarding such a packet could be to free up buffer space.
+                Discontinuities in the value of this counter can occur at re-initialization of the management system,
+                and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 85bd367e29a14fb8a419edab02df0eec
+              name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
+              key: 'net.if.in.errors[ifInErrors.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                For packet-oriented interfaces, the number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.  For character-oriented or fixed-length interfaces, the number of inbound transmission units that contained errors preventing them from being deliverable to a higher-layer protocol. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 8f88694f593842bda68c5a180d50ae1b
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
+              key: 'net.if.in[ifHCInOctets.{#SNMPINDEX}]'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets received on the interface, including framing characters. This object is a 64-bit version of ifInOctets. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 58b8e48b529f49c098a5d61190a9efd3
+              name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets discarded'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}'
+              key: 'net.if.out.discards[ifOutDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                The number of outbound packets which were chosen to be discarded
+                even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.
+                One possible reason for discarding such a packet could be to free up buffer space.
+                Discontinuities in the value of this counter can occur at re-initialization of the management system,
+                and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: a4d8e8d715334939bb6eca1558d9f406
+              name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
+              key: 'net.if.out.errors[ifOutErrors.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                For packet-oriented interfaces, the number of outbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.  For character-oriented or fixed-length interfaces, the number of outbound transmission units that contained errors preventing them from being deliverable to a higher-layer protocol. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 69fd55d484aa4b38a3bdc064396b453a
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
+              key: 'net.if.out[ifHCOutOctets.{#SNMPINDEX}]'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets transmitted out of the interface, including framing characters. This object is a 64-bit version of ifOutOctets.Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: e158f8ee222e4327a166e9aa9f187923
+              name: 'Interface {#IFNAME}({#IFALIAS}): Speed'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
+              key: 'net.if.speed[ifHighSpeed.{#SNMPINDEX}]'
+              delay: 5m
+              trends: '0'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                An estimate of the interface's current bandwidth in units of 1,000,000 bits per second. If this object reports a value of `n' then the speed of the interface is somewhere in the range of `n-500,000' to`n+499,999'.  For interfaces which do not vary in bandwidth or for those where no accurate estimation can be made, this object should contain the nominal bandwidth. For a sub-layer which has no concept of bandwidth, this object should be zero.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000000'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 6f99e5d6052944388629a4e551ae913a
+              name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+              key: 'net.if.status[ifOperStatus.{#SNMPINDEX}]'
+              trends: '0'
+              description: |
+                MIB: IF-MIB
+                The current operational state of the interface.
+                - The testing(3) state indicates that no operational packet scan be passed
+                - If ifAdminStatus is down(2) then ifOperStatus should be down(2)
+                - If ifAdminStatus is changed to up(1) then ifOperStatus should change to up(1) if the interface is ready to transmit and receive network traffic
+                - It should change todormant(5) if the interface is waiting for external actions (such as a serial line waiting for an incoming connection)
+                - It should remain in the down(2) state if and only if there is a fault that prevents it from going to the up(1) state
+                - It should remain in the notPresent(6) state if the interface has missing(typically, hardware) components.
+              valuemap:
+                name: 'IF-MIB::ifOperStatus'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+              trigger_prototypes:
+                - uuid: 5b627160c0db427d8817f78910e67c28
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+                  name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: |
+                    Триггер работает следующим образом:
+                    1. Стреляет, если "Operation status" интерфейса уходит в состояние "Down(0)".
+                    2. Вы можете определять на уровне шаблона или создать на хосте макрос { $IFCONTROL }=1 - для глобального определения всех интерфейсов важными или { $IFCONTROL }=0 - не важными. (Убрать пробелы!)
+                    3. Вы можете использовать на хосте макросы с контекстом для определения конкретного интерфейса важным или не важным, в зависимости от Вашего решения в п.2, например:
+                    { $IFCONTROL:{#IFNAME} }=1. (Убрать пробелы!)
+                    4. Стреляет, если "Operation status" интерфейса до этого был в состоянии "Up(1)"
+                    5. Триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что п.4.
+                  tags:
+                    - tag: scope
+                      value: availability
+          trigger_prototypes:
+            - uuid: 3d5cc1f2a8a2475b838342e068565fdf
+              expression: |
+                (avg(/Eltex MES by SNMP export/net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or
+                avg(/Eltex MES by SNMP export/net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and
+                last(/Eltex MES by SNMP export/net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                avg(/Eltex MES by SNMP export/net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Eltex MES by SNMP export/net.if.speed[ifHighSpeed.{#SNMPINDEX}]) and
+                avg(/Eltex MES by SNMP export/net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Eltex MES by SNMP export/net.if.speed[ifHighSpeed.{#SNMPINDEX}])
+              name: 'Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( > {$IF.UTIL.MAX:"{#IFNAME}"}% )'
+              opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
+              priority: INFO
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_expression: 'last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 6cea9ff37ccf420b8a69d65642952b98
+              expression: |
+                min(/Eltex MES by SNMP export/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/Eltex MES by SNMP export/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                max(/Eltex MES by SNMP export/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/Eltex MES by SNMP export/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+              name: 'Interface {#IFNAME}({#IFALIAS}): High error rate ( > {$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              description: 'Recovers when below 80% of {$IF.ERRORS.WARN:"{#IFNAME}"} threshold'
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_expression: 'last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 73fb176edede4d44999e9538ba0c5edc
+          name: 'LAG network interfaces discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#IFTYPE},1.3.6.1.2.1.2.2.1.3]'
+          key: lag.net.if.discovery
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+                formulaid: A
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.MATCHES}'
+                formulaid: C
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
+                formulaid: E
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: F
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+                formulaid: G
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: H
+              - macro: '{#IFTYPE}'
+                value: ^161$
+                formulaid: I
+          lifetime: 3d
+          description: 'Discovering LAG interfaces.'
+          item_prototypes:
+            - uuid: a13bbeac845d4506b23ddc4827844ec3
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
+              key: 'lag.net.if.in[ifHCInOctets.{#SNMPINDEX}]'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets received on the interface, including framing characters. This object is a 64-bit version of ifInOctets. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: d15d71c6ba7b411cad8a8424dc1784ca
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
+              key: 'lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}]'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets transmitted out of the interface, including framing characters. This object is a 64-bit version of ifOutOctets.Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: ee0f920ccfc6456ebf75aed6552aa4e9
+              name: 'Interface {#IFNAME}({#IFALIAS}): Speed'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
+              key: 'lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}]'
+              delay: 3m
+              trends: '0'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                An estimate of the interface's current bandwidth in units of 1,000,000 bits per second. If this object reports a value of `n' then the speed of the interface is somewhere in the range of `n-500,000' to`n+499,999'.  For interfaces which do not vary in bandwidth or for those where no accurate estimation can be made, this object should contain the nominal bandwidth. For a sub-layer which has no concept of bandwidth, this object should be zero.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000000'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 37ca8e597c404de2ae4821c5fba66e65
+              name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+              key: 'lag.net.if.status[ifOperStatus.{#SNMPINDEX}]'
+              trends: '0'
+              description: |
+                MIB: IF-MIB
+                The current operational state of the interface.
+                - The testing(3) state indicates that no operational packet scan be passed
+                - If ifAdminStatus is down(2) then ifOperStatus should be down(2)
+                - If ifAdminStatus is changed to up(1) then ifOperStatus should change to up(1) if the interface is ready to transmit and receive network traffic
+                - It should change todormant(5) if the interface is waiting for external actions (such as a serial line waiting for an incoming connection)
+                - It should remain in the down(2) state if and only if there is a fault that prevents it from going to the up(1) state
+                - It should remain in the notPresent(6) state if the interface has missing(typically, hardware) components.
+              valuemap:
+                name: 'IF-MIB::ifOperStatus'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+              trigger_prototypes:
+                - uuid: 19d23e0029784342a74617ce9bb03488
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+                  name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: |
+                    Триггер работает следующим образом:
+                    1. Стреляет, если "Operation status" интерфейса уходит в состояние "Down(0)".
+                    2. Вы можете определять на уровне шаблона или создать на хосте макрос { $IFCONTROL }=1 - для глобального определения всех интерфейсов важными или { $IFCONTROL }=0 - не важными. (Убрать пробелы!)
+                    3. Вы можете использовать на хосте макросы с контекстом для определения конкретного интерфейса важным или не важным, в зависимости от Вашего решения в п.2, например:
+                    { $IFCONTROL:{#IFNAME} }=1. (Убрать пробелы!)
+                    4. Стреляет, если "Operation status" интерфейса до этого был в состоянии "Up(1)"
+                    5. Триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что п.4.
+                  tags:
+                    - tag: scope
+                      value: availability
+          trigger_prototypes:
+            - uuid: 3d1c09e031904b299aeff2d1ad13cc83
+              expression: |
+                (avg(/Eltex MES by SNMP export/lag.net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or
+                avg(/Eltex MES by SNMP export/lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and
+                last(/Eltex MES by SNMP export/lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                avg(/Eltex MES by SNMP export/lag.net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Eltex MES by SNMP export/lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}]) and
+                avg(/Eltex MES by SNMP export/lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Eltex MES by SNMP export/lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}])
+              name: 'Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( > {$IF.UTIL.MAX:"{#IFNAME}"}% )'
+              opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
+              priority: INFO
+              description: 'The network interface utilization is close to its estimated maximum bandwidth.'
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_expression: 'last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 9aa2436344db49e498d756da778b5e0e
+          name: 'Optic network interfaces discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#MEDIATYPE},1.3.6.1.4.1.89.53.3.1.3]'
+          key: optic.net.if.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+                formulaid: A
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.MATCHES}'
+                formulaid: C
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
+                formulaid: E
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: F
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+                formulaid: G
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: H
+              - macro: '{#MEDIATYPE}'
+                value: '^.*$'
+                formulaid: I
+              - macro: '{#MEDIATYPE}'
+                value: ^1$
+                operator: NOT_MATCHES_REGEX
+                formulaid: J
+          lifetime: 3d
+          description: 'Discovering copper interfaces (optic-fiber(2) or combo(3))'
+          item_prototypes:
+            - uuid: 6c7ff07a3a6d437ca71e43bb2b406728
+              name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets discarded'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}'
+              key: 'optic.net.if.in.discards[ifInDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                The number of inbound packets which were chosen to be discarded
+                even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.
+                One possible reason for discarding such a packet could be to free up buffer space.
+                Discontinuities in the value of this counter can occur at re-initialization of the management system,
+                and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 2771544da83c45bfa6fbd10f275c53e4
+              name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
+              key: 'optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                For packet-oriented interfaces, the number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.  For character-oriented or fixed-length interfaces, the number of inbound transmission units that contained errors preventing them from being deliverable to a higher-layer protocol. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: ed10c49f6db8479f9ac3855e3a7a3594
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
+              key: 'optic.net.if.in[ifHCInOctets.{#SNMPINDEX}]'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets received on the interface, including framing characters. This object is a 64-bit version of ifInOctets. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 66bb99da78e94581bba06184f8e15762
+              name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets discarded'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}'
+              key: 'optic.net.if.out.discards[ifOutDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                The number of Outbound packets which were chosen to be discarded
+                even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.
+                One possible reason for discarding such a packet could be to free up buffer space.
+                Discontinuities in the value of this counter can occur at re-initialization of the management system,
+                and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 40f17b7e267448daa56be0ddf1dc689a
+              name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
+              key: 'optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}]'
+              delay: 3m
+              description: |
+                MIB: IF-MIB
+                For packet-oriented interfaces, the number of outbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.  For character-oriented or fixed-length interfaces, the number of outbound transmission units that contained errors preventing them from being deliverable to a higher-layer protocol. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 41c2c4f0f9c945e6832ba97010f39116
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
+              key: 'optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}]'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                The total number of octets transmitted out of the interface, including framing characters. This object is a 64-bit version of ifOutOctets.Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: c841e9e3f7164d609f196da61474481b
+              name: 'Interface {#IFNAME}({#IFALIAS}): Speed'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
+              key: 'optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}]'
+              delay: 3m
+              trends: '0'
+              units: bps
+              description: |
+                MIB: IF-MIB
+                An estimate of the interface's current bandwidth in units of 1,000,000 bits per second. If this object reports a value of `n' then the speed of the interface is somewhere in the range of `n-500,000' to`n+499,999'.  For interfaces which do not vary in bandwidth or for those where no accurate estimation can be made, this object should contain the nominal bandwidth. For a sub-layer which has no concept of bandwidth, this object should be zero.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000000'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: cd022a5cb011464882b54fb4ce7ddb82
+              name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+              key: 'optic.net.if.status[ifOperStatus.{#SNMPINDEX}]'
+              trends: '0'
+              description: |
+                MIB: IF-MIB
+                The current operational state of the interface.
+                - The testing(3) state indicates that no operational packet scan be passed
+                - If ifAdminStatus is down(2) then ifOperStatus should be down(2)
+                - If ifAdminStatus is changed to up(1) then ifOperStatus should change to up(1) if the interface is ready to transmit and receive network traffic
+                - It should change todormant(5) if the interface is waiting for external actions (such as a serial line waiting for an incoming connection)
+                - It should remain in the down(2) state if and only if there is a fault that prevents it from going to the up(1) state
+                - It should remain in the notPresent(6) state if the interface has missing(typically, hardware) components.
+              valuemap:
+                name: 'IF-MIB::ifOperStatus'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+              trigger_prototypes:
+                - uuid: 46ea6604351548acad5d97c6e4e2a579
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+                  name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: |
+                    Триггер работает следующим образом:
+                    1. Стреляет, если "Operation status" интерфейса уходит в состояние "Down(0)".
+                    2. Вы можете определять на уровне шаблона или создать на хосте макрос { $IFCONTROL }=1 - для глобального определения всех интерфейсов важными или { $IFCONTROL }=0 - не важными. (Убрать пробелы!)
+                    3. Вы можете использовать на хосте макросы с контекстом для определения конкретного интерфейса важным или не важным, в зависимости от Вашего решения в п.2, например:
+                    { $IFCONTROL:{#IFNAME} }=1. (Убрать пробелы!)
+                    4. Стреляет, если "Operation status" интерфейса до этого был в состоянии "Up(1)"
+                    5. Триггер можно закрыть вручную, стрелять при следующем опросе он не будет потому, что п.4.
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 81b74a775bfc41d8945d6865ceb95c20
+              name: 'Interface {#IFNAME}({#IFALIAS}): SFP Input power'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.9'
+              key: 'optic.rlPhyTestGetResult.InPow[{#SNMPINDEX}]'
+              delay: 10m
+              value_type: FLOAT
+              units: mW/dBm
+              description: 'Input power on SFP interface.'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 6424f8a59c8747a0a263e4c6e696a9f6
+              name: 'Interface {#IFNAME}({#IFALIAS}): SFP mA'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.7'
+              key: 'optic.rlPhyTestGetResult.mA[{#SNMPINDEX}]'
+              delay: 10m
+              value_type: FLOAT
+              units: mA
+              description: 'mA on SFP interface.'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 977bcb348f1f4505adac1686f8010468
+              name: 'Interface {#IFNAME}({#IFALIAS}): SFP Out power'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.8'
+              key: 'optic.rlPhyTestGetResult.OutPow[{#SNMPINDEX}]'
+              delay: 10m
+              value_type: FLOAT
+              units: mW/dBm
+              description: 'Out power on SFP interface.'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: d827c8a6bdce4fc9b244028a91d1cf30
+              name: 'Interface {#IFNAME}({#IFALIAS}): SFP temperature'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.5'
+              key: 'optic.rlPhyTestGetResult.t[{#SNMPINDEX}]'
+              delay: 10m
+              value_type: FLOAT
+              units: '`C'
+              description: 'Temperature on SFP interface.'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+              trigger_prototypes:
+                - uuid: a8627c73dafa496ab98f47a8e65ddc9a
+                  expression: 'last(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.t[{#SNMPINDEX}])>{$SFP.MAX.TEMPERATURE}'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.t[{#SNMPINDEX}])<{$SFP.MAX.TEMPERATURE}-2'
+                  name: 'Interface {#IFNAME}({#IFALIAS}): Температура SFP больше {$SFP.MAX.TEMPERATURE}'
+                  opdata: 'SFP t` = {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+            - uuid: 3d10cefcbfb5487297258b757c0e80fe
+              name: 'Interface {#IFNAME}({#IFALIAS}): SFP Volt'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.6'
+              key: 'optic.rlPhyTestGetResult.v[{#SNMPINDEX}]'
+              delay: 10m
+              value_type: FLOAT
+              units: V
+              description: 'Volt on SFP interface.'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-6'
+              tags:
+                - tag: component
+                  value: network
+                - tag: description
+                  value: '{#IFALIAS}'
+                - tag: interface
+                  value: '{#IFNAME}'
+          trigger_prototypes:
+            - uuid: 392bf0bf49d742b7b7f3c1e844bd84bf
+              expression: |
+                (avg(/Eltex MES by SNMP export/optic.net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or
+                avg(/Eltex MES by SNMP export/optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and
+                last(/Eltex MES by SNMP export/optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                avg(/Eltex MES by SNMP export/optic.net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Eltex MES by SNMP export/optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}]) and
+                avg(/Eltex MES by SNMP export/optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Eltex MES by SNMP export/optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}])
+              name: 'Interface {#IFNAME}({#IFALIAS}): High bandwidth usage ( > {$IF.UTIL.MAX:"{#IFNAME}"}% )'
+              opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
+              priority: INFO
+              description: 'The network interface utilization is close to its estimated maximum bandwidth.'
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_expression: 'last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 2cf938ca2c744f238fd12dbb1c066b3e
+              expression: |
+                min(/Eltex MES by SNMP export/optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/Eltex MES by SNMP export/optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                max(/Eltex MES by SNMP export/optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/Eltex MES by SNMP export/optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+              name: 'Interface {#IFNAME}({#IFALIAS}): High error rate ( > {$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              description: 'Recovers when below 80% of {$IF.ERRORS.WARN:"{#IFNAME}"} threshold'
+              dependencies:
+                - name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
+                  recovery_expression: 'last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+            - uuid: 094faef89a4342a79f7332f4ca82108c
+              expression: 'avg(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.InPow[{#SNMPINDEX}],5m)<(avg(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.OutPow[{#SNMPINDEX}],5m)*{$SFP.INOUTPOW.RATIO})'
+              name: 'Interface {#IFNAME}({#IFALIAS}): Затухание на SFP'
+              opdata: 'InPow: {ITEM.LASTVALUE1}, OutPow: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              description: |
+                Потери мощности на оптической линии.
+                Для корректировки чувствительности смотри макрос 
+                { $SFP.INOUTPOW.RATIO }
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 1f7c1875b91743b5bfb5420e92529544
+          name: 'Eltex chassis discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.89.53.15.1.1]'
+          key: StackUnit
+          delay: 1h
+          lifetime: 1w
+          item_prototypes:
+            - uuid: ee78e225c8c444c585530783dab1e943
+              name: 'StackUnit-{#SNMPVALUE} ProductID'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.4.1.6.{#SNMPVALUE}'
+              key: 'rlPhdStackProductID.[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: system
+            - uuid: 5a8c9a58b4114ffea4dd748ad3bfea4a
+              name: 'StackUnit-{#SNMPVALUE} Fan1 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.4.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: afb35695f76846c9b5acb98aceeae77a
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}])=1'
+                  name: 'Fan1 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 386b9c3688a44808be54c2ff327fdd31
+              name: 'StackUnit-{#SNMPVALUE} Fan2 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.5.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: 85cfc8509038413b9553dbe8e17443b9
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}])=1'
+                  name: 'Fan2 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: d12d6f5fcdbf436e86095be6ff842b16
+              name: 'StackUnit-{#SNMPVALUE} Fan3 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.6.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: b9221acdb37846018d532d3e39322e8c
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}])=1'
+                  name: 'Fan3 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 72a70b0f7bdd4247950ccce8ef866a77
+              name: 'StackUnit-{#SNMPVALUE} Fan4 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.7.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: dd3f3d8f7e43480bb6a79b3b883d32dc
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}])=1'
+                  name: 'Fan4 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 88f080fc49274ef384e42b9861341dee
+              name: 'StackUnit-{#SNMPVALUE} Fan5 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.8.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan5Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+            - uuid: d239b61361c445fea7419af794bb1ddc
+              name: 'StackUnit-{#SNMPVALUE} Fan6 status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.9.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: fan
+              trigger_prototypes:
+                - uuid: 3ed230993b674b758f5982b271248acb
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}],#2))=1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}])=1'
+                  name: 'Fan6 status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 709051e246f049d5bc07c6fe780a2d15
+              name: 'StackUnit-{#SNMPVALUE} Main PS Status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.2.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamMainPSStatus[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 58d4d888b5964b41ae609c67d997cd41
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamMainPSStatus[{#SNMPVALUE}])<>1'
+                  name: 'Main power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 621ecfa9770c41798080ca7c4a059386
+              name: 'StackUnit-{#SNMPVALUE} Redundant PS Status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.3.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: RlEnvMonState
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 871115641ed54d8f973d1a400690747f
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}])<>1 and last(/Eltex MES by SNMP export/rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}])<>5'
+                  name: 'Redundant power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 193e83a737a54c6f9379a59aaef66e97
+              name: 'StackUnit-{#SNMPVALUE} Temperature sensor status'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.11.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamTempSensorStatus[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              valuemap:
+                name: 'ENTITY-SENSORS-MIB::EntitySensorStatus'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: temperature
+              trigger_prototypes:
+                - uuid: e51ee688f5b64ad1b9a9890641035dec
+                  expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorStatus[{#SNMPVALUE}],#2)<>1'
+                  name: 'Temperature status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 5590d6eba16a43c181e238151017320f
+              name: 'StackUnit-{#SNMPVALUE} Temperature sensor value'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.10.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}]'
+              history: 14d
+              trends: 60d
+              units: C`
+              tags:
+                - tag: component
+                  value: temperature
+            - uuid: f53e159bee3c4889afaac51695b6e995
+              name: 'StackUnit-{#SNMPVALUE} Temperature sensor Warning Threshold Value'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.15.1.12.{#SNMPVALUE}'
+              key: 'rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}]'
+              delay: 1h
+              history: 2d
+              trends: '0'
+              units: C`
+              preprocessing:
+                - type: DISCARD_UNCHANGED
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: temperature
+            - uuid: 02f54d078bcb4e2084d408eedc55436f
+              name: 'StackUnit-{#SNMPVALUE} FirmwareVersion'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.3.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamFirmwareVersion[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: system
+            - uuid: 785833ff84d741469ccda14d06f24fb9
+              name: 'StackUnit-{#SNMPVALUE} HardwareVersion'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.4.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamHardwareVersion[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: system
+            - uuid: 17ff3db14faa42da89943f372393414e
+              name: 'StackUnit-{#SNMPVALUE} SerialNum'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.5.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamSerialNum[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: system
+            - uuid: b6b888074ede43dbafe78cf6069d3103
+              name: 'StackUnit-{#SNMPVALUE} SoftwareVersion'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.89.53.14.1.2.{#SNMPVALUE}'
+              key: 'rlPhdUnitGenParamSoftwareVersion[{#SNMPVALUE}]'
+              delay: 1h
+              history: 14d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: system
+          trigger_prototypes:
+            - uuid: e876e733fbc04b9d9200e77451c3f455
+              expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}])>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}])'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}])<last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}])-5'
+              name: 'Check {HOST.NAME} StackUnit-{#SNMPVALUE} temperature'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: availability
+      tags:
+        - tag: class
+          value: network
+        - tag: target
+          value: eltex
+        - tag: target
+          value: eltex-mes
+      macros:
+        - macro: '{$CPU.MAX.USAGE}'
+          value: '70'
+        - macro: '{$IF.ERRORS.WARN}'
+          value: '10'
+        - macro: '{$IF.UTIL.MAX}'
+          value: '90'
+        - macro: '{$IFCONTROL}'
+          value: '1'
+        - macro: '{$MEM.MAX.USAGE}'
+          value: '70'
+        - macro: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+          value: '^.*'
+        - macro: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+          value: ^2$
+          description: 'Ignore down(2) administrative status'
+        - macro: '{$NET.IF.IFALIAS.MATCHES}'
+          value: '.*'
+        - macro: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+        - macro: '{$NET.IF.IFDESCR.MATCHES}'
+          value: '.*'
+        - macro: '{$NET.IF.IFDESCR.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+        - macro: '{$NET.IF.IFNAME.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFNAME.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+        - macro: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+          value: ^6$
+          description: 'Ignore notPresent(6)'
+        - macro: '{$SFP.INOUTPOW.RATIO}'
+          value: '2.5'
+          description: 'Во сколько раз различаются InPow и OutPow. Увеличить коэффициент - загрубить триггер.'
+        - macro: '{$SFP.MAX.TEMPERATURE}'
+          value: '60'
+          description: 'Макс. температура модуля SFP'
+      dashboards:
+        - uuid: 33b2fbe1cc97420e9fc7b279c71e389b
+          name: 'Network interfaces'
+          pages:
+            - {  }
+      valuemaps:
+        - uuid: 2fa621670ffe4b88a0dab563365b5d26
+          name: 'ENTITY-SENSORS-MIB::EntitySensorStatus'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: unavailable
+            - value: '3'
+              newvalue: nonoperational
+        - uuid: 7b4c6992a80743eab577b94c0a82b6a2
+          name: 'IF-MIB::ifOperStatus'
+          mappings:
+            - value: '1'
+              newvalue: up
+            - value: '2'
+              newvalue: down
+            - value: '3'
+              newvalue: testing
+            - value: '4'
+              newvalue: unknown
+            - value: '5'
+              newvalue: dormant
+            - value: '6'
+              newvalue: notPresent
+            - value: '7'
+              newvalue: lowerLayerDown
+        - uuid: 4d102d55f4c64d519ede2a0d3a3c19f8
+          name: RlEnvMonState
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning
+            - value: '7'
+              newvalue: readingFailed
+            - value: '8'
+              newvalue: notAvailable
+            - value: '9'
+              newvalue: backingUp
+            - value: '10'
+              newvalue: readingFailed

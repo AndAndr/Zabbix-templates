@@ -4,25 +4,23 @@ zabbix_export:
     - uuid: 57b7ae836ca64446ba2c296389c009b7
       name: Templates/Modules
   templates:
-    - uuid: 365096d3ae2846e09e9e5ababd7b88cc
-      template: 'Module Eltex OSPF SNMPv2'
-      name: 'Module Eltex OSPF SNMPv2'
+    - uuid: 5c632ca859094cfd939235b7c5410050
+      template: 'Eltex MES OSPF by SNMP export'
+      name: 'Eltex MES OSPF by SNMP export'
       description: |
         https://github.com/AndAndr
         Автообнаружение соседей OSPF для коммутаторов Eltex серии MES.
       groups:
         - name: Templates/Modules
       discovery_rules:
-        - uuid: c1986099f55246edab809b7769e9dacc
+        - uuid: fb04b3b4793240a0afe35a47a409f745
           name: 'Eltex OSPF nbr discover'
           type: SNMP_AGENT
           snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.89.210.11.1.2.1]'
           key: rlOspfNbrIpAddr
           delay: 1h
-          lifetime: 10d
-          enabled_lifetime_type: DISABLE_NEVER
           item_prototypes:
-            - uuid: abd2799e57204787a211fb37b3114f65
+            - uuid: 374af00928034141b353a14b7c0be34c
               name: 'Eltex OSPF neighbor {#SNMPVALUE} state'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.210.11.1.7.1.{#SNMPVALUE}.0'
@@ -36,9 +34,9 @@ zabbix_export:
                 - tag: application
                   value: ospf
               trigger_prototypes:
-                - uuid: f30a485f98ee4e87a735497928f17e4c
-                  expression: 'last(/Module Eltex OSPF SNMPv2/rlOspfNbrState[{#SNMPVALUE}])<>8 and (last(/Module Eltex OSPF SNMPv2/rlOspfNbrState[{#SNMPVALUE}],#1)<>last(/Module Eltex OSPF SNMPv2/rlOspfNbrState[{#SNMPVALUE}],#2))=1'
-                  name: 'OSPF: Check neighbor {#SNMPVALUE} state on {HOST.NAME}'
+                - uuid: 0f7db94a07b241f5bdc7e97dc9e41978
+                  expression: 'last(/Eltex MES OSPF by SNMP export/rlOspfNbrState[{#SNMPVALUE}])<>8 and (last(/Eltex MES OSPF by SNMP export/rlOspfNbrState[{#SNMPVALUE}],#1)<>last(/Eltex MES OSPF by SNMP export/rlOspfNbrState[{#SNMPVALUE}],#2))=1'
+                  name: 'OSPF: Check neighbor {#SNMPVALUE} state'
                   opdata: 'NBR State={ITEM.LASTVALUE1}'
                   priority: WARNING
                   description: |
@@ -46,9 +44,9 @@ zabbix_export:
                     Триггер повторно не стреляет.
                   tags:
                     - tag: application
-                      value: 'neighbor {#SNMPVALUE}'
-                    - tag: application
                       value: ospf
+                    - tag: neighbor
+                      value: '{#SNMPVALUE}'
       tags:
         - tag: application
           value: ospf
@@ -59,7 +57,7 @@ zabbix_export:
         - tag: target
           value: eltex-mes
       valuemaps:
-        - uuid: 4fb05142e48b44db8cdc68502fbbddf9
+        - uuid: 873ccf9f85d14d8e817f177e04d61a37
           name: 'SNMP OSPF Neighbor State (ospfNbrState)'
           mappings:
             - value: '1'

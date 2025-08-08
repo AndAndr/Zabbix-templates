@@ -37,7 +37,6 @@
 
 
 ## Howto:
-1. Импорт **Generic SNMP**, **Module Eltex OSPF SNMPv2**, **Module Eltex MES Interfaces SNMPv2**.
-2. Импорт шаблона **Template Eltex MES SNMPv2**.
 
+Присоединить шаблон к хосту.
 
