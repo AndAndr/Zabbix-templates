@@ -17,7 +17,7 @@
 
 
 ## Network
-**CiscoNexus** Модуль Zabbix 6 для мониторинга по SNMP состояния соседей и area OSPF для Cisco Nexus.
+**CiscoNexus** Модуль Zabbix 7 для мониторинга по SNMP состояния соседей и area OSPF для Cisco Nexus.
 
 **UsergateUTM** Шаблон Zabbix 4,7 для мониторинга Usergate UTM по SNMP с поддержкой трапов.
 
