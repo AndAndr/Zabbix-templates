@@ -4,7 +4,7 @@ zabbix_export:
     - uuid: 36bff6c29af64692839d077febfc7079
       name: 'Templates/Network devices'
   templates:
-    - uuid: c1a25fc5beb6433d8338017a3b063be7
+    - uuid: 4dd7b8eae5834d40967089882bdfa3da
       template: 'Eltex MES by SNMP export'
       name: 'Eltex MES by SNMP export'
       description: |
@@ -13,7 +13,7 @@ zabbix_export:
       groups:
         - name: 'Templates/Network devices'
       items:
-        - uuid: 59a2011a71564b9785afef1caf50b349
+        - uuid: 2d5b666d89c8439e9f54e29e08b665f9
           name: 'Memory Utilization Free'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.7.0
@@ -27,7 +27,7 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: 3a9c2ffab2bc43fb8e7c52cf207c553c
+        - uuid: e291a9de39f142d69cbe42c648096e01
           name: 'Memory Utilization Free Percent'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.6.0
@@ -41,7 +41,7 @@ zabbix_export:
             - tag: component
               value: system
           triggers:
-            - uuid: 02736aaf22344f99ab42d2f47e5bf74f
+            - uuid: e319f505ccc44cfe9e42dd3b0edb2646
               expression: 'last(/Eltex MES by SNMP export/eltexProcessMemoryFreePercent)>{$MEM.MAX.USAGE}'
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: 'last(/Eltex MES by SNMP export/eltexProcessMemoryFreePercent)<{$MEM.MAX.USAGE}-5'
@@ -53,7 +53,7 @@ zabbix_export:
                   value: capacity
                 - tag: scope
                   value: performance
-        - uuid: c7f56fd3f3464db1b5cbb09ffe93ff0c
+        - uuid: 6863910fe69a48fd92ac6cca11b9da81
           name: 'Memory Total'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.4.1.35265.41.1.2.1.1.3.0
@@ -67,7 +67,7 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: bfd8a38ed0b14e30a18ec019a71d77d2
+        - uuid: 69647f23cfdd4e87bd40099a972842cb
           name: 'ICMP ping'
           type: SIMPLE
           key: icmpping
@@ -76,11 +76,11 @@ zabbix_export:
             - tag: component
               value: network
           triggers:
-            - uuid: e6d86adf1f67423d86dae1b8b1ea464d
+            - uuid: b254062c9e1b4e4fa37864d2009ac7da
               expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=0'
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=1'
-              name: 'Unavailable by ICMP ping'
+              name: 'Тест доступности по протоколу ICMP'
               priority: HIGH
               description: |
                 Last value: {ITEM.LASTVALUE1}.
@@ -88,7 +88,7 @@ zabbix_export:
               tags:
                 - tag: scope
                   value: availability
-        - uuid: 3630528148a34fa699aedf7f43c25108
+        - uuid: e770f74c24444910a9d4463f1c2f2cd5
           name: 'ICMP loss'
           type: SIMPLE
           key: icmppingloss
@@ -99,12 +99,12 @@ zabbix_export:
             - tag: component
               value: network
           triggers:
-            - uuid: 20a122b35c8a46d9af00fcd7c1338170
+            - uuid: a8862532c59b467f8fc5f4568e62797d
               expression: 'min(/Eltex MES by SNMP export/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Eltex MES by SNMP export/icmppingloss,5m)<100'
               name: 'High ICMP ping loss'
               priority: WARNING
               dependencies:
-                - name: 'Unavailable by ICMP ping'
+                - name: 'Тест доступности по протоколу ICMP'
                   expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=0'
                   recovery_expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=1'
               tags:
@@ -112,7 +112,7 @@ zabbix_export:
                   value: availability
                 - tag: scope
                   value: performance
-        - uuid: de9307656af245b48abafdc89cd1c508
+        - uuid: db97b4e8e7c2441c9ca7146617c56c51
           name: 'ICMP response time'
           type: SIMPLE
           key: icmppingsec
@@ -123,14 +123,14 @@ zabbix_export:
             - tag: component
               value: network
           triggers:
-            - uuid: 9484c9ee92fd442c949babafedc2f8d7
+            - uuid: a6bb3aad5ba94a6d8afa62f41e8e5dd4
               expression: 'avg(/Eltex MES by SNMP export/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
               name: 'High ICMP ping response time'
               priority: WARNING
               dependencies:
                 - name: 'High ICMP ping loss'
                   expression: 'min(/Eltex MES by SNMP export/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Eltex MES by SNMP export/icmppingloss,5m)<100'
-                - name: 'Unavailable by ICMP ping'
+                - name: 'Тест доступности по протоколу ICMP'
                   expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=0'
                   recovery_expression: 'last(/Eltex MES by SNMP export/icmpping,#3)=1'
               tags:
@@ -138,7 +138,7 @@ zabbix_export:
                   value: availability
                 - tag: scope
                   value: performance
-        - uuid: ef0c81344eb648988ac1bf0a657b36f4
+        - uuid: e588744d759a49c4a029bc538a68549c
           name: 'CPU Utilization 1min'
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.4.1.89.1.8.0
@@ -152,7 +152,7 @@ zabbix_export:
             - tag: component
               value: system
           triggers:
-            - uuid: 2545216f8d024bd68ff861fb233222a6
+            - uuid: 8d389bd2983e4f99ad2a691272bea9ec
               expression: 'last(/Eltex MES by SNMP export/rlCpuUtilDuringLastMinute)>{$CPU.MAX.USAGE} and last(/Eltex MES by SNMP export/rlCpuUtilDuringLastMinute)<=100'
               name: 'High CPU usage'
               opdata: 'CPU Usage: {ITEM.LASTVALUE1}'
@@ -160,7 +160,7 @@ zabbix_export:
               tags:
                 - tag: scope
                   value: performance
-        - uuid: a2c67f000673493ca3dae11cfff86f1e
+        - uuid: c5970276cc954dca899197d3a307832c
           name: 'SNMP traps (fallback)'
           type: SNMP_TRAP
           key: snmptrap.fallback
@@ -172,7 +172,7 @@ zabbix_export:
           tags:
             - tag: component
               value: network
-        - uuid: 9f222360526241fbb22de7a083404efa
+        - uuid: 19199287284040748bdc8c0aee3770a0
           name: 'System contact details'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.2.1.1.4.0
@@ -191,7 +191,7 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: e7dda035ca474807a616e62c1ecdaa7c
+        - uuid: 6498218fac474d93a7f54676408a5928
           name: 'System description'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.2.1.1.1.0
@@ -211,7 +211,7 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: 2fd8f35d2e96471eb7dac6e4b1a33b32
+        - uuid: 91a078f482694447b4b70d51489164c6
           name: 'System location'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.2.1.1.6.0
@@ -230,7 +230,7 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: cc4ff870c7484229a7329813dcd2231b
+        - uuid: 8fb7a863702f4140a3e0bcd45bdcacaf
           name: 'System name'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.2.1.1.5.0
@@ -250,7 +250,7 @@ zabbix_export:
             - tag: component
               value: system
           triggers:
-            - uuid: 030221cefb2f4abcb0ee60e9bfce7d00
+            - uuid: 4a478a6bd24247cc8e3bc3740cf1d0fa
               expression: 'last(/Eltex MES by SNMP export/system.name,#1)<>last(/Eltex MES by SNMP export/system.name,#2) and length(last(/Eltex MES by SNMP export/system.name))>0'
               name: 'System name has changed'
               event_name: 'System name has changed (new name: {ITEM.VALUE})'
@@ -262,7 +262,7 @@ zabbix_export:
                   value: notice
                 - tag: scope
                   value: security
-        - uuid: b6e7448d4f7b4439a252dd7d5aa55faa
+        - uuid: 59e611367ce14360a48a758f5f70cef3
           name: Uptime
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.2.1.1.3.0
@@ -279,7 +279,7 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: 3e30fe266e5046ebb4a871b392631270
+        - uuid: 810c7c3d57a44a3fa1b5f5ecdde3f50c
           name: 'System object ID'
           type: SNMP_AGENT
           snmp_oid: 1.3.6.1.2.1.1.2.0
@@ -297,7 +297,7 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: bdbf3a6824d441adb0164c121866df68
+        - uuid: cb2dd052a85b4d9db091dbf9c8018aff
           name: 'SNMP agent availability'
           type: INTERNAL
           key: 'zabbix[host,snmp,available]'
@@ -314,7 +314,7 @@ zabbix_export:
             - tag: component
               value: network
           triggers:
-            - uuid: c7ed618cf4dd4f23b33f6ecb2abd3943
+            - uuid: c7a70a55d9dc468f947790f7f70fce76
               expression: 'max(/Eltex MES by SNMP export/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
               name: 'No SNMP data collection'
               opdata: 'Current state: {ITEM.LASTVALUE1}'
@@ -324,7 +324,7 @@ zabbix_export:
                 - tag: scope
                   value: availability
       discovery_rules:
-        - uuid: 7a491b84c77d4428b25ba6f4f298ed53
+        - uuid: 0529f79a32cd41a4849815e727e073f3
           name: 'Copper network interfaces discovery'
           type: SNMP_AGENT
           snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#MEDIATYPE},1.3.6.1.4.1.89.53.3.1.3]'
@@ -371,7 +371,7 @@ zabbix_export:
           lifetime: 3d
           description: 'Discovering copper interfaces.'
           item_prototypes:
-            - uuid: 6624bae4b99a4265a865ee2f6851d3a3
+            - uuid: d07a49dedd4b4d489afa7148da97cce3
               name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets discarded'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}'
@@ -395,7 +395,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 85bd367e29a14fb8a419edab02df0eec
+            - uuid: ed38cea59eeb4d9196ee9ffc53628c82
               name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
@@ -415,7 +415,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 8f88694f593842bda68c5a180d50ae1b
+            - uuid: f66e0cb0877e497f802b4c9bbfb35182
               name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
@@ -438,7 +438,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 58b8e48b529f49c098a5d61190a9efd3
+            - uuid: 2f70dfff3a114645b3f7598b116791c3
               name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets discarded'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}'
@@ -462,7 +462,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: a4d8e8d715334939bb6eca1558d9f406
+            - uuid: fa1957d2618f4a76bd4c8b035c592e6d
               name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
@@ -482,7 +482,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 69fd55d484aa4b38a3bdc064396b453a
+            - uuid: 24b05fb5c45b49e0a1181a24b751278d
               name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
@@ -505,7 +505,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: e158f8ee222e4327a166e9aa9f187923
+            - uuid: 7d44477dc80841d49994b0a8d0736666
               name: 'Interface {#IFNAME}({#IFALIAS}): Speed'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
@@ -530,7 +530,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 6f99e5d6052944388629a4e551ae913a
+            - uuid: 9ee61174109d458e8c723b4f05bdb233
               name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
@@ -555,7 +555,7 @@ zabbix_export:
                 - tag: interface
                   value: '{#IFNAME}'
               trigger_prototypes:
-                - uuid: 5b627160c0db427d8817f78910e67c28
+                - uuid: 455c8330fb15496e85d065c3bce46cf1
                   expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
@@ -574,7 +574,7 @@ zabbix_export:
                     - tag: scope
                       value: availability
           trigger_prototypes:
-            - uuid: 3d5cc1f2a8a2475b838342e068565fdf
+            - uuid: a76012b5040143d8b21492330d43652b
               expression: |
                 (avg(/Eltex MES by SNMP export/net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or
                 avg(/Eltex MES by SNMP export/net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and
@@ -593,7 +593,7 @@ zabbix_export:
               tags:
                 - tag: scope
                   value: notice
-            - uuid: 6cea9ff37ccf420b8a69d65642952b98
+            - uuid: a4dc233194a04217a0bf6ac5197eebc3
               expression: |
                 min(/Eltex MES by SNMP export/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
                 or min(/Eltex MES by SNMP export/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
@@ -614,7 +614,7 @@ zabbix_export:
                   value: availability
                 - tag: scope
                   value: performance
-        - uuid: 73fb176edede4d44999e9538ba0c5edc
+        - uuid: 6ef855def0d84053b11b4627914375f6
           name: 'LAG network interfaces discovery'
           type: SNMP_AGENT
           snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#IFTYPE},1.3.6.1.2.1.2.2.1.3]'
@@ -656,7 +656,7 @@ zabbix_export:
           lifetime: 3d
           description: 'Discovering LAG interfaces.'
           item_prototypes:
-            - uuid: a13bbeac845d4506b23ddc4827844ec3
+            - uuid: 6a91310766a849b79fe92f2e76b8fdaa
               name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
@@ -679,7 +679,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: d15d71c6ba7b411cad8a8424dc1784ca
+            - uuid: d79f6ae85fd1484ebfa2deec1cc28aba
               name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
@@ -702,7 +702,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: ee0f920ccfc6456ebf75aed6552aa4e9
+            - uuid: c2401748eb794e6d8455916014d21c4e
               name: 'Interface {#IFNAME}({#IFALIAS}): Speed'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
@@ -727,7 +727,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 37ca8e597c404de2ae4821c5fba66e65
+            - uuid: b600c05db32c4f78ade09a688eeddadc
               name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
@@ -752,7 +752,7 @@ zabbix_export:
                 - tag: interface
                   value: '{#IFNAME}'
               trigger_prototypes:
-                - uuid: 19d23e0029784342a74617ce9bb03488
+                - uuid: 375b15e6bb4d4fddbfdc446e72e5c2e1
                   expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/lag.net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
@@ -771,7 +771,7 @@ zabbix_export:
                     - tag: scope
                       value: availability
           trigger_prototypes:
-            - uuid: 3d1c09e031904b299aeff2d1ad13cc83
+            - uuid: 53a729d5bc514c6c96a00e5d0f5c92d5
               expression: |
                 (avg(/Eltex MES by SNMP export/lag.net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or
                 avg(/Eltex MES by SNMP export/lag.net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/lag.net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and
@@ -791,7 +791,7 @@ zabbix_export:
               tags:
                 - tag: scope
                   value: notice
-        - uuid: 9aa2436344db49e498d756da778b5e0e
+        - uuid: 05a7a495e83e441d8b71cf9cfc05e9ca
           name: 'Optic network interfaces discovery'
           type: SNMP_AGENT
           snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#MEDIATYPE},1.3.6.1.4.1.89.53.3.1.3]'
@@ -838,7 +838,7 @@ zabbix_export:
           lifetime: 3d
           description: 'Discovering copper interfaces (optic-fiber(2) or combo(3))'
           item_prototypes:
-            - uuid: 6c7ff07a3a6d437ca71e43bb2b406728
+            - uuid: 96d6dcbb550c478199ccc2d77264e550
               name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets discarded'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}'
@@ -862,7 +862,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 2771544da83c45bfa6fbd10f275c53e4
+            - uuid: 2c81de65210d4d6eaed106f471118426
               name: 'Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
@@ -882,7 +882,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: ed10c49f6db8479f9ac3855e3a7a3594
+            - uuid: 609c910f70734684a39244b3a5a8538f
               name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
@@ -905,7 +905,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 66bb99da78e94581bba06184f8e15762
+            - uuid: e67fa8428c0e4b7fb5a7df1c298ee3ca
               name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets discarded'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}'
@@ -929,7 +929,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 40f17b7e267448daa56be0ddf1dc689a
+            - uuid: 0e5b161346fe441ab995576487145425
               name: 'Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
@@ -949,7 +949,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 41c2c4f0f9c945e6832ba97010f39116
+            - uuid: 566d95741dac4710b56ec075b20f052e
               name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
@@ -972,7 +972,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: c841e9e3f7164d609f196da61474481b
+            - uuid: 5615970c3d9f4e2e95398625b03d46fc
               name: 'Interface {#IFNAME}({#IFALIAS}): Speed'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
@@ -997,7 +997,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: cd022a5cb011464882b54fb4ce7ddb82
+            - uuid: 10e7cb223e2e4ff5b86d43f9734ca4d3
               name: 'Interface {#IFNAME}({#IFALIAS}): Operational status'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
@@ -1022,7 +1022,7 @@ zabbix_export:
                 - tag: interface
                   value: '{#IFNAME}'
               trigger_prototypes:
-                - uuid: 46ea6604351548acad5d97c6e4e2a579
+                - uuid: 105da5f52f544df6bf86060fd84d8a8e
                   expression: '{$IFCONTROL:"{#IFNAME}"}=1 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}],#2))=1)'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/optic.net.if.status[ifOperStatus.{#SNMPINDEX}])<>2'
@@ -1040,7 +1040,7 @@ zabbix_export:
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 81b74a775bfc41d8945d6865ceb95c20
+            - uuid: b717f6bb68974c2ba2bb9d31151080cf
               name: 'Interface {#IFNAME}({#IFALIAS}): SFP Input power'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.9'
@@ -1060,7 +1060,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 6424f8a59c8747a0a263e4c6e696a9f6
+            - uuid: 3acafb7a818341849454453e4c9a505a
               name: 'Interface {#IFNAME}({#IFALIAS}): SFP mA'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.7'
@@ -1080,7 +1080,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: 977bcb348f1f4505adac1686f8010468
+            - uuid: b677ab026a1f49a9a59e07d82e14f55f
               name: 'Interface {#IFNAME}({#IFALIAS}): SFP Out power'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.8'
@@ -1100,7 +1100,7 @@ zabbix_export:
                   value: '{#IFALIAS}'
                 - tag: interface
                   value: '{#IFNAME}'
-            - uuid: d827c8a6bdce4fc9b244028a91d1cf30
+            - uuid: d9c4bf664c1a4af99515ba1a8fd349f4
               name: 'Interface {#IFNAME}({#IFALIAS}): SFP temperature'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.5'
@@ -1117,7 +1117,7 @@ zabbix_export:
                 - tag: interface
                   value: '{#IFNAME}'
               trigger_prototypes:
-                - uuid: a8627c73dafa496ab98f47a8e65ddc9a
+                - uuid: 96b1f71ff9674336b96b07c5264e00b7
                   expression: 'last(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.t[{#SNMPINDEX}])>{$SFP.MAX.TEMPERATURE}'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.t[{#SNMPINDEX}])<{$SFP.MAX.TEMPERATURE}-2'
@@ -1129,7 +1129,7 @@ zabbix_export:
                       value: availability
                     - tag: scope
                       value: performance
-            - uuid: 3d10cefcbfb5487297258b757c0e80fe
+            - uuid: 60e3309cac814645a4c9c7d37a756613
               name: 'Interface {#IFNAME}({#IFALIAS}): SFP Volt'
               type: SNMP_AGENT
               snmp_oid: '1.3.6.1.4.1.89.90.1.2.1.3.{#SNMPINDEX}.6'
@@ -1150,7 +1150,7 @@ zabbix_export:
                 - tag: interface
                   value: '{#IFNAME}'
           trigger_prototypes:
-            - uuid: 392bf0bf49d742b7b7f3c1e844bd84bf
+            - uuid: 9afcca38f02847afa99a8c388d18439e
               expression: |
                 (avg(/Eltex MES by SNMP export/optic.net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or
                 avg(/Eltex MES by SNMP export/optic.net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Eltex MES by SNMP export/optic.net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and
@@ -1170,7 +1170,7 @@ zabbix_export:
               tags:
                 - tag: scope
                   value: notice
-            - uuid: 2cf938ca2c744f238fd12dbb1c066b3e
+            - uuid: ef47ae122203481dbcddce05b1f876bb
               expression: |
                 min(/Eltex MES by SNMP export/optic.net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
                 or min(/Eltex MES by SNMP export/optic.net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
@@ -1191,7 +1191,7 @@ zabbix_export:
                   value: availability
                 - tag: scope
                   value: performance
-            - uuid: 094faef89a4342a79f7332f4ca82108c
+            - uuid: 8e7350e5a5ab4567a75b2db6b1d4eced
               expression: 'avg(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.InPow[{#SNMPINDEX}],5m)<(avg(/Eltex MES by SNMP export/optic.rlPhyTestGetResult.OutPow[{#SNMPINDEX}],5m)*{$SFP.INOUTPOW.RATIO})'
               name: 'Interface {#IFNAME}({#IFALIAS}): Затухание на SFP'
               opdata: 'InPow: {ITEM.LASTVALUE1}, OutPow: {ITEM.LASTVALUE2}'
@@ -1205,7 +1205,7 @@ zabbix_export:
                   value: availability
                 - tag: scope
                   value: performance
-        - uuid: 1f7c1875b91743b5bfb5420e92529544
+        - uuid: 74498c3143384d3aab4b160e1dbaf9c9
           name: 'Eltex chassis discovery'
           type: SNMP_AGENT
           snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.89.53.15.1.1]'
@@ -1213,7 +1213,7 @@ zabbix_export:
           delay: 1h
           lifetime: 1w
           item_prototypes:
-            - uuid: ee78e225c8c444c585530783dab1e943
+            - uuid: d30200e0976e4d77bd5d8df76f1d4fc2
               name: 'StackUnit-{#SNMPVALUE} ProductID'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.4.1.6.{#SNMPVALUE}'
@@ -1229,7 +1229,7 @@ zabbix_export:
               tags:
                 - tag: component
                   value: system
-            - uuid: 5a8c9a58b4114ffea4dd748ad3bfea4a
+            - uuid: 23c6de4184f7411e804e124d77b64784
               name: 'StackUnit-{#SNMPVALUE} Fan1 status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.4.{#SNMPVALUE}'
@@ -1246,7 +1246,7 @@ zabbix_export:
                 - tag: component
                   value: fan
               trigger_prototypes:
-                - uuid: afb35695f76846c9b5acb98aceeae77a
+                - uuid: 782393dfb6684cda8add1cd3b7aabd44
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}],#2))=1'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan1Status[{#SNMPVALUE}])=1'
@@ -1255,7 +1255,7 @@ zabbix_export:
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 386b9c3688a44808be54c2ff327fdd31
+            - uuid: e0615b8dc81143b4bf391052c5910bf7
               name: 'StackUnit-{#SNMPVALUE} Fan2 status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.5.{#SNMPVALUE}'
@@ -1272,7 +1272,7 @@ zabbix_export:
                 - tag: component
                   value: fan
               trigger_prototypes:
-                - uuid: 85cfc8509038413b9553dbe8e17443b9
+                - uuid: f382b8efea5f47c39c73d8013be8a60e
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}],#2))=1'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan2Status[{#SNMPVALUE}])=1'
@@ -1281,7 +1281,7 @@ zabbix_export:
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: d12d6f5fcdbf436e86095be6ff842b16
+            - uuid: a7b19e935c554b328d9ca8326ce1b753
               name: 'StackUnit-{#SNMPVALUE} Fan3 status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.6.{#SNMPVALUE}'
@@ -1298,7 +1298,7 @@ zabbix_export:
                 - tag: component
                   value: fan
               trigger_prototypes:
-                - uuid: b9221acdb37846018d532d3e39322e8c
+                - uuid: 654cacbf249042eeafe85d57880368da
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}],#2))=1'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan3Status[{#SNMPVALUE}])=1'
@@ -1307,7 +1307,7 @@ zabbix_export:
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 72a70b0f7bdd4247950ccce8ef866a77
+            - uuid: c5738c414a68413596a22c77eeba52b8
               name: 'StackUnit-{#SNMPVALUE} Fan4 status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.7.{#SNMPVALUE}'
@@ -1324,7 +1324,7 @@ zabbix_export:
                 - tag: component
                   value: fan
               trigger_prototypes:
-                - uuid: dd3f3d8f7e43480bb6a79b3b883d32dc
+                - uuid: d823aee3c630493c925205c81dcab451
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}],#2))=1'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan4Status[{#SNMPVALUE}])=1'
@@ -1333,7 +1333,7 @@ zabbix_export:
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 88f080fc49274ef384e42b9861341dee
+            - uuid: c9378e40d38d46a2a0ab64378e5de738
               name: 'StackUnit-{#SNMPVALUE} Fan5 status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.8.{#SNMPVALUE}'
@@ -1349,7 +1349,7 @@ zabbix_export:
               tags:
                 - tag: component
                   value: fan
-            - uuid: d239b61361c445fea7419af794bb1ddc
+            - uuid: b6c4910290cb46bfae3bb7e680a429a3
               name: 'StackUnit-{#SNMPVALUE} Fan6 status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.9.{#SNMPVALUE}'
@@ -1366,7 +1366,7 @@ zabbix_export:
                 - tag: component
                   value: fan
               trigger_prototypes:
-                - uuid: 3ed230993b674b758f5982b271248acb
+                - uuid: 4c21c00b631a4b12a4641b6fca0f7cad
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}])<>1 and (last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}],#1)<>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}],#2))=1'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamFan6Status[{#SNMPVALUE}])=1'
@@ -1375,7 +1375,7 @@ zabbix_export:
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 709051e246f049d5bc07c6fe780a2d15
+            - uuid: 802f48bb31754a59947cf6ff9e71fbda
               name: 'StackUnit-{#SNMPVALUE} Main PS Status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.2.{#SNMPVALUE}'
@@ -1392,14 +1392,14 @@ zabbix_export:
                 - tag: component
                   value: power
               trigger_prototypes:
-                - uuid: 58d4d888b5964b41ae609c67d997cd41
+                - uuid: 5beb4553f7014730b3cfe7757b3cb99f
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamMainPSStatus[{#SNMPVALUE}])<>1'
                   name: 'Main power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
                   priority: WARNING
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 621ecfa9770c41798080ca7c4a059386
+            - uuid: 318e2e088def4ad4998d95b2df007970
               name: 'StackUnit-{#SNMPVALUE} Redundant PS Status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.3.{#SNMPVALUE}'
@@ -1416,14 +1416,14 @@ zabbix_export:
                 - tag: component
                   value: power
               trigger_prototypes:
-                - uuid: 871115641ed54d8f973d1a400690747f
+                - uuid: 82a55b622f404cd5aabe938e99456aa2
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}])<>1 and last(/Eltex MES by SNMP export/rlPhdUnitEnvParamRedundantPSStatus[{#SNMPVALUE}])<>5'
                   name: 'Redundant power supply is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
                   priority: WARNING
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 193e83a737a54c6f9379a59aaef66e97
+            - uuid: 56510dc9acee4897b6cbc2d4baaa3d38
               name: 'StackUnit-{#SNMPVALUE} Temperature sensor status'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.11.{#SNMPVALUE}'
@@ -1440,14 +1440,14 @@ zabbix_export:
                 - tag: component
                   value: temperature
               trigger_prototypes:
-                - uuid: e51ee688f5b64ad1b9a9890641035dec
+                - uuid: 2895ad241da54868b9a7f2af04a46781
                   expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorStatus[{#SNMPVALUE}],#2)<>1'
                   name: 'Temperature status is not OK on {HOST.NAME} StackUnit-{#SNMPVALUE}'
                   priority: WARNING
                   tags:
                     - tag: scope
                       value: availability
-            - uuid: 5590d6eba16a43c181e238151017320f
+            - uuid: 8974107967d54ad79e03d01635d369b0
               name: 'StackUnit-{#SNMPVALUE} Temperature sensor value'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.10.{#SNMPVALUE}'
@@ -1458,7 +1458,7 @@ zabbix_export:
               tags:
                 - tag: component
                   value: temperature
-            - uuid: f53e159bee3c4889afaac51695b6e995
+            - uuid: b98c4298473146dc838a8673db41e072
               name: 'StackUnit-{#SNMPVALUE} Temperature sensor Warning Threshold Value'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.15.1.12.{#SNMPVALUE}'
@@ -1474,7 +1474,7 @@ zabbix_export:
               tags:
                 - tag: component
                   value: temperature
-            - uuid: 02f54d078bcb4e2084d408eedc55436f
+            - uuid: ba3b28887e0c405ba12b5414746d78dc
               name: 'StackUnit-{#SNMPVALUE} FirmwareVersion'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.14.1.3.{#SNMPVALUE}'
@@ -1490,7 +1490,7 @@ zabbix_export:
               tags:
                 - tag: component
                   value: system
-            - uuid: 785833ff84d741469ccda14d06f24fb9
+            - uuid: 9cddd1914ee247c49b900e5284e3681b
               name: 'StackUnit-{#SNMPVALUE} HardwareVersion'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.14.1.4.{#SNMPVALUE}'
@@ -1506,7 +1506,7 @@ zabbix_export:
               tags:
                 - tag: component
                   value: system
-            - uuid: 17ff3db14faa42da89943f372393414e
+            - uuid: cb0564acb08d46c5bf4ac733d2dca6e7
               name: 'StackUnit-{#SNMPVALUE} SerialNum'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.14.1.5.{#SNMPVALUE}'
@@ -1522,7 +1522,7 @@ zabbix_export:
               tags:
                 - tag: component
                   value: system
-            - uuid: b6b888074ede43dbafe78cf6069d3103
+            - uuid: 056020856acc4416bf5a84e597b58424
               name: 'StackUnit-{#SNMPVALUE} SoftwareVersion'
               type: SNMP_AGENT
               snmp_oid: '.1.3.6.1.4.1.89.53.14.1.2.{#SNMPVALUE}'
@@ -1539,7 +1539,7 @@ zabbix_export:
                 - tag: component
                   value: system
           trigger_prototypes:
-            - uuid: e876e733fbc04b9d9200e77451c3f455
+            - uuid: d7d359ce9c8049d3adb87e8c3efa1fda
               expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}])>last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}])'
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: 'last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorValue[{#SNMPVALUE}])<last(/Eltex MES by SNMP export/rlPhdUnitEnvParamTempSensorWarningThresholdValue[{#SNMPVALUE}])-5'
@@ -1558,6 +1558,12 @@ zabbix_export:
       macros:
         - macro: '{$CPU.MAX.USAGE}'
           value: '70'
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
         - macro: '{$IF.ERRORS.WARN}'
           value: '10'
         - macro: '{$IF.UTIL.MAX}'
@@ -1594,13 +1600,11 @@ zabbix_export:
         - macro: '{$SFP.MAX.TEMPERATURE}'
           value: '60'
           description: 'Макс. температура модуля SFP'
-      dashboards:
-        - uuid: 33b2fbe1cc97420e9fc7b279c71e389b
-          name: 'Network interfaces'
-          pages:
-            - {  }
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+          description: 'Time interval for the SNMP availability trigger.'
       valuemaps:
-        - uuid: 2fa621670ffe4b88a0dab563365b5d26
+        - uuid: 0787434a84b347dc8bfbef357d7f5315
           name: 'ENTITY-SENSORS-MIB::EntitySensorStatus'
           mappings:
             - value: '1'
@@ -1609,7 +1613,7 @@ zabbix_export:
               newvalue: unavailable
             - value: '3'
               newvalue: nonoperational
-        - uuid: 7b4c6992a80743eab577b94c0a82b6a2
+        - uuid: 05a5d3a19adb435994088ebf308ca846
           name: 'IF-MIB::ifOperStatus'
           mappings:
             - value: '1'
@@ -1626,7 +1630,7 @@ zabbix_export:
               newvalue: notPresent
             - value: '7'
               newvalue: lowerLayerDown
-        - uuid: 4d102d55f4c64d519ede2a0d3a3c19f8
+        - uuid: 18aec19465164521b2aeb3cfab5e8a12
           name: RlEnvMonState
           mappings:
             - value: '1'
