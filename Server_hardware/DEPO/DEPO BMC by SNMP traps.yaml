@@ -1,0 +1,424 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: e960332b3f6c46a1956486d4f3f99fce
+      name: 'Templates/Server hardware'
+  templates:
+    - uuid: cb25517a3557410d9151c9122835eea0
+      template: 'DEPO BMC by SNMP traps'
+      name: 'DEPO BMC by SNMP traps'
+      description: |
+        Шаблон для мониторинга BMC сервера DEPO Storm.
+        Необходима КОРРЕКТНАЯ настройка BMC для отправки ВСЕХ SNMP трапов в Zabbix. Необходима настройка snmptrapd для приёма трапов от BMC с комьюнити "AMI". SNMP-трансляцию настраивать не следует, файл MIB в систему не подкладывать!
+        Тестировалось на DEPO Storm 3400A2.
+        
+        https://github.com/AndAndr/Zabbix-templates
+      groups:
+        - name: 'Templates/Server hardware'
+      items:
+        - uuid: d5fd387ce6d846c3a05a531bdaa5264d
+          name: 'SNMP fallback'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          tags:
+            - tag: component
+              value: trap
+          triggers:
+            - uuid: cbaef764fc5b4b9f9fb2d5b4539d139e
+              expression: 'nodata(/DEPO BMC by SNMP traps/snmptrap.fallback,{$INFO.TRIGGER.TTL})=0'
+              name: 'Неизвестная ошибка'
+              opdata: 'Триггер закрывается сам через {$INFO.TRIGGER.TTL} после появления.'
+              priority: INFO
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: e36196f54b2f4fd594f823acaedfa65b
+          name: 'Test alarm'
+          type: SNMP_TRAP
+          key: 'snmptrap[.*51172.1.1.0.0$]'
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          description: 'Ловим тестовый трап.'
+          tags:
+            - tag: component
+              value: trap
+          triggers:
+            - uuid: ec5da6aa87194e87a8231a0bb0dce8dc
+              expression: 'nodata(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.0$],{$INFO.TRIGGER.TTL})=0'
+              name: 'Получен тестовый SNMP трап'
+              opdata: 'Триггер закрывается сам через {$INFO.TRIGGER.TTL} после появления.'
+              priority: INFO
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: c35f04e8e89b47e1b4f6124d5c249c26
+          name: Alarm
+          type: SNMP_TRAP
+          key: 'snmptrap[.*51172.1.1.0.\d+$]'
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          tags:
+            - tag: component
+              value: trap
+          triggers:
+            - uuid: 29bca4ee027544eab3df4b13883cd3f2
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.552707")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.552835")=1'
+              name: 'Блок питания: Нет электропитания'
+              priority: WARNING
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 7c142666c50b4f2f93691f3e1f05217d
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.552705")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.552833")=1'
+              name: 'Блок питания: обнаружена неисправность'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 5422c43e30184d03a44af93a372bc6db
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.552704")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.552832")=1'
+              name: 'Блок питания: отсутствует'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 8a333105bef3435a936efc4d3a407e6f
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262402")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262530")=1'
+              name: 'Вентилятор: Lower Critical'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 455cf7b4b3cc4241854772cba3423f1a
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262400")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262528")=1'
+              name: 'Вентилятор: Lower Non-Critical'
+              priority: WARNING
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: abb9de6d725a4f77bd809f2eb496f45e
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262404")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262532")=1'
+              name: 'Вентилятор: Lower Non-Recoverable'
+              priority: HIGH
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: b4dfb52e733b435daea4e7c9abb83e7a
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262409")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262537")=1'
+              name: 'Вентилятор: Upper Critical'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 60e164167c6e40adb6bc672850fc134b
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262407")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262535")=1'
+              name: 'Вентилятор: Upper Non-Critical'
+              priority: WARNING
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 60c3060f7d014871b3fa57ef77262a42
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262411")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.262539")=1'
+              name: 'Вентилятор: Upper Non-Recoverable'
+              priority: HIGH
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 4a567f1765014741a278e3ed963a4514
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131330")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131458")=1'
+              name: 'Напряжение: Lower Critical'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 65c385d8fd7b4ffca50953b1930c7169
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131328")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131456")=1'
+              name: 'Напряжение: Lower Non-Critical'
+              priority: WARNING
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: dfa287b50773493c8214fb7f0d73f087
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131332")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131460")=1'
+              name: 'Напряжение: Lower Non-Recoverable'
+              priority: HIGH
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 974783ef2b934ede8ed46ece357bec4e
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131337")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131465")=1'
+              name: 'Напряжение: Upper Critical'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 6478aae605f84e6a91f66678b65d76f2
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131335")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131463")=1'
+              name: 'Напряжение: Upper Non-Critical'
+              priority: WARNING
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 1f2c82585a2d4558a3f0f68dabf5fc4c
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131339")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.131467")=1'
+              name: 'Напряжение: Upper Non-Recoverable'
+              priority: HIGH
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 11dfd49dd5c546408161528851ac36d2
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65794")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65922")=1'
+              name: 'Температура: Lower Critical'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 5f358f976c5f46cd85b81683a7a0ab02
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65792")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65920")=1'
+              name: 'Температура: Lower Non-Critical'
+              priority: WARNING
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 1a2241dd5d7e405491c9253d8ec0408a
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65796")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65924")=1'
+              name: 'Температура: Lower Non-Recoverable'
+              priority: HIGH
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 421d38599abf4cedbea83c25c985afb0
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65801")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65929")=1'
+              name: 'Температура: Upper Critical'
+              priority: AVERAGE
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 03a578eccf144060987902efa5551051
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65799")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65927")=1'
+              name: 'Температура: Upper Non-Critical'
+              priority: WARNING
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: af0ea709f44b4bf493a0f34cb2187a43
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65803")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.65931")=1'
+              name: 'Температура: Upper Non-Recoverable'
+              priority: HIGH
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 35c54d0d5f174bfd960c09178e0d1bf7
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.1444352")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'nodata(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$INFO.TRIGGER.TTL})=1'
+              name: 'Шасси: MEPowerOn'
+              priority: INFO
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 7606aedcebcb47bb8db12b7719061e61
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.2060037")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'nodata(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$INFO.TRIGGER.TTL})=1'
+              name: 'Шасси: OSBoot'
+              priority: INFO
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 6d27781410cb4c6ea5aa50fddf3e21d1
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.12585474")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'nodata(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$INFO.TRIGGER.TTL})=1'
+              name: 'Шасси: PowerOff'
+              priority: INFO
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 4886767e14b1445093cd9bfd975829d5
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.12585472")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'nodata(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$INFO.TRIGGER.TTL})=1'
+              name: 'Шасси: PowerOn'
+              priority: INFO
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 69a9589c13b84c97b5811a5c9cb24dcc
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.12611328")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'nodata(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$INFO.TRIGGER.TTL})=1'
+              name: 'Шасси: PowerReset'
+              priority: INFO
+              description: 'Доступно ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 0ddf2cd0c3af4771bafb47405229bebe
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.814848")=1'
+              recovery_mode: NONE
+              name: 'Шасси: Исправимая ошибка в модуле оперативной памяти'
+              opdata: 'Проверь, если ОК - закрой вручную.'
+              priority: WARNING
+              description: 'Ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 0c19d4ef3bcc484bafbbf51e4309df57
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.814849")=1'
+              recovery_mode: NONE
+              name: 'Шасси: Неисправимая ошибка в модуле оперативной памяти'
+              opdata: 'Проверь, если ОК - закрой вручную.'
+              priority: HIGH
+              description: 'Ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 339287d3e69d4f65b6d76a6e2b7b775e
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.814855")=1'
+              recovery_mode: NONE
+              name: 'Шасси: Неправильная конфигурация модулей памяти'
+              opdata: 'Проверь, если ОК - закрой вручную.'
+              priority: WARNING
+              description: 'Ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 6416afdc60464cf59336a9f57d927f9a
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.2519311")=1'
+              recovery_mode: NONE
+              name: 'Шасси: Перезагрузка BMC'
+              opdata: 'Проверь, если ОК - закрой вручную.'
+              priority: WARNING
+              description: 'Ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: f556da046e5b433ab6fecfe6fbb693c7
+              expression: 'find(/DEPO BMC by SNMP traps/snmptrap[.*51172.1.1.0.\d+$],{$TRAP.ACTUAL.TIME},"like","51172.1.1.0.487169")=1'
+              recovery_mode: NONE
+              name: 'Шасси: Тепловое отключение процессора'
+              opdata: 'Проверь, если ОК - закрой вручную.'
+              priority: HIGH
+              description: 'Ручное закрытие.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: depo
+        - tag: target
+          value: storm
+      macros:
+        - macro: '{$INFO.TRIGGER.TTL}'
+          value: 10m
+        - macro: '{$TRAP.ACTUAL.TIME}'
+          value: 1m
