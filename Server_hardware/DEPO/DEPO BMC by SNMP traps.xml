@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2025-08-21T15:19:11Z</date>
+    <groups>
+        <group>
+            <name>Templates/Server hardware</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>DEPO BMC by SNMP traps</template>
+            <name>DEPO BMC by SNMP traps</name>
+            <description>Шаблон для мониторинга BMC сервера DEPO Storm.&#13;
+Необходима КОРРЕКТНАЯ настройка BMC для отправки ВСЕХ SNMP трапов в Zabbix. Необходима настройка snmptrapd для приёма трапов от BMC с комьюнити &quot;AMI&quot;. SNMP-трансляцию настраивать не следует, файл MIB в систему не подкладывать!&#13;
+Тестировалось на DEPO Storm 3400A2.&#13;
+&#13;
+https://github.com/AndAndr/Zabbix-templates</description>
+            <groups>
+                <group>
+                    <name>Templates/Server hardware</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>SNMP Traps</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>SNMP fallback</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap.fallback</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>SNMP Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$INFO.TRIGGER.TTL})}=0</expression>
+                            <name>Неизвестная ошибка</name>
+                            <opdata>Триггер закрывается сам через {$INFO.TRIGGER.TTL} после появления.</opdata>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Test alarm</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[.*51172.1.1.0.0$]</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>Ловим тестовый трап.</description>
+                    <applications>
+                        <application>
+                            <name>SNMP Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$INFO.TRIGGER.TTL})}=0</expression>
+                            <name>Получен тестовый SNMP трап</name>
+                            <opdata>Триггер закрывается сам через {$INFO.TRIGGER.TTL} после появления.</opdata>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Alarm</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[.*51172.1.1.0.\d+$]</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>SNMP Traps</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.552707,{$TRAP.ACTUAL.TIME})}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.552835,{$TRAP.ACTUAL.TIME})}=1</recovery_expression>
+                            <name>Блок питания: Нет электропитания</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.552705,{$TRAP.ACTUAL.TIME})}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.552833,{$TRAP.ACTUAL.TIME})}=1</recovery_expression>
+                            <name>Блок питания: обнаружена неисправность</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.552704,{$TRAP.ACTUAL.TIME})}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.552832,{$TRAP.ACTUAL.TIME})}=1</recovery_expression>
+                            <name>Блок питания: отсутствует</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.262402)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.262530)}=1</recovery_expression>
+                            <name>Вентилятор: Lower Critical</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.262400)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.262528)}=1</recovery_expression>
+                            <name>Вентилятор: Lower Non-Critical</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.262404)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.262532)}=1</recovery_expression>
+                            <name>Вентилятор: Lower Non-Recoverable</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.262409)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.262537)}=1</recovery_expression>
+                            <name>Вентилятор: Upper Critical</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.262407)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.262535)}=1</recovery_expression>
+                            <name>Вентилятор: Upper Non-Critical</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.262411)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.262539)}=1</recovery_expression>
+                            <name>Вентилятор: Upper Non-Recoverable</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.131330)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.131458)}=1</recovery_expression>
+                            <name>Напряжение: Lower Critical</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.131328)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.131456)}=1</recovery_expression>
+                            <name>Напряжение: Lower Non-Critical</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.131332)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.131460)}=1</recovery_expression>
+                            <name>Напряжение: Lower Non-Recoverable</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.131337)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.131465)}=1</recovery_expression>
+                            <name>Напряжение: Upper Critical</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.131335)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.131463)}=1</recovery_expression>
+                            <name>Напряжение: Upper Non-Critical</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.131339)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.131467)}=1</recovery_expression>
+                            <name>Напряжение: Upper Non-Recoverable</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.65794)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.65922)}=1</recovery_expression>
+                            <name>Температура: Lower Critical</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.65792)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.65920)}=1</recovery_expression>
+                            <name>Температура: Lower Non-Critical</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.65796)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.65924)}=1</recovery_expression>
+                            <name>Температура: Lower Non-Recoverable</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.65801)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.65929)}=1</recovery_expression>
+                            <name>Температура: Upper Critical</name>
+                            <priority>AVERAGE</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.65799)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.65927)}=1</recovery_expression>
+                            <name>Температура: Upper Non-Critical</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.65803)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(51172.1.1.0.65931)}=1</recovery_expression>
+                            <name>Температура: Upper Non-Recoverable</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.1444352)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{nodata({$INFO.TRIGGER.TTL})}=1</recovery_expression>
+                            <name>Шасси: MEPowerOn</name>
+                            <priority>INFO</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.2060037)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{nodata({$INFO.TRIGGER.TTL})}=1</recovery_expression>
+                            <name>Шасси: OSBoot</name>
+                            <priority>INFO</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.12585474)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{nodata({$INFO.TRIGGER.TTL})}=1</recovery_expression>
+                            <name>Шасси: PowerOff</name>
+                            <priority>INFO</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.12585472)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{nodata({$INFO.TRIGGER.TTL})}=1</recovery_expression>
+                            <name>Шасси: PowerOn</name>
+                            <priority>INFO</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.12611328)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{nodata({$INFO.TRIGGER.TTL})}=1</recovery_expression>
+                            <name>Шасси: PowerReset</name>
+                            <priority>INFO</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.814848)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <name>Шасси: Исправимая ошибка в модуле оперативной памяти</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.814849)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <name>Шасси: Неисправимая ошибка в модуле оперативной памяти</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.814855)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <name>Шасси: Неправильная конфигурация модулей памяти</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.2519311)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <name>Шасси: Перезагрузка BMC</name>
+                            <priority>WARNING</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(51172.1.1.0.487169)}=1 and {nodata({$TRAP.ACTUAL.TIME})}=0</expression>
+                            <name>Шасси: Тепловое отключение процессора</name>
+                            <priority>HIGH</priority>
+                            <description>Доступно ручное закрытие.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$INFO.TRIGGER.TTL}</macro>
+                    <value>10m</value>
+                </macro>
+                <macro>
+                    <macro>{$TRAP.ACTUAL.TIME}</macro>
+                    <value>1m</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
