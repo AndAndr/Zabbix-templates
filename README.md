@@ -32,8 +32,6 @@
 
 
 ## Other_hardware
-**DeltaSTS** Шаблон для мониторинга по SNMP cтатического переключателя ввода СТС Delta Electronics Delta Static Transfer Switch - Delta STS32A. Тестировалось на STS30002SR10035 v.01.12.15j.
-
 **ELEMY_ATS-1203** Шаблон для мониторинга по SNMP Elemy ATS - АВР автоматический ввод резерва. Тестировалось на прошивке h2_b2_m1.1.8.
 
 **EatonPowerware9390** Шаблон для мониторинга по SNMP ИБП Eaton Powerware 9390.
@@ -52,10 +50,16 @@
 
 
 
+## Power
+**DeltaSTS** Шаблон для мониторинга по SNMP cтатического переключателя ввода СТС Delta Electronics Delta Static Transfer Switch - Delta STS32A. Тестировалось на STS30002SR10035 v.01.12.15j.
+
+
+
 ## SAN
 **FC_HBA_stats_Linux_by_Zabbix_agent_zbxv4.xml** Шаблон для мониторинга (через Zabbix агента) FC HBA (в том числе fc_host_statistics) Linux для Zabbix 4.4.
 
 **Brocade FC by SNMP.yaml** Шаблон для мониторинга по SNMP FC-коммутаторов Brocade и их форков для Zabbix 7.0.
+
 
 
 ## Server_hardware

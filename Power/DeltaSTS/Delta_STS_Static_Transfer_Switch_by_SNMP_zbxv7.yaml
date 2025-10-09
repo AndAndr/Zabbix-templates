@@ -1,0 +1,908 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 3dcd5bbe90534f9e8eb5c2d53756af63
+      name: Templates/Power
+  templates:
+    - uuid: cc2e1ac3a0464a2085c2264d3d02de74
+      template: 'Delta STS Static Transfer Switch by SNMP'
+      name: 'Delta STS Static Transfer Switch by SNMP'
+      description: |
+        https://github.com/AndAndr/Zabbix-templates/
+        Tested on STS30002SR10035 v.01.12.15j
+        прим. В OID'ах АВРа очепятки..
+      groups:
+        - name: Templates/Power
+      items:
+        - uuid: 651ceffa947a4cb9af65f0d76a96fddd
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 2812c43ccde44544ab8476e4b8ce5082
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/icmpping,#3)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Delta STS Static Transfer Switch by SNMP/icmpping,#3)=1'
+              name: 'Unavailable by ICMP ping'
+              priority: HIGH
+              description: |
+                Last value: {ITEM.LASTVALUE1}.
+                Last three attempts returned timeout.  Please check device connectivity.
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 5600e63db5b945d8a04f59679f76fd74
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 656cbf6220b34325b4aab055343baeef
+              expression: 'min(/Delta STS Static Transfer Switch by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Delta STS Static Transfer Switch by SNMP/icmppingloss,5m)<100'
+              name: 'High ICMP ping loss'
+              priority: WARNING
+              dependencies:
+                - name: 'Unavailable by ICMP ping'
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/Delta STS Static Transfer Switch by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 840ecf104a4c4e5da79611d8f21c8d93
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 613c1f2f85e84f4aa91003e2676996e1
+              expression: 'avg(/Delta STS Static Transfer Switch by SNMP/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'High ICMP ping response time'
+              priority: WARNING
+              dependencies:
+                - name: 'High ICMP ping loss'
+                  expression: 'min(/Delta STS Static Transfer Switch by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Delta STS Static Transfer Switch by SNMP/icmppingloss,5m)<100'
+                - name: 'Unavailable by ICMP ping'
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/Delta STS Static Transfer Switch by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 5e630075f52a4059a957a4c950c64afa
+          name: 'SNMP traps (fallback)'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          value_type: LOG
+          trends: '0'
+          description: 'The item is used to collect all SNMP traps unmatched by other snmptrap items'
+          logtimefmt: 'hh:mm:sszyyyy/MM/dd'
+          tags:
+            - tag: component
+              value: network
+        - uuid: a26a493cf500452bbca47d43ce7fbe5c
+          name: stsAgentManufacturer
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.1.1.0
+          key: stsAgentManufacturer
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          inventory_link: VENDOR
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 8f8398a39b5440d382ca394c1f393fba
+          name: stsAgentVersion
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.1.2.0
+          key: stsAgentVersion
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: c33da24696114e17ae35536f6ff08c25
+          name: stsFailureIndicator
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.4.5.0
+          key: stsFailureIndicator
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: health
+        - uuid: 0247739ed10d422e915bcc9ad4822763
+          name: stsFailureNoOutput
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.4.6.2.0
+          key: stsFailureNoOutput
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: power
+          triggers:
+            - uuid: 35af413f61514f39952824e724e08d30
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsFailureNoOutput)<>2'
+              name: 'No output on'
+              opdata: 'Нет напряжения на выходе'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 72d998f4f2d4445aa6a1819e9bb61de9
+          name: stsFailureOutputOC
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.4.6.3.0
+          key: stsFailureOutputOC
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: e5b7d73ee9c049528c1dd3e6c5b5c7b6
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsFailureOutputOC)<>2'
+              name: Overcurrent
+              opdata: 'Превышение по току'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 0eeb008be7a94076af8cdbb20a6113d7
+          name: stsFailureOverTemperature
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.4.6.4.0
+          key: stsFailureOverTemperature
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: temperature
+          triggers:
+            - uuid: c168aa78e989472c825ea98939060426
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsFailureOverTemperature)<>2'
+              name: Overheat
+              opdata: 'Превышение по температуре'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 2e89c39bac5241dd9e86d9b97f6e7055
+          name: stsFailureSwitchFault
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.4.6.1.0
+          key: stsFailureSwitchFault
+          valuemap:
+            name: stsStatus
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 1db1d90598e5429b8c88941d0d8cbf82
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsFailureSwitchFault)<>2'
+              name: 'General fault'
+              priority: AVERAGE
+              description: 'Сбой какого либо реле, тиристора или перегрев'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 1de8af0a326e492abfca75b058ef4855
+          name: stsIdentFWVersion
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.2.2.0
+          key: stsIdentFWVersion
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: aa00b73dd390449696768bdb1fe7d6c1
+          name: stsIdentModel
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.2.1.0
+          key: stsIdentModel
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          inventory_link: MODEL
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: bcff51538c614216b7c2b53514a62441
+          name: stsIdentSerialNumber
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.2.4.0
+          key: stsIdentSerialNumber
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SERIALNO_A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 3842b6c26ba6437692c02ce1c7508219
+          name: stsMeasureTemperatureC
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.3.3.0
+          key: stsMeasureTemperatureC
+          units: '`C'
+          description: Температура
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: temperature
+          triggers:
+            - uuid: 69a85cd425d7414e9a3f5a70cd4e45a1
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsMeasureTemperatureC)>{$STSMAXTEMP}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsMeasureTemperatureC)<{$STSMAXTEMP}-3'
+              name: 'High temperature'
+              opdata: 'Высокая температура в шкафу, проверь климат!'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 2eeebf5519b34e6f9142dbd3e9248031
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsMeasureTemperatureC)<{$STSMINTEMP}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsMeasureTemperatureC)>{$STSMINTEMP}+3'
+              name: 'Low temperature'
+              opdata: 'Низкая температура в шкафу, проверь климат!'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 1653a5a3a0e540b5815c2780da528e4d
+          name: stsMessureOperationMode
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.3.7.0
+          key: stsMessureOperationMode
+          valuemap:
+            name: stsOperationMode
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 29a73eb3da3b476cb49de838b9ba48e4
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsMessureOperationMode)<>4 and last(/Delta STS Static Transfer Switch by SNMP/stsMessureOperationMode)<>5'
+              name: 'Check operation mode'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 9eb3a6d53cde4c14b97c3975e9c5b8c9
+              expression: 'abs(change(/Delta STS Static Transfer Switch by SNMP/stsMessureOperationMode))=1'
+              name: 'Source was changed'
+              opdata: 'Источник изменился'
+              priority: WARNING
+              dependencies:
+                - name: 'Check operation mode'
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsMessureOperationMode)<>4 and last(/Delta STS Static Transfer Switch by SNMP/stsMessureOperationMode)<>5'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 5a4e075d0d574a86a01cef3c4d3d3865
+          name: stsMessureTransferedTimes
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.3.6.0
+          key: stsMessureTransferedTimes
+          delay: 5m
+          units: Times
+          tags:
+            - tag: component
+              value: power
+        - uuid: 01b0d2d131a9440d81e7e3fe27f3f592
+          name: stsOutputCurrent
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.3.2.2.0
+          key: stsOutputCurrent
+          value_type: FLOAT
+          units: A
+          description: 'Ток на выходе'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: ef7012d285424156ad8e2a09da76a36c
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsOutputCurrent)>={$STSMAXOUTPUTCURRENT}'
+              name: 'Output current is gt {$STSMAXOUTPUTCURRENT}'
+              opdata: 'Ток={ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 98be18c9a26d4387901dd57a9fe050cb
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsOutputCurrent)>={$STSWARNINGOUTPUTCURRENT}'
+              name: 'Output current is gt {$STSWARNINGOUTPUTCURRENT}'
+              opdata: 'Ток={ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                - name: 'Output current is gt {$STSMAXOUTPUTCURRENT}'
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsOutputCurrent)>={$STSMAXOUTPUTCURRENT}'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 218cfa46f9c547e898167f62e51c5fa4
+          name: stsOutputVoltage
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2254.2.80.3.2.1.0
+          key: stsOutputVoltage
+          value_type: FLOAT
+          units: V
+          description: 'Напряжение на выходе'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: component
+              value: power
+        - uuid: f4af025568124771bbe35ca3327aafb6
+          name: 'System contact details'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: 'system.contact[sysContact.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The textual identification of the contact person for this managed node, together with information on how to contact this person.  If no contact information is known, the value is the zero-length string.
+          inventory_link: CONTACT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 0ad53d4984464695bbc2e9da35ec9a1f
+          name: 'System description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: 'system.descr[sysDescr.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            A textual description of the entity. This value should
+            include the full name and version identification of the system's hardware type, software operating-system, and
+            networking software.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 577a6b4c68a74da8b4d43d14867401df
+          name: 'System location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: 'system.location[sysLocation.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            Physical location of the node (e.g., `equipment room`, `3rd floor`). If not provided, the value is a zero-length string.
+          inventory_link: LOCATION
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 536835a123454ddc816e5dc5b9d4802e
+          name: 'System name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: system.name
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            An administratively-assigned name for this managed node.By convention, this is the node's fully-qualified domain name.  If the name is unknown, the value is the zero-length string.
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 8b0ea38ce1ad430995eb3f1a52106b66
+              expression: 'last(/Delta STS Static Transfer Switch by SNMP/system.name,#1)<>last(/Delta STS Static Transfer Switch by SNMP/system.name,#2) and length(last(/Delta STS Static Transfer Switch by SNMP/system.name))>0'
+              name: 'System name has changed'
+              event_name: 'System name has changed (new name: {ITEM.VALUE})'
+              priority: INFO
+              description: 'The name of the system has changed. Acknowledge to close the problem manually.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: 3e1e0dd9b4654863bedaa6de5040a001
+          name: Uptime
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: 'system.net.uptime[sysUpTime.0]'
+          trends: '0'
+          units: uptime
+          description: |
+            MIB: SNMPv2-MIB
+            Time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: ecdc025b63e64d5284f5e76acc8ca62b
+          name: 'System object ID'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.2.0
+          key: 'system.objectid[sysObjectID.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The vendor's authoritative identification of the network management subsystem contained in the entity.  This value is allocated within the SMI enterprises subtree (1.3.6.1.4.1) and provides an easy and unambiguous means for determining`what kind of box' is being managed.  For example, if vendor`Flintstones, Inc.' was assigned the subtree1.3.6.1.4.1.4242, it could assign the identifier 1.3.6.1.4.1.4242.1.1 to its `Fred Router'.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 2362c0b7169840c18d463ff47d111330
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          delay: 5m
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 705149e8bbca41d4952d9f47598fda7d
+              expression: 'max(/Delta STS Static Transfer Switch by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              tags:
+                - tag: scope
+                  value: availability
+      discovery_rules:
+        - uuid: 3945db41b17b41ca9f9d33c75fdd8aa5
+          name: InputFailure
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2254.2.80.4.4.1.1]'
+          key: stsInputFailureIndex
+          delay: 1h
+          lifetime: 10d
+          description: 'Input discovery'
+          item_prototypes:
+            - uuid: 23b2b16add7e4818b6c43bffe2665f59
+              name: 'Input Aux Power state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.7.{#SNMPVALUE}'
+              key: 'stsInputFailureAuxPower[{#SNMPVALUE}]'
+              description: 'Состояние внутреннего источника питания'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: ed77c17ca4384a87ad5d13dadebdec6f
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureAuxPower[{#SNMPVALUE}])<>2'
+                  name: 'Check internal power source-{#SNMPVALUE}'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: 4242f90f8f2a4bb3835884c27e0a8721
+              name: 'Input voltage brownout state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.9.{#SNMPVALUE}'
+              key: 'stsInputFailureBrownout[{#SNMPVALUE}]'
+              description: 'Обнаружено отключение напряжения'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 4af74b03d1d84c64b25b4e0489d21668
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureBrownout[{#SNMPVALUE}])<>2'
+                  name: 'Voltage brownout on source-{#SNMPVALUE}'
+                  opdata: 'Обнаружено превышение напряжения'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'Check input source-{#SNMPVALUE}'
+                      expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureNotOperable[{#SNMPVALUE}])<>2'
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: 6310a8c2b7ee44988d8c11cce21b2823
+              name: 'Input voltage drop state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.8.{#SNMPVALUE}'
+              key: 'stsInputFailureDrop[{#SNMPVALUE}]'
+              description: 'Обнаружено падение напряжения'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: e3a688bfb595447b949d23530b884a12
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureDrop[{#SNMPVALUE}])<>2'
+                  name: 'Voltage drop on source-{#SNMPVALUE}'
+                  opdata: 'Обнаружено падение напряжения'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'Check input source-{#SNMPVALUE}'
+                      expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureNotOperable[{#SNMPVALUE}])<>2'
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: 53667a6c92ee4290976b47ff0a746ed6
+              name: 'Input Frequency state source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.10.{#SNMPVALUE}'
+              key: 'stsInputFailureFrequency[{#SNMPVALUE}]'
+              description: 'Обнаружено отклонение частоты от нормы'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: beffa505656d44efaa84a51f5ebeb041
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureFrequency[{#SNMPVALUE}])<>2'
+                  name: 'Source-{#SNMPVALUE} frequency is out of range'
+                  opdata: 'Частота не норма'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: d41472c058e847a489d5632e6e7888d3
+              name: 'Input state not operable source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.11.{#SNMPVALUE}'
+              key: 'stsInputFailureNotOperable[{#SNMPVALUE}]'
+              description: 'Ввод отключён'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 2f5eab5841a544b29cc97aecafe9ea0b
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureNotOperable[{#SNMPVALUE}])<>2'
+                  name: 'Check input source-{#SNMPVALUE}'
+                  opdata: 'Нет напряжения на входе'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: cf7e245876ad40029b3948949d8eb2f9
+              name: 'Input Open Relay status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.2.{#SNMPVALUE}'
+              key: 'stsInputFailureRelayOpen[{#SNMPVALUE}]'
+              description: 'The status of input relay is OPEN'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: f9bc7fa80e8a471d9768422d0d129fb7
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureRelayOpen[{#SNMPVALUE}])<>2'
+                  name: 'Check open relay status source-{#SNMPVALUE}'
+                  priority: WARNING
+                  description: 'Состояние реле "RelayOpen"'
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: b771c4e4ccfc449dba61357ae4f80129
+              name: 'Input Short Relay status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.3.{#SNMPVALUE}'
+              key: 'stsInputFailureRelayShort[{#SNMPVALUE}]'
+              description: 'The status of input relay is SHORT'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 3dfb3acaf88c4705b6bf6873ca7080dd
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureRelayShort[{#SNMPVALUE}])<>2'
+                  name: 'Check short relay status source-{#SNMPVALUE}'
+                  priority: WARNING
+                  description: 'Состояние реле "RelayShort"'
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: 3fe882380d4f4d2dab18bacf177d110b
+              name: 'Input Open SCR status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.4.{#SNMPVALUE}'
+              key: 'stsInputFailureSCROpen[{#SNMPVALUE}]'
+              description: 'The status of input SCR is OPEN'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: bb01830b679c42acaa171b0c1ba07c6e
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureSCROpen[{#SNMPVALUE}])<>2'
+                  name: 'Check open SCR status source-{#SNMPVALUE}'
+                  priority: WARNING
+                  description: 'Состояние тиристора "SCROpen"'
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: cdc3c52ce4bf4cc6bee69b4452875cd3
+              name: 'Input Short SCR status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.5.{#SNMPVALUE}'
+              key: 'stsInputFailureSCRShort[{#SNMPVALUE}]'
+              description: 'The status of input SCR is SHORT'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 9c24eeeec2c1496db9ed3efbb56d0e97
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureSCRShort[{#SNMPVALUE}])<>2'
+                  name: 'Check short SCR status source-{#SNMPVALUE}'
+                  priority: WARNING
+                  description: 'Состояние тиристора "SCRShort"'
+                  tags:
+                    - tag: scope
+                      value: notice
+            - uuid: 6b9879e7184e4e94bbeeeeb3df9c75e9
+              name: 'Input SCR Thermal status source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.4.4.1.6.{#SNMPVALUE}'
+              key: 'stsInputFailureSCRThermal[{#SNMPVALUE}]'
+              description: 'Статус температуры тиристора SCR'
+              valuemap:
+                name: stsStatus
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: power
+                - tag: component
+                  value: temperature
+              trigger_prototypes:
+                - uuid: dd46cd7a0bf7454cb2bfe7f8f80111b5
+                  expression: 'last(/Delta STS Static Transfer Switch by SNMP/stsInputFailureSCRThermal[{#SNMPVALUE}])<>2'
+                  name: 'SCR source-{#SNMPVALUE } temperature warning'
+                  opdata: 'Перегрев тиристора SCR'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: notice
+        - uuid: 091e24f8cd2f48d0ae4e5829db0730f8
+          name: Input
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2254.2.80.3.1.1.1]'
+          key: stsInputIndex
+          delay: 1h
+          lifetime: 10d
+          description: 'Input discovery'
+          item_prototypes:
+            - uuid: 20a6fbac294c48edac5888299996a182
+              name: 'Input Frequency source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.3.1.1.3.{#SNMPVALUE}'
+              key: 'stsInputFrequency[{#SNMPVALUE}]'
+              value_type: FLOAT
+              units: Hz
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: component
+                  value: power
+            - uuid: c1979e3e2624436281130576d66b58d4
+              name: 'Input voltage source-{#SNMPVALUE}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2254.2.80.3.1.1.2.{#SNMPVALUE}'
+              key: 'stsInputVoltage[{#SNMPVALUE}]'
+              value_type: FLOAT
+              units: V
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: component
+                  value: power
+      tags:
+        - tag: class
+          value: power
+        - tag: target
+          value: delta
+        - tag: target
+          value: 'delta sts'
+      macros:
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        - macro: '{$STSMAXINPUTVOLTAGE}'
+          value: '260'
+          description: 'Максимальное напряжение на входе'
+        - macro: '{$STSMAXOUTPUTCURRENT}'
+          value: '30'
+          description: 'Максимальный ток фатальный'
+        - macro: '{$STSMAXTEMP}'
+          value: '35'
+          description: 'Максимальная температура устройства'
+        - macro: '{$STSMININPUTVOLTAGE}'
+          value: '190'
+          description: 'Минимальное напряжение на входе'
+        - macro: '{$STSMINTEMP}'
+          value: '16'
+          description: 'Минимальная температура устройства'
+        - macro: '{$STSWARNINGOUTPUTCURRENT}'
+          value: '24'
+          description: 'Максимальный ток для предупреждения'
+      valuemaps:
+        - uuid: 20f41a09b2064f7e883a581f8f604c20
+          name: stsOperationMode
+          mappings:
+            - value: '1'
+              newvalue: Initialization
+            - value: '2'
+              newvalue: Diagnosis
+            - value: '3'
+              newvalue: 'Off'
+            - value: '4'
+              newvalue: source-1
+            - value: '5'
+              newvalue: source-2
+            - value: '6'
+              newvalue: Safe
+            - value: '7'
+              newvalue: Fault
+        - uuid: 686c249647554479955a0c1399d44da7
+          name: stsStatus
+          mappings:
+            - value: '1'
+              newvalue: Abnormal
+            - value: '2'
+              newvalue: Normal
