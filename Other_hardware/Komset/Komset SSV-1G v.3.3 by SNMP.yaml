@@ -1,28 +1,26 @@
 zabbix_export:
   version: '7.0'
   template_groups:
-    - uuid: cee0d7cd026a4cb4b9ff10c8226e970a
+    - uuid: 2cb435130e6a483a8b41678605abea1b
       name: 'Templates/Other Hardware'
   templates:
-    - uuid: d514e3e0325a41159b2e17a7f7e654be
-      template: 'Komset SSV-1G by SNMP'
-      name: 'Komset SSV-1G by SNMP'
+    - uuid: 569a65fdd2c7404fadc045e746d2834d
+      template: 'Komset SSV-1G v.3.3 by SNMP'
+      name: 'Komset SSV-1G v.3.3 by SNMP'
       description: |
         https://github.com/AndAndr
         Мониторинг по SNMP сервера точного времени Комсет ССВ-1Г:
         1. Состояния БП.
         2. Статус устройства.
         3. Статус аварии.
-        4. Состояния внутреннего модуля ГНСС.
-      templates:
-        - name: 'Generic by SNMP'
+        4. Состояния модулей ГНСС.
       groups:
         - name: 'Templates/Other Hardware'
       items:
-        - uuid: ecbc2ba045f34265a5d2ece088b9fe30
+        - uuid: 2274e71e4645455aa1a5b5bbb54173a1
           name: 'Alarm status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.5.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.5.0]'
           key: devAlarmStatus
           trends: '0'
           valuemap:
@@ -31,38 +29,38 @@ zabbix_export:
             - tag: component
               value: alert
           triggers:
-            - uuid: bdc4cd06424f4498b5290ca689276744
-              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=7'
+            - uuid: c04b2c0fd67e4106857f6c35eef87745
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devAlarmStatus,#5)=7'
               name: 'Alert alarm'
               priority: HIGH
-            - uuid: 6c9fff725d1d49b790fb06992d08041c
-              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=6'
+            - uuid: 93391ce44a2447638ed763d9d6dc5bc9
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devAlarmStatus,#5)=6'
               name: 'Critical alarm'
               priority: AVERAGE
-            - uuid: a59ddf1f6735486cade00e3b81c5a468
-              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=8'
+            - uuid: ef8ca886ab654e848d893765702d420b
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devAlarmStatus,#5)=8'
               name: 'Emergency alarm'
               priority: HIGH
-            - uuid: 55292d25e7864a63bd29cc5313c30d21
-              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=5'
+            - uuid: 3ecf981788f64990b75ee83b41a7cdcf
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devAlarmStatus,#5)=5'
               name: 'Error alarm'
-              priority: AVERAGE
-            - uuid: cf3a6e78f5154fe9babbc2ad51a7b690
-              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=3'
+              priority: WARNING
+            - uuid: ef3e8461e24d46ce967f2ce669543fa4
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devAlarmStatus,#5)=3'
               name: 'Notice alarm'
               priority: INFO
-            - uuid: 3a76171f318a427ba507ab0333b48df5
-              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=0'
+            - uuid: 541c76e7e53644cb813f5a9311d53eb4
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devAlarmStatus,#5)=0'
               name: 'Unknown alarm'
               priority: WARNING
-            - uuid: f871d48f54694ae3af5bf1df8d565d67
-              expression: 'last(/Komset SSV-1G by SNMP/devAlarmStatus,#5)=4'
+            - uuid: 77f171a3b4a64a5794acd82dc0924882
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devAlarmStatus,#5)=4'
               name: 'Warning alarm'
               priority: AVERAGE
-        - uuid: ac115f6898754c0c836a8a93c7ded4ac
+        - uuid: 416a222c9ef448d5bf0f820117e3a7bd
           name: 'Device status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.6.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.6.0]'
           key: devDeviceStatus
           trends: '0'
           valuemap:
@@ -71,36 +69,36 @@ zabbix_export:
             - tag: component
               value: system
           triggers:
-            - uuid: e1c32e0c67f640b289056b534b4252fe
-              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=6'
+            - uuid: c83c57f3feef4a4da37ccaf8d0d94f40
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devDeviceStatus,#5)=6'
               name: 'Clock not sync'
               priority: HIGH
-            - uuid: 285ac69eb3854ceab7e5f68caa46cca0
-              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=2'
+            - uuid: 028be9791d5f4df5baae5639fa72bcfe
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devDeviceStatus,#5)=2'
               name: 'No sync source'
               priority: HIGH
-            - uuid: 9213837861424a1d9179d2c25e7099a4
-              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=4'
+            - uuid: c782b4a3eb074f87a32d9348dee550cc
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devDeviceStatus,#5)=4'
               name: 'No time source'
               priority: HIGH
-            - uuid: 8790a8903cf149008d7a7feff38ebc0e
-              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=3'
+            - uuid: 5d9609e906564db3b3fb6b7c712cf339
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devDeviceStatus,#5)=3'
               name: 'Sync source not valid'
               priority: HIGH
-            - uuid: adb2997aa03141ddafcd1841de1fcdf2
-              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=5'
+            - uuid: 3f98280dce254387b04e887d1084770a
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devDeviceStatus,#5)=5'
               name: 'Time source not valid'
               priority: HIGH
-            - uuid: 1458328dcc514d0281f258e999d06807
-              expression: 'last(/Komset SSV-1G by SNMP/devDeviceStatus,#5)=0'
+            - uuid: efd2856cfe4949b59d16158393fd3798
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devDeviceStatus,#5)=0'
               name: 'Unknown device status'
               priority: HIGH
-        - uuid: a18dbaa9c4164bfa995401bab57a4686
+        - uuid: 26b22203437047f081c808e18452f53b
           name: 'Hardware version'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.2.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.2.0]'
           key: devHwVersion
-          delay: 5m
+          delay: 1h
           value_type: TEXT
           trends: '0'
           description: 'Hardware version'
@@ -112,30 +110,30 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: ca438b8350094105be64bdc58fede652
-          name: 'Syncronization Status Message'
+        - uuid: 01374bcd0d724082adaa84acb9eaa569
+          name: 'Synchronization Status Message'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.11.2.0]'
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.30.1.11.2.0]'
           key: devOscSSM
           valuemap:
             name: OscStatus
           tags:
             - tag: component
               value: system
-        - uuid: bf0b9e8eedc148278cd705551d442e1f
+        - uuid: e0d1e85b117e49ed9faff7d4519146b7
           name: 'Internal oscillator status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.11.1.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.11.1.0]'
           key: devOscStatus
           valuemap:
             name: OscStatus
           tags:
             - tag: component
               value: system
-        - uuid: 1d6fe054c62c4258ae5b48b02db61cfd
+        - uuid: 58ce5b42fae8435bae42afa75e018b2e
           name: 'Power supply 1 status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.7.1.0]'
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.30.1.7.1.0]'
           key: devPowerStatus1
           valuemap:
             name: devPowerStatus
@@ -143,15 +141,15 @@ zabbix_export:
             - tag: component
               value: power
           triggers:
-            - uuid: 3bf8276e32274a62a9f7a2d0896add7a
-              expression: 'last(/Komset SSV-1G by SNMP/devPowerStatus1)<>5'
+            - uuid: c3b56051d54a4e449c5d9f662493bbae
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devPowerStatus1)<>5'
               name: 'Check PS1'
-              opdata: 'Проверь БП1'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
               priority: WARNING
-        - uuid: 226ec942d7514e12a85626b3ab99eab0
+        - uuid: 2da09399479844f2929143456939c6bc
           name: 'Power supply 2 status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.7.2.0]'
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.30.1.7.2.0]'
           key: devPowerStatus2
           valuemap:
             name: devPowerStatus
@@ -159,17 +157,17 @@ zabbix_export:
             - tag: component
               value: power
           triggers:
-            - uuid: 5866cd639fa24c69a9efe964978f61e2
-              expression: 'last(/Komset SSV-1G by SNMP/devPowerStatus2)<>5'
+            - uuid: 434a837c69ba42d8a43a679bc7621e19
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devPowerStatus2)<>5'
               name: 'Check PS2'
-              opdata: 'Проверь БП2'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
               priority: WARNING
-        - uuid: 52e7f544554d4969b5e98546f7945d3c
+        - uuid: f3ca883c5a5941a6af0235555ce38bfe
           name: 'Serial number'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.4.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.4.0]'
           key: devSerialNumber
-          delay: 5m
+          delay: 1h
           value_type: TEXT
           trends: '0'
           description: 'Serial number'
@@ -181,12 +179,12 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: 9829b9e768774b29bc023e3896e2c978
+        - uuid: 92109f902ec849aa92bc619716942702
           name: 'Software version'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.3.0]'
+          snmp_oid: 'get[iso.3.6.1.4.1.7999.30.1.3.0]'
           key: devSwVersion
-          delay: 5m
+          delay: 1h
           value_type: TEXT
           trends: '0'
           description: 'Software version'
@@ -198,133 +196,358 @@ zabbix_export:
           tags:
             - tag: component
               value: system
-        - uuid: 6d8f46fd5b1e4f8985383911cdea7e7e
+        - uuid: 1e756446ddeb453a9b8cd420b5bec892
           name: 'Leap second TimeScalePopravka'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.10.2.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.10.2.0]'
           key: devTimeScalePopravka
           tags:
             - tag: component
               value: ntp
-        - uuid: 75a88094e14e47f1bc1c81879fdf250c
+        - uuid: 338f04787a854650adc908b19206c596
           name: 'Leap second status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.10.1.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.10.1.0]'
           key: devTimeScaleStatus
+          delay: 10m
           valuemap:
             name: TimeScaleStatus
           tags:
             - tag: component
               value: ntp
           triggers:
-            - uuid: 62f3aae6eea44576b5dcfc564520646e
-              expression: 'last(/Komset SSV-1G by SNMP/devTimeScaleStatus)=3'
+            - uuid: ec5f72e709644eb4a837023ceb2b836e
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devTimeScaleStatus)=3'
               name: 'Leap status - Delete second'
-              priority: AVERAGE
-            - uuid: 5a711860e55c418dac23614f697ed2ee
-              expression: 'last(/Komset SSV-1G by SNMP/devTimeScaleStatus)=2'
+              priority: INFO
+            - uuid: 7f81577e9f2042f9a822b00492d5fb76
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devTimeScaleStatus)=2'
               name: 'Leap status - Insert second'
-              priority: AVERAGE
-            - uuid: 51f5c537dc394a23a98b095d62b567d1
-              expression: 'last(/Komset SSV-1G by SNMP/devTimeScaleStatus)=4'
+              priority: INFO
+            - uuid: b8d79a9a2dd447ada31faf8e9d3b815f
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/devTimeScaleStatus)=4'
               name: 'Leap status - Not synchronised'
-              priority: AVERAGE
-            - uuid: 12a0e644a141463cb53acf292d299490
-              expression: 'nodata(/Komset SSV-1G by SNMP/devTimeScaleStatus,5m)=1'
-              name: 'No SNMP data from device'
               priority: WARNING
-        - uuid: 3afb39bb63574434abd6855fcfdeeb8d
+        - uuid: 2a23a7bb49cc46eb9ee76ea9f5a81113
           name: 'Device TimeZone'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.1.10.3.0]'
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.1.10.3.0]'
           key: devTimeZone
+          delay: 1h
+          units: час.
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  return value/=3600;
+                  
+                  
+                  
           tags:
             - tag: component
               value: system
-        - uuid: 1a833473503f4de981f9b29c3db21005
-          name: 'BEIDOU navigation satellites count'
+        - uuid: 627c2bf1e13249e8bdfe683e75816da8
+          name: 'moduleExt{$MGNSS.EXT.MODULE.LOCATION} Alarm Status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.6.0]'
-          key: GnssNavSatBeidou
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.1.{$MGNSS.EXT.MODULE.LOCATION}.6.0]'
+          key: moduleExtAlarmStatus
+          valuemap:
+            name: AlarmStatus
           tags:
             - tag: component
               value: gnss
-        - uuid: 059663d570b14d9ba460526c89488a39
-          name: 'GALILEO navigation satellites count'
+        - uuid: 33f1da49769b46e1bb84fbfc8beee3b0
+          name: 'moduleExt{$MGNSS.EXT.MODULE.LOCATION} BEIDOU navigation satellites count'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.5.0]'
-          key: GnssNavSatGalileo
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.1.{$MGNSS.EXT.MODULE.LOCATION}.10.6.0]'
+          key: moduleExtGnssNavSatBeidou
           tags:
             - tag: component
               value: gnss
-        - uuid: 0cbede8f60a74d6da2e83edb36c85993
-          name: 'GLONASS navigation satellites count'
+        - uuid: 0780a7261f6e44c5806210641f5b4426
+          name: 'moduleExt{$MGNSS.EXT.MODULE.LOCATION} GALILEO navigation satellites count'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.3.0]'
-          key: GnssNavSatGlonass
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.1.{$MGNSS.EXT.MODULE.LOCATION}.10.5.0]'
+          key: moduleExtGnssNavSatGalileo
           tags:
             - tag: component
               value: gnss
-        - uuid: a631f85b2b3145eea9257051f849049d
-          name: 'GPS navigation satellites count'
+        - uuid: d3c8e7f1092f4d0cbfe8934c4502eafb
+          name: 'moduleExt{$MGNSS.EXT.MODULE.LOCATION} GLONASS navigation satellites count'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.4.0]'
-          key: GnssNavSatGPS
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.1.{$MGNSS.EXT.MODULE.LOCATION}.10.3.0]'
+          key: moduleExtGnssNavSatGlonass
           tags:
             - tag: component
               value: gnss
-        - uuid: 86a0fb37ee1f451dbca0dd395e10b8c1
-          name: 'GNSS navigation satellites count summary'
+        - uuid: 6c03514cdd8e4686af8e77ea017b3ac4
+          name: 'moduleExt{$MGNSS.EXT.MODULE.LOCATION} GPS navigation satellites count'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.2.0]'
-          key: GnssNavSatSummary
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.1.{$MGNSS.EXT.MODULE.LOCATION}.10.4.0]'
+          key: moduleExtGnssNavSatGPS
           tags:
             - tag: component
               value: gnss
-        - uuid: f5a194df46e24bb58e0edffa221c26fd
-          name: 'GNSS Status'
+        - uuid: 4bc53b6239784396be56fd771a63f378
+          name: 'moduleExt{$MGNSS.EXT.MODULE.LOCATION} GNSS Status'
           type: SNMP_AGENT
-          snmp_oid: 'get[iso.3.6.1.4.1.7999.20.200.9.10.1.0]'
-          key: GnssStatus
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.1.{$MGNSS.EXT.MODULE.LOCATION}.10.1.0]'
+          key: moduleExtGnssStatus
           valuemap:
             name: GnssStatus
           tags:
             - tag: component
               value: gnss
           triggers:
-            - uuid: 66ed85dec38c4ac9a7788c8e44860402
-              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=4'
-              name: 'GNSS Antenna alarm'
-              priority: HIGH
-            - uuid: 44040b41f5914e37819d510921a6227b
-              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=6'
-              name: 'GNSS Antenna not connected'
-              priority: HIGH
-            - uuid: 0c0a054032bc43598291950809c7f9cb
-              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=3'
-              name: 'GNSS Antenna shadowed'
-              priority: HIGH
-            - uuid: 1bd6aa1993a24ad89fc767342bf35386
-              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=5'
-              name: 'GNSS Antenna shorted'
-              priority: HIGH
-            - uuid: 4dc5e239fc8a432988b0063b7e51e19c
-              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=7'
-              name: 'GNSS Low sat count'
+            - uuid: 35247363e28e4f52859d1492fdc67692
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/moduleExtGnssStatus)<>2'
+              name: 'Состояние внешнего модуля ГНСС не Норма'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: INFO
+        - uuid: cc4f0e97ffaa431d8bb448548af9772d
+          name: 'moduleInt1 Alarm Status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.2.9.6.0]'
+          key: moduleInt1AlarmStatus
+          valuemap:
+            name: AlarmStatus
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 42f55954749b439d826da5a6df0c1a6f
+          name: 'moduleInt1 BEIDOU navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.2.9.10.6.0]'
+          key: moduleInt1GnssNavSatBeidou
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 0d46ee7e58304cd09953f9862ae9add0
+          name: 'moduleInt1 GALILEO navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.2.9.10.5.0]'
+          key: moduleInt1GnssNavSatGalileo
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 0cd4ba7b518b4174a70a7aebd5d0d6af
+          name: 'moduleInt1 GLONASS navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.2.9.10.3.0]'
+          key: moduleInt1GnssNavSatGlonass
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 08ee96adb03e4c09bafb2ad565ca21ee
+          name: 'moduleInt1 GPS navigation satellites count'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.2.9.10.4.0]'
+          key: moduleInt1GnssNavSatGPS
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: 92f4438fe045493da4fea6ea7e6a2577
+          name: 'moduleInt1 GNSS navigation satellites count summary'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.2.9.10.2.0]'
+          key: moduleInt1GnssNavSatSummary
+          tags:
+            - tag: component
+              value: gnss
+        - uuid: d1e4bb3cbb8a47e2b86eb8e340178fac
+          name: 'moduleInt1 GNSS Status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[1.3.6.1.4.1.7999.30.200.2.9.10.1.0]'
+          key: moduleInt1GnssStatus
+          valuemap:
+            name: GnssStatus
+          tags:
+            - tag: component
+              value: gnss
+          triggers:
+            - uuid: 437b51114d62485da3e204e9537e2184
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/moduleInt1GnssStatus)<>2'
+              name: 'Состояние встроенного модуля ГНСС не Норма'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: INFO
+        - uuid: e7f59fd9b1244a4fad20979742d8a260
+          name: 'SNMP traps (fallback)'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          value_type: LOG
+          trends: '0'
+          description: 'The item is used to collect all SNMP traps unmatched by other snmptrap items'
+          logtimefmt: 'hh:mm:sszyyyy/MM/dd'
+          tags:
+            - tag: component
+              value: network
+        - uuid: 3232e9a2fd9049b783c2d786304c97ba
+          name: 'System contact details'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: 'system.contact[sysContact.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The textual identification of the contact person for this managed node, together with information on how to contact this person.  If no contact information is known, the value is the zero-length string.
+          inventory_link: CONTACT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: d0f9ef30ce654ddebab483a9bfadc8cf
+          name: 'System description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: 'system.descr[sysDescr.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            A textual description of the entity. This value should
+            include the full name and version identification of the system's hardware type, software operating-system, and
+            networking software.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: e656140176c4451f8c8afd1a8cd829c7
+          name: 'System location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: 'system.location[sysLocation.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            Physical location of the node (e.g., `equipment room`, `3rd floor`). If not provided, the value is a zero-length string.
+          inventory_link: LOCATION
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 77ad618ab9bb42deb141ed1136fe9730
+          name: 'System name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: system.name
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            An administratively-assigned name for this managed node.By convention, this is the node's fully-qualified domain name.  If the name is unknown, the value is the zero-length string.
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: a19079d3285345f7b5d0bcff600d0771
+              expression: 'last(/Komset SSV-1G v.3.3 by SNMP/system.name,#1)<>last(/Komset SSV-1G v.3.3 by SNMP/system.name,#2) and length(last(/Komset SSV-1G v.3.3 by SNMP/system.name))>0'
+              name: 'System name has changed'
+              event_name: 'System name has changed (new name: {ITEM.VALUE})'
+              priority: INFO
+              description: 'The name of the system has changed. Acknowledge to close the problem manually.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: ce498dbe641d4645a69e3278e4779aee
+          name: Uptime
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: 'system.net.uptime[sysUpTime.0]'
+          trends: '0'
+          units: uptime
+          description: |
+            MIB: SNMPv2-MIB
+            Time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 5eb4d5d2582549108517a0669c59cbd7
+          name: 'System object ID'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.2.0
+          key: 'system.objectid[sysObjectID.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The vendor's authoritative identification of the network management subsystem contained in the entity.  This value is allocated within the SMI enterprises subtree (1.3.6.1.4.1) and provides an easy and unambiguous means for determining`what kind of box' is being managed.  For example, if vendor`Flintstones, Inc.' was assigned the subtree1.3.6.1.4.1.4242, it could assign the identifier 1.3.6.1.4.1.4242.1.1 to its `Fred Router'.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: bab9527ed8ba48de945d154055476950
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          delay: 5m
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 5eaf317c5a884264a880e264b8955b0e
+              expression: 'max(/Komset SSV-1G v.3.3 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
               priority: WARNING
-            - uuid: 72a9c745988c4325bf51715fd57174d5
-              expression: 'last(/Komset SSV-1G by SNMP/GnssStatus)=0'
-              name: 'GNSS unknown status'
-              priority: HIGH
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              tags:
+                - tag: scope
+                  value: availability
       tags:
         - tag: class
-          value: hardware
+          value: gnss
         - tag: target
           value: komset
         - tag: target
           value: ssv-1g
+      macros:
+        - macro: '{$MGNSS.EXT.MODULE.LOCATION}'
+          value: '2'
+          description: 'Расположение внешнего модуля mGNSS'
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
       dashboards:
-        - uuid: afdc271e5cf94d6088a8a0fa10fe91fd
+        - uuid: 34068df8e74b4c588a1e443abd065f8a
           name: ССВ-1Г
           pages:
             - widgets:
@@ -335,8 +558,8 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid.0
                       value:
-                        host: 'Komset SSV-1G by SNMP'
-                        name: 'Количество спутников'
+                        host: 'Komset SSV-1G v.3.3 by SNMP'
+                        name: 'Статистика НКА - встроенный модуль'
                     - type: STRING
                       name: reference
                       value: XZJXW
@@ -360,7 +583,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Komset SSV-1G by SNMP'
+                        host: 'Komset SSV-1G v.3.3 by SNMP'
                         key: devPowerStatus1
                     - type: INTEGER
                       name: show.0
@@ -422,7 +645,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Komset SSV-1G by SNMP'
+                        host: 'Komset SSV-1G v.3.3 by SNMP'
                         key: devPowerStatus2
                     - type: INTEGER
                       name: show.0
@@ -487,7 +710,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Komset SSV-1G by SNMP'
+                        host: 'Komset SSV-1G v.3.3 by SNMP'
                         key: devDeviceStatus
                     - type: INTEGER
                       name: show.0
@@ -557,7 +780,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Komset SSV-1G by SNMP'
+                        host: 'Komset SSV-1G v.3.3 by SNMP'
                         key: devAlarmStatus
                     - type: INTEGER
                       name: show.0
@@ -619,7 +842,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Komset SSV-1G by SNMP'
+                        host: 'Komset SSV-1G v.3.3 by SNMP'
                         key: devTimeScaleStatus
                     - type: INTEGER
                       name: show.0
@@ -666,11 +889,6 @@ zabbix_export:
                     - type: INTEGER
                       name: decimal_size
                       value: '15'
-                    - type: ITEM
-                      name: itemid.0
-                      value:
-                        host: 'Komset SSV-1G by SNMP'
-                        key: GnssStatus
                     - type: INTEGER
                       name: show.0
                       value: '2'
@@ -728,8 +946,21 @@ zabbix_export:
                     - type: INTEGER
                       name: value_size
                       value: '15'
+                - type: graph
+                  x: '36'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Komset SSV-1G v.3.3 by SNMP'
+                        name: 'Статистика НКА - внешний модуль'
+                    - type: STRING
+                      name: reference
+                      value: KEHQQ
       valuemaps:
-        - uuid: 6f48e640a4704bc6ab3fbda530fe7d1c
+        - uuid: bdaf40cbc7fe413fb55677af2b59c21e
           name: AlarmStatus
           mappings:
             - value: '0'
@@ -750,7 +981,7 @@ zabbix_export:
               newvalue: alert
             - value: '8'
               newvalue: emergency
-        - uuid: b8ef0472b56d471c805c8db5f6a0650a
+        - uuid: 0a22aa74916c4dafae8d60516d203ba6
           name: DeviceStatus
           mappings:
             - value: '0'
@@ -767,7 +998,7 @@ zabbix_export:
               newvalue: timeSrcNotValid
             - value: '6'
               newvalue: clockNotSync
-        - uuid: 2bb73f5a8e2847b7bb11663c10d5d621
+        - uuid: eaefcb018b9c4b59b637a2a100d38bb0
           name: devPowerStatus
           mappings:
             - value: '0'
@@ -782,7 +1013,7 @@ zabbix_export:
               newvalue: noOutputVoltage
             - value: '5'
               newvalue: success
-        - uuid: 5e3e34c90b5a423f8f58cd259aadd903
+        - uuid: d3513ec6aa6043bf88e6b81411b4b733
           name: GnssStatus
           mappings:
             - value: '0'
@@ -801,7 +1032,7 @@ zabbix_export:
               newvalue: stateAntennaNotConnected
             - value: '7'
               newvalue: stateLoSatCount
-        - uuid: 069f1378a02748c8bde8e4eb7d9e2c80
+        - uuid: 261d4973417d49798c18f53b2eeba632
           name: OscSSM
           mappings:
             - value: '1'
@@ -836,7 +1067,7 @@ zabbix_export:
               newvalue: ssmINV14
             - value: '16'
               newvalue: ssmDNU
-        - uuid: fba5ccaea7f8466fa78916c863484415
+        - uuid: f7a752306b3041a28f2486dbba38a5a0
           name: OscStatus
           mappings:
             - value: '1'
@@ -851,7 +1082,7 @@ zabbix_export:
               newvalue: oscTraceable
             - value: '6'
               newvalue: oscLocked
-        - uuid: d310dd419c3046f8a1a4f240cd485763
+        - uuid: 690b6dd3a661453a95d4e3e8d191cfb5
           name: TimeScaleStatus
           mappings:
             - value: '1'
@@ -863,30 +1094,57 @@ zabbix_export:
             - value: '4'
               newvalue: Alarm
   graphs:
-    - uuid: b1007dfdef7e40f58dabc1c4f8d56489
-      name: 'Количество спутников'
+    - uuid: e4e4594f21a34b8d8fcb443ea57ade0b
+      name: 'Статистика НКА - внешний модуль'
       ymin_type_1: FIXED
       graph_items:
         - color: 00FF00
           calc_fnc: ALL
           item:
-            host: 'Komset SSV-1G by SNMP'
-            key: GnssNavSatGlonass
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleExtGnssNavSatGlonass
         - sortorder: '1'
           color: 0040FF
           calc_fnc: ALL
           item:
-            host: 'Komset SSV-1G by SNMP'
-            key: GnssNavSatGalileo
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleExtGnssNavSatGalileo
         - sortorder: '2'
           color: FFFF00
           calc_fnc: ALL
           item:
-            host: 'Komset SSV-1G by SNMP'
-            key: GnssNavSatBeidou
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleExtGnssNavSatBeidou
         - sortorder: '3'
           color: F63100
           calc_fnc: ALL
           item:
-            host: 'Komset SSV-1G by SNMP'
-            key: GnssNavSatGPS
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleExtGnssNavSatGPS
+    - uuid: ef8811ce2850409a84daa6cf77c266fe
+      name: 'Статистика НКА - встроенный модуль'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: 00FF00
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleInt1GnssNavSatGlonass
+        - sortorder: '1'
+          color: 0040FF
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleInt1GnssNavSatGalileo
+        - sortorder: '2'
+          color: FFFF00
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleInt1GnssNavSatBeidou
+        - sortorder: '3'
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: 'Komset SSV-1G v.3.3 by SNMP'
+            key: moduleInt1GnssNavSatGPS
