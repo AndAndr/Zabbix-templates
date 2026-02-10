@@ -63,7 +63,7 @@
 
 
 ## Server_hardware
-**Yadro** Шаблон для мониторинга по SNMP BMC серверов YADRO Vegman для Zabbix 4.4.
+**Yadro** Шаблоны для мониторинга по SNMP BMC серверов YADRO Vegman.
 
 **DEPO** Шаблон для мониторинга по SNMP BMC серверов DEPO Storm.
 

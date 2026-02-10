@@ -1,0 +1,1794 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: e960332b3f6c46a1956486d4f3f99fce
+      name: 'Templates/Server hardware'
+  templates:
+    - uuid: d12a48312d6e4dcab3fb255439bbe751
+      template: 'Yadro Vegman BMC by SNMP export'
+      name: 'Yadro Vegman BMC by SNMP export'
+      description: 'Шаблон для серверов Yadro Vegman. Основан на шаблоне Yadro vegman v1.10. Работает в режиме опроса и + ловли трапов SNMP.'
+      groups:
+        - name: 'Templates/Server hardware'
+      items:
+        - uuid: 58a5a374cf984022afbfbfd2ee092e1b
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: dcf17a3e28504a18b4d2504b6159ab86
+              expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=1'
+              name: 'Тест доступности по протоколу ICMP'
+              priority: HIGH
+              description: |
+                Последнее значение: {ITEM.LASTVALUE1}.
+                Последние три попытки вернули timeout. Проверьте подключение устройства.
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: a285d6add12944f3a9eaaa6f904ffc04
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 52116091cc3f4d86bc98fc77a365ecf7
+              expression: 'min(/Yadro Vegman BMC by SNMP export/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Yadro Vegman BMC by SNMP export/icmppingloss,5m)<100'
+              name: 'Высокая потеря пакетов ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=0'
+                  recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 80f3ef6bd89346068f0c0650112921fe
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 53197f7830bd4b299d6445a7db5840ad
+              expression: 'avg(/Yadro Vegman BMC by SNMP export/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'Высокое время отклика ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Высокая потеря пакетов ICMP ping'
+                  expression: 'min(/Yadro Vegman BMC by SNMP export/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/Yadro Vegman BMC by SNMP export/icmppingloss,5m)<100'
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=0'
+                  recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: abaae064e8ed4f789cdf20ba23d13a4f
+          name: 'SNMP traps (fallback)'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          value_type: LOG
+          trends: '0'
+          description: 'The item is used to collect all SNMP traps unmatched by other snmptrap items'
+          logtimefmt: 'hh:mm:sszyyyy/MM/dd'
+          tags:
+            - tag: component
+              value: network
+        - uuid: 8471a11b1cba4a9fa12b4bf2ddf520fe
+          name: 'SNMP trap: yadroCurrSensorStateNotification'
+          type: SNMP_TRAP
+          key: 'snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"]'
+          delay: '0'
+          history: 90d
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var valueMap = {"0": "disabled", "1": "normal", "2": "warningLow", "3":"warningHigh", "4":"criticalLow", "5":"criticalHigh"};
+                  var result = value.match(/(?:.*yadroCurrSensorState.\"*(\w+)\"*|.*49769\.1\.5\.1\.7\.([\d\.]+))(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\w+)/i);
+                  if (result == null) 
+                  {
+                    throw "Unable to parse the SNMP trap:\n\n" + value;
+                  }
+                  var sensorName = "";
+                  var sensorState = "";
+                  if (result[1] != null) 
+                  {
+                    sensorName = result[1];
+                  }
+                  if (result[2] != null) 
+                  {
+                    var asciiString = "";
+                    var asciiCodeArray = result[2].split('.');
+                    for (var i = 0; i < asciiCodeArray.length; i++) {
+                      if (asciiCodeArray[i] > 32) {
+                        asciiString += String.fromCharCode(asciiCodeArray[i]);
+                      }
+                    }
+                    sensorName = asciiString;
+                  }
+                  if (!isNaN(parseInt(result[3]))) 
+                  {
+                    sensorState = valueMap[result[3]];
+                  }
+                  else 
+                  {
+                    sensorState = result[3];
+                  }
+                  return "Sensor: " + sensorName + "; State: " + sensorState + ";";
+                  
+          tags:
+            - tag: component
+              value: snmptrap
+          triggers:
+            - uuid: 7af066f5d7e74ea98d3c23c0e079ec93
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"],,"regexp","State: criticalHigh;")=1'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тока \1 достиг верхнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 7eaf2f3469174fac950136f845db168d
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"],,"regexp","State: warningHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"],,"regexp","State: warningHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тока \1 достиг верхнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: c5082146e8ed450b8c76d94f4bd77bd2
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"],,"regexp","State: criticalLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"],,"regexp","State: criticalLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тока \1 достиг нижнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 38cc4d66aadb41de95966f649ab9eab4
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"],,"regexp","State: warningLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroCurrSensorStateNotification|.*49769.0.5[\s|$])"],,"regexp","State: warningLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тока \1 достиг нижнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+        - uuid: 945d1751970345fda0e0e77aa8c76227
+          name: 'SNMP trap: yadroHostPowerStateNotification'
+          type: SNMP_TRAP
+          key: 'snmptrap["(.*yadroHostPowerStateNotification|.*49769.0.1[\s|$])"]'
+          delay: '0'
+          history: 90d
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var valueMap = {"-1": "unknown", "0": "off", "1": "on"};
+                  var result = value.match(/(?:.*yadroHostPowerState|.*49769.1.1)(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\-*\w+)/i);
+                  if (result == null) 
+                  {
+                    throw "Unable to parse the SNMP trap:\n\n" + value;
+                  }
+                  if (!isNaN(parseInt(result[1]))) 
+                  {
+                    return valueMap[result[1]];
+                  }
+                  
+                  return result[1];
+          tags:
+            - tag: component
+              value: snmptrap
+          triggers:
+            - uuid: f6995ba3419044e7bcb3ba10a29e8e5a
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroHostPowerStateNotification|.*49769.0.1[\s|$])"],,"regexp","off")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroHostPowerStateNotification|.*49769.0.1[\s|$])"],,"regexp","off")=0'
+              name: 'SNMP-trap: питание хоста отключено'
+              opdata: '{ITEM.VALUE}'
+              status: DISABLED
+              priority: HIGH
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Сервер выключен'
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)=0 and change(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)<0'
+                  recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)=1'
+              tags:
+                - tag: snmpTrap
+            - uuid: ebb12e98aa13470ea0d47ee5f187c5b3
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroHostPowerStateNotification|.*49769.0.1[\s|$])"],,"regexp","unknown")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroHostPowerStateNotification|.*49769.0.1[\s|$])"],,"regexp","unknown")=0'
+              name: 'SNMP-trap: состояние питания хоста неизвестно'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: snmpTrap
+        - uuid: 6f8b29e1eb2045eb905225ab0524bf4f
+          name: 'SNMP trap: yadroInventoryItemNotification'
+          type: SNMP_TRAP
+          key: 'snmptrap["(.*yadroInventoryItemNotification|.*49769.0.7[\s|$])"]'
+          delay: '0'
+          history: 90d
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  //value = "  YADRO-MIB::yadroInventoryPresent.\"system/chassis/motherboard/cpu1\" type=2  value=INTEGER: 1 \nYADRO-MIB::yadroInventoryFunctional.\"system/chassis/motherboard/cpu1\" type=2  value=INTEGER: 2";
+                  var valueMap = {"1": "true", "2": "false"};
+                  var result = value.match(/(?:.*yadroInventoryPresent.\"*([\/\w]+)\"*|.*49769\.4\.1\.9\.([\d\.]+))(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\w+)(?:\s+|\s*\n)(?:.*yadroInventoryFunctional.\"*([\/\w]+)\"*|.*49769\.4\.1\.10\.([\d\.]+))(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\w+)/i);
+                  if (result == null) 
+                  {
+                    throw "Unable to parse the SNMP trap:\n\n" + value;
+                  }
+                  var inventoryPath = "";
+                  var isPresent = "";
+                  var isFunctional = "";
+                  if (result[1] != null) 
+                  {
+                    inventoryPath = result[1];
+                  }
+                  if (result[2] != null) 
+                  {
+                    var asciiString = "";
+                    var asciiCodeArray = result[2].split('.');
+                    for (var i = 0; i < asciiCodeArray.length; i++) {
+                      if (asciiCodeArray[i] > 32) {
+                        asciiString += String.fromCharCode(asciiCodeArray[i]);
+                      }
+                    }
+                    inventoryPath = asciiString;
+                  }
+                  
+                  if (!isNaN(parseInt(result[3]))) 
+                  {
+                    isPresent = valueMap[result[3]];
+                  }
+                  else 
+                  {
+                    isPresent = result[3];
+                  }
+                  if (!isNaN(parseInt(result[6]))) 
+                  {
+                    isFunctional = valueMap[result[6]];
+                  }
+                  else 
+                  {
+                    isFunctional = result[6];
+                  }
+                  return "Path: " + inventoryPath + "; IsPresent: " + isPresent + "; IsFunctional: " + isFunctional + ";";
+                  
+                  
+          tags:
+            - tag: component
+              value: snmptrap
+          triggers:
+            - uuid: 3ec770af8b7d4fa6b26155de09ad2b56
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroInventoryItemNotification|.*49769.0.7[\s|$])"],,"regexp","IsPresent: true; IsFunctional: false;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroInventoryItemNotification|.*49769.0.7[\s|$])"],,"regexp","IsPresent: true; IsFunctional: false;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Path
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Path: (.*?);", "Устройство \1 не работает")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              description: '{{ITEM.VALUE}.regsub("Path: (.*?);", "Устройство \1 найдено, но не функционирует")}'
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: Path
+                  value: '{{ITEM.VALUE}.regsub("Path: (.*?);", "\1")}'
+                - tag: scope
+                  value: availability
+                - tag: snmpTrap
+            - uuid: 00d7d62cfab643bf8c0267e51ae3d8b7
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroInventoryItemNotification|.*49769.0.7[\s|$])"],,"regexp","IsPresent: false;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroInventoryItemNotification|.*49769.0.7[\s|$])"],,"regexp","IsPresent: false;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Path
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Path: (.*?); IsPresent: (.*?);", "Устройство \1 отсутствует")}'
+              opdata: '{ITEM.VALUE}'
+              status: DISABLED
+              priority: INFO
+              description: '{{ITEM.VALUE}.regsub("Path: (.*?); IsPresent: (.*?);", "Устройство \1 отсутствует")} Возможно, оно было удалено. Пожалуйста, закройте триггер вручную, если устройство не было возвращено.'
+              type: MULTIPLE
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Сервер выключен'
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)=0 and change(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)<0'
+                  recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)=1'
+              tags:
+                - tag: Path
+                  value: '{{ITEM.VALUE}.regsub("Path: (.*?);", "\1")}'
+                - tag: snmpTrap
+        - uuid: 6cc8b08d87e14ab9b98a58e2ca3de669
+          name: 'SNMP trap: yadroPwrSensorStateNotification'
+          type: SNMP_TRAP
+          key: 'snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"]'
+          delay: '0'
+          history: 90d
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var valueMap = {"0": "disabled", "1": "normal", "2": "warningLow", "3":"warningHigh", "4":"criticalLow", "5":"criticalHigh"};
+                  var result = value.match(/(?:.*yadroPowerSensorState.\"*(\w+)\"*|.*49769\.1\.6\.1\.7\.([\d\.]+))(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\w+)/i);
+                  if (result == null) 
+                  {
+                    throw "Unable to parse the SNMP trap:\n\n" + value;
+                  }
+                  var sensorName = "";
+                  var sensorState = "";
+                  if (result[1] != null) 
+                  {
+                    sensorName = result[1];
+                  }
+                  if (result[2] != null) 
+                  {
+                    var asciiString = "";
+                    var asciiCodeArray = result[2].split('.');
+                    for (var i = 0; i < asciiCodeArray.length; i++) {
+                      if (asciiCodeArray[i] > 32) {
+                        asciiString += String.fromCharCode(asciiCodeArray[i]);
+                      }
+                    }
+                    sensorName = asciiString;
+                  }
+                  if (!isNaN(parseInt(result[3]))) 
+                  {
+                    sensorState = valueMap[result[3]];
+                  }
+                  else 
+                  {
+                    sensorState = result[3];
+                  }
+                  return "Sensor: " + sensorName + "; State: " + sensorState + ";";
+                  
+          tags:
+            - tag: component
+              value: snmptrap
+          triggers:
+            - uuid: 6f612c21cfc54d5a837f1a1b9e993e8d
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: criticalHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: criticalHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик мощности \1 достиг верхнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 7d1b1e81ed2b4cbc9dae6d6f89746f57
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: warningHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: warningHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик мощности \1 достиг верхнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 4dde795ed6af4f3289fece5f03f9b0d3
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: criticalLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: criticalLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик мощности \1 достиг нижнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 7dc04facccc94faabf172ed23a482b58
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: warningLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroPwrSensorStateNotification|.*49769.0.6[\s|$])"],,"regexp","State: warningLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик мощности \1 достиг нижнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+        - uuid: bbe147c151d247cfa30a6b8b1475c801
+          name: 'SNMP trap: yadroTachSensorStateNotification'
+          type: SNMP_TRAP
+          key: 'snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"]'
+          delay: '0'
+          history: 90d
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var valueMap = {"0": "disabled", "1": "normal", "2": "warningLow", "3":"warningHigh", "4":"criticalLow", "5":"criticalHigh"};
+                  var result = value.match(/(?:.*yadroTachSensorState.\"*(\w+)\"*|.*49769\.1\.4\.1\.7\.([\d\.]+))(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\w+)/i);
+                  if (result == null) 
+                  {
+                    throw "Unable to parse the SNMP trap:\n\n" + value;
+                  }
+                  var sensorName = "";
+                  var sensorState = "";
+                  if (result[1] != null) 
+                  {
+                    sensorName = result[1];
+                  }
+                  if (result[2] != null) 
+                  {
+                    var asciiString = "";
+                    var asciiCodeArray = result[2].split('.');
+                    for (var i = 0; i < asciiCodeArray.length; i++) {
+                      if (asciiCodeArray[i] > 32) {
+                        asciiString += String.fromCharCode(asciiCodeArray[i]);
+                      }
+                    }
+                    sensorName = asciiString;
+                  }
+                  if (!isNaN(parseInt(result[3]))) 
+                  {
+                    sensorState = valueMap[result[3]];
+                  }
+                  else 
+                  {
+                    sensorState = result[3];
+                  }
+                  return "Sensor: " + sensorName + "; State: " + sensorState + ";";
+                  
+          tags:
+            - tag: component
+              value: snmptrap
+          triggers:
+            - uuid: fc7792da0ad14e2480e9d9c3605452f0
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: criticalHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: criticalHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тахометра \1 достиг верхнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: c8e1c8e71a2c42c986e42ccbbd35e0c8
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: warningHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: warningHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тахометра \1 достиг верхнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 0407f16ccb024ad29216f29850cb7287
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: criticalLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: criticalLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тахометра \1 достиг нижнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 6e8abb311a8e4695acb990c7980152d1
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: warningLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTachSensorStateNotification|.*49769.0.4[\s|$])"],,"regexp","State: warningLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик тахометра \1 достиг нижнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+        - uuid: f22602c4c2a4405eb28b8ee7d699a535
+          name: 'SNMP trap: yadroTempSensorStateNotification'
+          type: SNMP_TRAP
+          key: 'snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"]'
+          delay: '0'
+          history: 90d
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var valueMap = {"0": "disabled", "1": "normal", "2": "warningLow", "3":"warningHigh", "4":"criticalLow", "5":"criticalHigh"};
+                  var result = value.match(/(?:.*yadroTempSensorState.\"*(\w+)\"*|.*49769\.1\.2\.1\.7\.([\d\.]+))(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\w+)/i);
+                  if (result == null) 
+                  {
+                    throw "Unable to parse the SNMP trap:\n\n" + value;
+                  }
+                  var sensorName = "";
+                  var sensorState = "";
+                  if (result[1] != null) 
+                  {
+                    sensorName = result[1];
+                  }
+                  if (result[2] != null) 
+                  {
+                    var asciiString = "";
+                    var asciiCodeArray = result[2].split('.');
+                    for (var i = 0; i < asciiCodeArray.length; i++) {
+                      if (asciiCodeArray[i] > 32) {
+                        asciiString += String.fromCharCode(asciiCodeArray[i]);
+                      }
+                    }
+                    sensorName = asciiString;
+                  }
+                  if (!isNaN(parseInt(result[3]))) 
+                  {
+                    sensorState = valueMap[result[3]];
+                  }
+                  else 
+                  {
+                    sensorState = result[3];
+                  }
+                  return "Sensor: " + sensorName + "; State: " + sensorState + ";";
+                  
+          tags:
+            - tag: component
+              value: snmptrap
+          triggers:
+            - uuid: 3c03280393564863a3c8120b54b0c327
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: criticalHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: criticalHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик температуры \1 достиг верхнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 84a17df104ca4082b415ddc8528da20d
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: warningHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: warningHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик температуры \1 достиг верхнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: e1f3b21fc14f4bc2a1917064ab624398
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: criticalLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: criticalLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик температуры \1 достиг нижнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: cc59dc938a364286babbfd44d5417ad6
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: warningLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroTempSensorStateNotification|.*49769.0.2[\s|$])"],,"regexp","State: warningLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик температуры \1 достиг нижнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+        - uuid: 2f67d30a8ca548b089e0577a7efa908b
+          name: 'SNMP trap: yadroVoltSensorStateNotification'
+          type: SNMP_TRAP
+          key: 'snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"]'
+          delay: '0'
+          history: 90d
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var valueMap = {"0": "disabled", "1": "normal", "2": "warningLow", "3":"warningHigh", "4":"criticalLow", "5":"criticalHigh"};
+                  var result = value.match(/(?:.*yadroVoltSensorState.\"*(\w+)\"*|.*49769\.1\.3\.1\.7\.([\d\.]+))(?:\s+type=\d+\s+value=\w+:\s+|\s=\s\w+:\s|\s=\s|:)(\w+)/i);
+                  if (result == null) 
+                  {
+                    throw "Unable to parse the SNMP trap:\n\n" + value;
+                  }
+                  var sensorName = "";
+                  var sensorState = "";
+                  if (result[1] != null) 
+                  {
+                    sensorName = result[1];
+                  }
+                  if (result[2] != null) 
+                  {
+                    var asciiString = "";
+                    var asciiCodeArray = result[2].split('.');
+                    for (var i = 0; i < asciiCodeArray.length; i++) {
+                      if (asciiCodeArray[i] > 32) {
+                        asciiString += String.fromCharCode(asciiCodeArray[i]);
+                      }
+                    }
+                    sensorName = asciiString;
+                  }
+                  if (!isNaN(parseInt(result[3]))) 
+                  {
+                    sensorState = valueMap[result[3]];
+                  }
+                  else 
+                  {
+                    sensorState = result[3];
+                  }
+                  return "Sensor: " + sensorName + "; State: " + sensorState + ";";
+                  
+          tags:
+            - tag: component
+              value: snmptrap
+          triggers:
+            - uuid: 576b0a96d3334ac5a0ed2ea79f517ff4
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: criticalHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: criticalHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик напряжения \1 достиг верхнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 91faaecc65ac4a6ca41e737cecc58291
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: warningHigh;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: warningHigh;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик напряжения \1 достиг верхнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 61ced05feaf145298a45b58565d8ae20
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: criticalLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: criticalLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик напряжения \1 достиг нижнего критического значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: HIGH
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+            - uuid: 9365e861db6c46e1b97bc697d8935e16
+              expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: warningLow;")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Yadro Vegman BMC by SNMP export/snmptrap["(.*yadroVoltSensorStateNotification|.*49769.0.3[\s|$])"],,"regexp","State: warningLow;")=0'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Sensor
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "Датчик напряжения \1 достиг нижнего предупредительного значения")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: Sensor
+                  value: '{{ITEM.VALUE}.regsub("Sensor: (.*?); State: (.*?);", "\1")}'
+                - tag: snmpTrap
+        - uuid: a5cb577827b0404b89ea5473e140c242
+          name: 'System contact details'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: 'system.contact[sysContact.0]'
+          delay: 5h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The textual identification of the contact person for this managed node, together with information on how to contact this person.  If no contact information is known, the value is the zero-length string.
+          inventory_link: CONTACT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: fb8f62d8090941b6aef45b74bf9eda41
+          name: 'System description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: 'system.descr[sysDescr.0]'
+          delay: 5h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            A textual description of the entity. This value should
+            include the full name and version identification of the system's hardware type, software operating-system, and
+            networking software.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: bc9518beb9474fb69e8242867be71383
+          name: 'System location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: 'system.location[sysLocation.0]'
+          delay: 5h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            Physical location of the node (e.g., `equipment room`, `3rd floor`). If not provided, the value is a zero-length string.
+          inventory_link: LOCATION
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 1019475f708f4e179d5ef342200b947a
+          name: 'System name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: system.name
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            An administratively-assigned name for this managed node.By convention, this is the node's fully-qualified domain name.  If the name is unknown, the value is the zero-length string.
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 9f5a6396f9b341a88c93394a94c2f219
+              expression: 'last(/Yadro Vegman BMC by SNMP export/system.name,#1)<>last(/Yadro Vegman BMC by SNMP export/system.name,#2) and length(last(/Yadro Vegman BMC by SNMP export/system.name))>0'
+              name: 'Имя системы изменилось'
+              event_name: 'Имя системы изменилось (новое имя: {ITEM.VALUE})'
+              priority: INFO
+              description: 'Имя системы было изменено. Подтвердите, чтобы закрыть проблему вручную.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: fdd944fa4bf7478eb543650e20e739a1
+          name: 'System object ID'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.2.0
+          key: 'system.objectid[sysObjectID.0]'
+          delay: 5h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The vendor's authoritative identification of the network management subsystem contained in the entity.  This value is allocated within the SMI enterprises subtree (1.3.6.1.4.1) and provides an easy and unambiguous means for determining`what kind of box' is being managed.  For example, if vendor`Flintstones, Inc.' was assigned the subtree1.3.6.1.4.1.4242, it could assign the identifier 1.3.6.1.4.1.4242.1.1 to its `Fred Router'.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 7b72a80104c44df59638a485217c955f
+          name: 'Host Power State'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.49769.1.1
+          key: vegman.server.Host.Power.State
+          delay: 11m
+          history: 30d
+          description: 'Статус работы сервера'
+          valuemap:
+            name: 'YADRO: HostPowerState'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 99e9a2b26dd340f88626e6191ec64e21
+              expression: 'nodata(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State,30m)=1'
+              name: 'Нет данных от субагента Yadro по протоколу SNMP'
+              priority: WARNING
+              description: 'Возможно необходима перезагрузка BMC сервера.'
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=0'
+                  recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 1aa40ec76fce40f397aee235a7cd9b1e
+              expression: 'last(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)=0 and change(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)<0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/vegman.server.Host.Power.State)=1'
+              name: 'Сервер выключен'
+              priority: INFO
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 092850b9c2e84c26b952a0cef2a15656
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          delay: 5m
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 3fb8311584fb4d6c8473c80711adaf9d
+              expression: 'max(/Yadro Vegman BMC by SNMP export/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'Нет сбора данных SNMP'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP недоступен для опроса. Проверьте подключение устройства и настройки SNMP.'
+              tags:
+                - tag: scope
+                  value: availability
+      discovery_rules:
+        - uuid: 13d8fb13683448029e010087a2af6895
+          name: 'Current sensors'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#NAME},1.3.6.1.4.1.49769.1.5.1.1,{#WLT},1.3.6.1.4.1.49769.1.5.1.3,{#WHT},1.3.6.1.4.1.49769.1.5.1.4,{#CLT},1.3.6.1.4.1.49769.1.5.1.5,{#CHT},1.3.6.1.4.1.49769.1.5.1.6]'
+          key: currentSensors.discovery
+          delay: 190m
+          lifetime: '{$LLD_KEEP_LOST}'
+          item_prototypes:
+            - uuid: 43181a920ef64402ad31089411d04948
+              name: 'Current sensor {#NAME} state'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.5.1.7.{#SNMPINDEX}'
+              key: 'yadroCurrSensorState[{#NAME}]'
+              delay: 3m
+              history: 30d
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} A
+                Warning high threshold: {#WHT} A
+                Critical low threshold: {#CLT} A
+                Critical high threshold: {#CHT} A
+              valuemap:
+                name: 'YADRO: Sensor state'
+              tags:
+                - tag: component
+                  value: 'current sensor {#NAME}'
+              trigger_prototypes:
+                - uuid: 0ed9fd5b053e4601b9be580596a5e53b
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroCurrSensorState[{#NAME}])=5'
+                  name: 'Current sensor {#NAME} has reached critical high threshold ({#CHT} A)'
+                  priority: HIGH
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} A
+                    Warning high threshold: {#WHT} A
+                    Critical low threshold: {#CLT} A
+                    Critical high threshold: {#CHT} A
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: b4ed47b9ba1f45f6b7c04cbdd48b1899
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroCurrSensorState[{#NAME}])=4'
+                  name: 'Current sensor {#NAME} has reached critical low threshold ({#CLT} A)'
+                  priority: HIGH
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} A
+                    Warning high threshold: {#WHT} A
+                    Critical low threshold: {#CLT} A
+                    Critical high threshold: {#CHT} A
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: 2f11d0d5951a4386bbcda58f46b324f2
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroCurrSensorState[{#NAME}])=3'
+                  name: 'Current sensor {#NAME} has reached warning high threshold ({#WHT} A)'
+                  priority: WARNING
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} A
+                    Warning high threshold: {#WHT} A
+                    Critical low threshold: {#CLT} A
+                    Critical high threshold: {#CHT} A
+                  dependencies:
+                    - name: 'Current sensor {#NAME} has reached critical high threshold ({#CHT} A)'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroCurrSensorState[{#NAME}])=5'
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: 4ca418b42ee54928a02a823203c71461
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroCurrSensorState[{#NAME}])=2'
+                  name: 'Current sensor {#NAME} has reached warning low threshold ({#WLT} A)'
+                  priority: WARNING
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} A
+                    Warning high threshold: {#WHT} A
+                    Critical low threshold: {#CLT} A
+                    Critical high threshold: {#CHT} A
+                  dependencies:
+                    - name: 'Current sensor {#NAME} has reached critical low threshold ({#CLT} A)'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroCurrSensorState[{#NAME}])=4'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: e625f0d57024441e878dc5a26a694117
+              name: 'Current sensor {#NAME} value'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.5.1.2.{#SNMPINDEX}'
+              key: 'yadroCurrSensorValue[{#NAME}]'
+              delay: 5m
+              history: 30d
+              value_type: FLOAT
+              status: DISABLED
+              discover: NO_DISCOVER
+              units: A
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} A
+                Warning high threshold: {#WHT} A
+                Critical low threshold: {#CLT} A
+                Critical high threshold: {#CHT} A
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: component
+                  value: 'current sensor {#NAME}'
+          graph_prototypes:
+            - uuid: 3608b29edb444243958272f46bd641c8
+              name: '{#NAME} current'
+              graph_items:
+                - sortorder: '1'
+                  color: 199C0D
+                  calc_fnc: MAX
+                  item:
+                    host: 'Yadro Vegman BMC by SNMP export'
+                    key: 'yadroCurrSensorValue[{#NAME}]'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var arr = JSON.parse(value);
+                  for (var i = 0; i < arr.length; ++i) {
+                    arr[i]["{#WLT}"] = arr[i]["{#WLT}"] * 0.001;
+                    arr[i]["{#WHT}"] = arr[i]["{#WHT}"] * 0.001;
+                    arr[i]["{#CLT}"] = arr[i]["{#CLT}"] * 0.001;
+                    arr[i]["{#CHT}"] = arr[i]["{#CHT}"] * 0.001;
+                  }
+                  return JSON.stringify(arr);
+        - uuid: 54ec95c510bd4c87b7246d48167837ef
+          name: Hardware
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#PATH},1.3.6.1.4.1.49769.4.1.1,{#NAME},1.3.6.1.4.1.49769.4.1.2,{#MF},1.3.6.1.4.1.49769.4.1.3,{#BDATE},1.3.6.1.4.1.49769.4.1.4,{#MODEL},1.3.6.1.4.1.49769.4.1.5,{#PN},1.3.6.1.4.1.49769.4.1.6,{#SN},1.3.6.1.4.1.49769.4.1.7,{#VER},1.3.6.1.4.1.49769.4.1.8,{#PRESENTED},1.3.6.1.4.1.49769.4.1.9]'
+          key: hardware.discovery
+          delay: 240m
+          filter:
+            conditions:
+              - macro: '{#PRESENTED}'
+                value: '1'
+                formulaid: A
+          lifetime: '{$LLD_KEEP_LOST}'
+          item_prototypes:
+            - uuid: 7a2f0421d8d84e6aaaa1a557506cf5e4
+              name: 'Is {#PATH} functional'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.4.1.10.{#SNMPINDEX}'
+              key: 'yadroInventoryFunctional[{#PATH}]'
+              delay: 7m
+              history: 30d
+              discover: NO_DISCOVER
+              description: |
+                {#PATH} information:
+                Name: {#NAME}
+                Manufacturer: {#MF}
+                Build date: {#BDATE}
+                Model: {#MODEL}
+                Part number: {#PN}
+                Serial number: {#SN}
+                Version: {#VER}
+              valuemap:
+                name: TruthValue
+              tags:
+                - tag: component
+                  value: hardware
+              trigger_prototypes:
+                - uuid: 6c71194e77544adda448b6a6dcb6d3f9
+                  expression: '(last(/Yadro Vegman BMC by SNMP export/yadroInventoryFunctional[{#PATH}],#1)<>last(/Yadro Vegman BMC by SNMP export/yadroInventoryFunctional[{#PATH}],#2))=1 and last(/Yadro Vegman BMC by SNMP export/yadroInventoryFunctional[{#PATH}])=2'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Yadro Vegman BMC by SNMP export/yadroInventoryFunctional[{#PATH}])<>2'
+                  name: '{#PATH} isn''t functional'
+                  discover: NO_DISCOVER
+                  priority: HIGH
+                  description: |
+                    {#PATH} information:
+                    Name: {#NAME}
+                    Manufacturer: {#MF}
+                    Build date: {#BDATE}
+                    Model: {#MODEL}
+                    Part number: {#PN}
+                    Serial number: {#SN}
+                    Version: {#VER}
+                  tags:
+                    - tag: scope
+                      value: availability
+        - uuid: 79ccb9c6965045d0af4cee3ce0955bb3
+          name: 'Power sensors'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#NAME},1.3.6.1.4.1.49769.1.6.1.1,{#WLT},1.3.6.1.4.1.49769.1.6.1.3,{#WHT},1.3.6.1.4.1.49769.1.6.1.4,{#CLT},1.3.6.1.4.1.49769.1.6.1.5,{#CHT},1.3.6.1.4.1.49769.1.6.1.6]'
+          key: powerSensors.discovery
+          delay: 170m
+          lifetime: '{$LLD_KEEP_LOST}'
+          item_prototypes:
+            - uuid: 3b742763e79d4c83ab30408f7d1ebd2d
+              name: 'Power sensor {#NAME} state'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.6.1.7.{#SNMPINDEX}'
+              key: 'yadroPowerSensorState[{#NAME}]'
+              delay: 9m
+              history: 30d
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} W
+                Warning high threshold: {#WHT} W
+                Critical low threshold: {#CLT} W
+                Critical high threshold: {#CHT} W
+              valuemap:
+                name: 'YADRO: Sensor state'
+              tags:
+                - tag: component
+                  value: 'power sensor {#NAME}'
+              trigger_prototypes:
+                - uuid: 1e335b5f39684d8dbc596940a81d0e19
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroPowerSensorState[{#NAME}])=5'
+                  name: 'Датчик мощности {#NAME} достиг критического высокого порога'
+                  priority: HIGH
+                  description: |
+                    Power sensor {#NAME} has reached critical high threshold ({#CHT} W)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} W
+                    Warning high threshold: {#WHT} W
+                    Critical low threshold: {#CLT} W
+                    Critical high threshold: {#CHT} W
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: a003ee09f4d5458a8208a283dbde17cc
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroPowerSensorState[{#NAME}])=4'
+                  name: 'Датчик мощности {#NAME} достиг критического низкого порога'
+                  priority: HIGH
+                  description: |
+                    Power sensor {#NAME} has reached critical low threshold ({#CLT} W)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} W
+                    Warning high threshold: {#WHT} W
+                    Critical low threshold: {#CLT} W
+                    Critical high threshold: {#CHT} W
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: 1516af5368be4fc0a1eb75cd62f55053
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroPowerSensorState[{#NAME}])=3'
+                  name: 'Датчик мощности {#NAME} достиг предупреждающего высокого порога'
+                  priority: WARNING
+                  description: |
+                    Power sensor {#NAME} has reached warning high threshold ({#WHT} W)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} W
+                    Warning high threshold: {#WHT} W
+                    Critical low threshold: {#CLT} W
+                    Critical high threshold: {#CHT} W
+                  dependencies:
+                    - name: 'Датчик мощности {#NAME} достиг критического высокого порога'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroPowerSensorState[{#NAME}])=5'
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: 70d7d9feb2f642a983687cdb22bcc2ac
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroPowerSensorState[{#NAME}])=2'
+                  name: 'Датчик мощности {#NAME} достиг предупреждающего низкого порога'
+                  priority: WARNING
+                  description: |
+                    Power sensor {#NAME} has reached warning low threshold ({#WLT} W)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} W
+                    Warning high threshold: {#WHT} W
+                    Critical low threshold: {#CLT} W
+                    Critical high threshold: {#CHT} W
+                  dependencies:
+                    - name: 'Датчик мощности {#NAME} достиг критического низкого порога'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroPowerSensorState[{#NAME}])=4'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: fb097023ed5d47fa9d91009bed333004
+              name: 'Power sensor {#NAME} value'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.6.1.2.{#SNMPINDEX}'
+              key: 'yadroPowerSensorValue[{#NAME}]'
+              delay: 5m
+              history: 30d
+              value_type: FLOAT
+              status: DISABLED
+              discover: NO_DISCOVER
+              units: W
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} W
+                Warning high threshold: {#WHT} W
+                Critical low threshold: {#CLT} W
+                Critical high threshold: {#CHT} W
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: component
+                  value: 'power sensor {#NAME}'
+          graph_prototypes:
+            - uuid: 44982d05fa474ef0930cb34f1d3e7d21
+              name: '{#NAME} power'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 199C0D
+                  calc_fnc: MAX
+                  item:
+                    host: 'Yadro Vegman BMC by SNMP export'
+                    key: 'yadroPowerSensorValue[{#NAME}]'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var arr = JSON.parse(value);
+                  for (var i = 0; i < arr.length; ++i) {
+                    arr[i]["{#WLT}"] = arr[i]["{#WLT}"] * 0.001;
+                    arr[i]["{#WHT}"] = arr[i]["{#WHT}"] * 0.001;
+                    arr[i]["{#CLT}"] = arr[i]["{#CLT}"] * 0.001;
+                    arr[i]["{#CHT}"] = arr[i]["{#CHT}"] * 0.001;
+                  }
+                  return JSON.stringify(arr);
+        - uuid: 52bfc8f9cd7040068fddef1d8c77dc9b
+          name: 'Tachometer sensors'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#NAME},1.3.6.1.4.1.49769.1.4.1.1,{#WLT},1.3.6.1.4.1.49769.1.4.1.3,{#WHT},1.3.6.1.4.1.49769.1.4.1.4,{#CLT},1.3.6.1.4.1.49769.1.4.1.5,{#CHT},1.3.6.1.4.1.49769.1.4.1.6]'
+          key: tachometerSensors.discovery
+          delay: 230m
+          lifetime: '{$LLD_KEEP_LOST}'
+          item_prototypes:
+            - uuid: 8d1e334b778c41aeaf741948370966dd
+              name: 'Tach sensor {#NAME} state'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.4.1.7.{#SNMPINDEX}'
+              key: 'yadroTachSensorState[{#NAME}]'
+              delay: 3m
+              history: 30d
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} rpm
+                Warning high threshold: {#WHT} rpm
+                Critical low threshold: {#CLT} rpm
+                Critical high threshold: {#CHT} rpm
+              valuemap:
+                name: 'YADRO: Sensor state'
+              tags:
+                - tag: component
+                  value: 'tach sensor {#NAME}'
+              trigger_prototypes:
+                - uuid: 33b1f34145ec423c99e40516b194b0e1
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTachSensorState[{#NAME}])=5'
+                  name: 'Tach sensor {#NAME} has reached critical high threshold ({#CHT} rpm)'
+                  priority: HIGH
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} rpm
+                    Warning high threshold: {#WHT} rpm
+                    Critical low threshold: {#CLT} rpm
+                    Critical high threshold: {#CHT} rpm
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+                - uuid: 65747ac6bb444d9fb7a18093dcf535fc
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTachSensorState[{#NAME}])=4'
+                  name: 'Tach sensor {#NAME} has reached critical low threshold ({#CLT} rpm)'
+                  priority: HIGH
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} rpm
+                    Warning high threshold: {#WHT} rpm
+                    Critical low threshold: {#CLT} rpm
+                    Critical high threshold: {#CHT} rpm
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+                - uuid: ffe5ebfcba074816b9aae39a85d6628e
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTachSensorState[{#NAME}])=3'
+                  name: 'Tach sensor {#NAME} has reached warning high threshold ({#WHT} rpm)'
+                  priority: WARNING
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} rpm
+                    Warning high threshold: {#WHT} rpm
+                    Critical low threshold: {#CLT} rpm
+                    Critical high threshold: {#CHT} rpm
+                  dependencies:
+                    - name: 'Tach sensor {#NAME} has reached critical high threshold ({#CHT} rpm)'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTachSensorState[{#NAME}])=5'
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+                - uuid: 6a35562a05fa4dbea158a5da08539e71
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTachSensorState[{#NAME}])=2'
+                  name: 'Tach sensor {#NAME} has reached warning low threshold ({#WLT} rpm)'
+                  priority: WARNING
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} rpm
+                    Warning high threshold: {#WHT} rpm
+                    Critical low threshold: {#CLT} rpm
+                    Critical high threshold: {#CHT} rpm
+                  dependencies:
+                    - name: 'Tach sensor {#NAME} has reached critical low threshold ({#CLT} rpm)'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTachSensorState[{#NAME}])=4'
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+            - uuid: f809b3a3367747f4a1fc337d95a2838d
+              name: 'Tach sensor {#NAME} value'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.4.1.2.{#SNMPINDEX}'
+              key: 'yadroTachSensorValue[{#NAME}]'
+              delay: 5m
+              history: 30d
+              value_type: FLOAT
+              status: DISABLED
+              discover: NO_DISCOVER
+              units: rpm
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} rpm
+                Warning high threshold: {#WHT} rpm
+                Critical low threshold: {#CLT} rpm
+                Critical high threshold: {#CHT} rpm
+              tags:
+                - tag: component
+                  value: 'tach sensor {#NAME}'
+          graph_prototypes:
+            - uuid: eb4331df687342438a45d82c38968351
+              name: '{#NAME} speed'
+              graph_items:
+                - sortorder: '1'
+                  color: 199C0D
+                  calc_fnc: MAX
+                  item:
+                    host: 'Yadro Vegman BMC by SNMP export'
+                    key: 'yadroTachSensorValue[{#NAME}]'
+        - uuid: fa79812e8d8e4703abc2c427e6144c7a
+          name: 'Temperature sensors'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#NAME},1.3.6.1.4.1.49769.1.2.1.1,{#WLT},1.3.6.1.4.1.49769.1.2.1.3,{#WHT},1.3.6.1.4.1.49769.1.2.1.4,{#CLT},1.3.6.1.4.1.49769.1.2.1.5,{#CHT},1.3.6.1.4.1.49769.1.2.1.6]'
+          key: temperatureSensors.discovery
+          delay: 180m
+          lifetime: '{$LLD_KEEP_LOST}'
+          item_prototypes:
+            - uuid: 7416964e0703440bbf4fcbb2c3e4b8a1
+              name: 'Temperature sensor {#NAME} state'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.2.1.7.{#SNMPINDEX}'
+              key: 'yadroTempSensorState[{#NAME}]'
+              delay: 4m
+              history: 30d
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} °C
+                Warning high threshold: {#WHT} °C
+                Critical low threshold: {#CLT} °C
+                Critical high threshold: {#CHT} °C
+              valuemap:
+                name: 'YADRO: Sensor state'
+              tags:
+                - tag: component
+                  value: 'temperature sensor {#NAME}'
+              trigger_prototypes:
+                - uuid: b9cb4060c1e64dc99a9179f6ecf932db
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTempSensorState[{#NAME}])=5'
+                  name: 'Temperature sensor {#NAME} has reached critical high threshold ({#CHT} °C)'
+                  priority: HIGH
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} °C
+                    Warning high threshold: {#WHT} °C
+                    Critical low threshold: {#CLT} °C
+                    Critical high threshold: {#CHT} °C
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+                - uuid: ce76c8a4a9564102a3fd28f6f019668e
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTempSensorState[{#NAME}])=4'
+                  name: 'Temperature sensor {#NAME} has reached critical low threshold ({#CLT} °C)'
+                  priority: HIGH
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} °C
+                    Warning high threshold: {#WHT} °C
+                    Critical low threshold: {#CLT} °C
+                    Critical high threshold: {#CHT} °C
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+                - uuid: 0f46556294d946d8b0d625ddd6f494c3
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTempSensorState[{#NAME}])=3'
+                  name: 'Temperature sensor {#NAME} has reached warning high threshold ({#WHT} °C)'
+                  priority: WARNING
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} °C
+                    Warning high threshold: {#WHT} °C
+                    Critical low threshold: {#CLT} °C
+                    Critical high threshold: {#CHT} °C
+                  dependencies:
+                    - name: 'Temperature sensor {#NAME} has reached critical high threshold ({#CHT} °C)'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTempSensorState[{#NAME}])=5'
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+                - uuid: c91ecb1f18964802a73d477c8b6f7d5d
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTempSensorState[{#NAME}])=2'
+                  name: 'Temperature sensor {#NAME} has reached warning low threshold ({#WLT} °C)'
+                  priority: WARNING
+                  description: |
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} °C
+                    Warning high threshold: {#WHT} °C
+                    Critical low threshold: {#CLT} °C
+                    Critical high threshold: {#CHT} °C
+                  dependencies:
+                    - name: 'Temperature sensor {#NAME} has reached critical low threshold ({#CLT} °C)'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroTempSensorState[{#NAME}])=4'
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
+            - uuid: 440e2189bea44433a05c733396a9d87b
+              name: 'Temperature sensor {#NAME} value'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.2.1.2.{#SNMPINDEX}'
+              key: 'yadroTempSensorValue[{#NAME}]'
+              delay: 5m
+              history: 30d
+              value_type: FLOAT
+              units: °C
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} °C
+                Warning high threshold: {#WHT} °C
+                Critical low threshold: {#CLT} °C
+                Critical high threshold: {#CHT} °C
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: component
+                  value: 'temperature sensor {#NAME}'
+          graph_prototypes:
+            - uuid: f04b052c4bd14874bd575559eb51e0a3
+              name: '{#NAME} temperature'
+              graph_items:
+                - sortorder: '1'
+                  color: 199C0D
+                  calc_fnc: MAX
+                  item:
+                    host: 'Yadro Vegman BMC by SNMP export'
+                    key: 'yadroTempSensorValue[{#NAME}]'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var arr = JSON.parse(value);
+                  for (var i = 0; i < arr.length; ++i) {
+                    arr[i]["{#WLT}"] = arr[i]["{#WLT}"] * 0.001;
+                    arr[i]["{#WHT}"] = arr[i]["{#WHT}"] * 0.001;
+                    arr[i]["{#CLT}"] = arr[i]["{#CLT}"] * 0.001;
+                    arr[i]["{#CHT}"] = arr[i]["{#CHT}"] * 0.001;
+                  }
+                  return JSON.stringify(arr);
+        - uuid: 53bcdc04236b4e7fab3bd5f537094ecd
+          name: 'Voltage sensors'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#NAME},1.3.6.1.4.1.49769.1.3.1.1,{#WLT},1.3.6.1.4.1.49769.1.3.1.3,{#WHT},1.3.6.1.4.1.49769.1.3.1.4,{#CLT},1.3.6.1.4.1.49769.1.3.1.5,{#CHT},1.3.6.1.4.1.49769.1.3.1.6]'
+          key: voltageSensors.discovery
+          delay: 250m
+          lifetime: '{$LLD_KEEP_LOST}'
+          item_prototypes:
+            - uuid: 5a6e034841b4455e947437a559748bfd
+              name: 'Voltage sensor {#NAME} state'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.3.1.7.{#SNMPINDEX}'
+              key: 'yadroVoltSensorState[{#NAME}]'
+              delay: 3m
+              history: 30d
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} V
+                Warning high threshold: {#WHT} V
+                Critical low threshold: {#CLT} V
+                Critical high threshold: {#CHT} V
+              valuemap:
+                name: 'YADRO: Sensor state'
+              tags:
+                - tag: component
+                  value: 'voltage sensor {#NAME}'
+              trigger_prototypes:
+                - uuid: 620dd78a31f24898bea478e940722338
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroVoltSensorState[{#NAME}])=3'
+                  name: 'Высокое напряжение на {#NAME}'
+                  priority: WARNING
+                  description: |
+                    Voltage sensor {#NAME} has reached warning high threshold ({#WHT} V)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} V
+                    Warning high threshold: {#WHT} V
+                    Critical low threshold: {#CLT} V
+                    Critical high threshold: {#CHT} V
+                  dependencies:
+                    - name: 'Критически высокое напряжение на {#NAME}'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroVoltSensorState[{#NAME}])=5'
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: ae615c3ca0ab4a5294aa394c77f6b341
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroVoltSensorState[{#NAME}])=5'
+                  name: 'Критически высокое напряжение на {#NAME}'
+                  priority: HIGH
+                  description: |
+                    Voltage sensor {#NAME} has reached critical high threshold ({#CHT} V)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} V
+                    Warning high threshold: {#WHT} V
+                    Critical low threshold: {#CLT} V
+                    Critical high threshold: {#CHT} V
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: f3282d4a328f4782889f6d4a68058e99
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroVoltSensorState[{#NAME}])=4'
+                  name: 'Критически низкое напряжение на {#NAME}'
+                  priority: HIGH
+                  description: |
+                    Voltage sensor {#NAME} has reached critical low threshold ({#CLT} V)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} V
+                    Warning high threshold: {#WHT} V
+                    Critical low threshold: {#CLT} V
+                    Critical high threshold: {#CHT} V
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: 2c87bc25480941af9d6528f33da41f75
+                  expression: 'last(/Yadro Vegman BMC by SNMP export/yadroVoltSensorState[{#NAME}])=2'
+                  name: 'Нет напряжения на {#NAME}'
+                  priority: AVERAGE
+                  description: |
+                    Voltage sensor {#NAME} has reached warning low threshold ({#WLT} V)
+                    
+                    Sensor {#NAME} information:
+                    Warning low threshold: {#WLT} V
+                    Warning high threshold: {#WHT} V
+                    Critical low threshold: {#CLT} V
+                    Critical high threshold: {#CHT} V
+                  dependencies:
+                    - name: 'Критически низкое напряжение на {#NAME}'
+                      expression: 'last(/Yadro Vegman BMC by SNMP export/yadroVoltSensorState[{#NAME}])=4'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 841d229ccaa24e73abec5321ab27e651
+              name: 'Voltage sensor {#NAME} value'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.49769.1.3.1.2.{#SNMPINDEX}'
+              key: 'yadroVoltSensorValue[{#NAME}]'
+              delay: 5m
+              history: 30d
+              value_type: FLOAT
+              status: DISABLED
+              discover: NO_DISCOVER
+              units: V
+              description: |
+                Sensor {#NAME} information:
+                Warning low threshold: {#WLT} V
+                Warning high threshold: {#WHT} V
+                Critical low threshold: {#CLT} V
+                Critical high threshold: {#CHT} V
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: component
+                  value: 'voltage sensor {#NAME}'
+          graph_prototypes:
+            - uuid: a1b798920b23452ea03fcfc9abcc6500
+              name: '{#NAME} voltage'
+              graph_items:
+                - sortorder: '1'
+                  color: 199C0D
+                  calc_fnc: MAX
+                  item:
+                    host: 'Yadro Vegman BMC by SNMP export'
+                    key: 'yadroVoltSensorValue[{#NAME}]'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var arr = JSON.parse(value);
+                  for (var i = 0; i < arr.length; ++i) {
+                    arr[i]["{#WLT}"] = arr[i]["{#WLT}"] * 0.001;
+                    arr[i]["{#WHT}"] = arr[i]["{#WHT}"] * 0.001;
+                    arr[i]["{#CLT}"] = arr[i]["{#CLT}"] * 0.001;
+                    arr[i]["{#CHT}"] = arr[i]["{#CHT}"] * 0.001;
+                  }
+                  return JSON.stringify(arr);
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: bmc
+        - tag: target
+          value: vegman
+        - tag: target
+          value: yadro
+      macros:
+        - macro: '{$FRQ_POLL_INTERVAL}'
+          value: 4m
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        - macro: '{$LLD_KEEP_LOST}'
+          value: 3d
+        - macro: '{$LLD_POLL_INTERVAL}'
+          value: 3h
+        - macro: '{$NFRQ_POLL_INTERVAL}'
+          value: 11m
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+      valuemaps:
+        - uuid: 3ec858c3ad074001b8845a1940db5f72
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up
+        - uuid: ab851c32c923481db2b5f2d0a8d4d552
+          name: TruthValue
+          mappings:
+            - value: '1'
+              newvalue: 'true'
+            - value: '2'
+              newvalue: 'false'
+        - uuid: db276454c7df4d0aa1379e94b4e47355
+          name: 'YADRO: HostPowerState'
+          mappings:
+            - value: '-1'
+              newvalue: unknown
+            - value: '0'
+              newvalue: 'off'
+            - value: '1'
+              newvalue: 'on'
+        - uuid: 8430a1c5382c410db39ce4d247f2f68d
+          name: 'YADRO: Sensor state'
+          mappings:
+            - value: '0'
+              newvalue: Disabled
+            - value: '1'
+              newvalue: Normal
+            - value: '2'
+              newvalue: 'Warning low'
+            - value: '3'
+              newvalue: 'Warning high'
+            - value: '4'
+              newvalue: 'Critical low'
+            - value: '5'
+              newvalue: 'Critical high'
