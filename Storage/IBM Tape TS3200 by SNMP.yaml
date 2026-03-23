@@ -1,0 +1,313 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: e5a913eb4fba41a8bd18c5bfea937c38
+      name: Templates/Storage
+  templates:
+    - uuid: 2497809d34dc4e12bc77b512ed25b265
+      template: 'IBM Tape TS3200 by SNMP'
+      name: 'IBM Tape TS3200 by SNMP'
+      description: |
+        https://github.com/AndAndr/Zabbix-templates
+        Шаблон для ленточных библиотек IBM TS3200.
+      groups:
+        - name: Templates/Storage
+      items:
+        - uuid: 7df76ed1e27645b7b8814f8c35285449
+          name: ibm3200IdAgentVersion
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.1.4.0
+          key: .1.3.6.1.4.1.2.6.211.1.4.0
+          delay: 1d
+          history: '0'
+          value_type: LOG
+          trends: '0'
+          tags:
+            - tag: component
+              value: chassis
+        - uuid: cf3d59926a8d45428adfb786f4f3d08c
+          name: ibm3200IdBuildNumber
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.1.5.0
+          key: .1.3.6.1.4.1.2.6.211.1.5.0
+          delay: 1d
+          history: '0'
+          value_type: LOG
+          trends: '0'
+          tags:
+            - tag: component
+              value: chassis
+        - uuid: a925f7457c394b00804ab7ede7bbda00
+          name: ibm3200StatusGlobalStatus
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.2.1.0
+          key: .1.3.6.1.4.1.2.6.211.2.1.0
+          history: 1w
+          trends: 20d
+          valuemap:
+            name: IBM3200status
+          tags:
+            - tag: component
+              value: chassis
+          triggers:
+            - uuid: cbc7509db61e4139ba4b45438c3ff430
+              expression: 'last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.2.1.0)=1 or last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.2.1.0)=2'
+              name: 'Check status'
+              priority: INFO
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: bb4eadff390c4215a47c8b5d76081ac3
+              expression: 'last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.2.1.0)=5'
+              name: 'Critical failure'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 8e64961fe21a4f82b37603d466eb4d2e
+              expression: 'last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.2.1.0)=4'
+              name: 'non-Critical failure'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: availability
+            - uuid: 5c00a8877a1a441da79c0d908dc82be4
+              expression: 'last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.2.1.0)=6'
+              name: 'non-Recoverable failure'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: f257bde369654d8d9ab4054db7da4bb0
+          name: librarySerNum
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.1.1.10.1
+          key: .1.3.6.1.4.1.2.6.211.3.1.1.10.1
+          delay: 1d
+          history: '0'
+          value_type: LOG
+          trends: '0'
+          tags:
+            - tag: component
+              value: library
+        - uuid: 692522a77b8d427aad608778868dcfb2
+          name: libraryMoves
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.1.1.15.1
+          key: .1.3.6.1.4.1.2.6.211.3.1.1.15.1
+          delay: 10m
+          history: 1w
+          trends: 20d
+          tags:
+            - tag: component
+              value: library
+        - uuid: d1bbb0df9fc14f368b335c60876417d9
+          name: librarySlotFetchRetries
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.1.1.16.1
+          key: .1.3.6.1.4.1.2.6.211.3.1.1.16.1
+          history: 1w
+          trends: 20d
+          description: 'Total number of slot fetch retries by this library'
+          tags:
+            - tag: component
+              value: library
+        - uuid: a1a7847cd7d34d8f97f870dda5f95314
+          name: librarySlotStowRetries
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.1.1.17.1
+          key: .1.3.6.1.4.1.2.6.211.3.1.1.17.1
+          history: 1w
+          trends: 20d
+          description: 'Total number of slot stow retries by this library'
+          tags:
+            - tag: component
+              value: library
+        - uuid: c2bbbf9053dd43c083875915ea0c0127
+          name: libraryDrvFetchRetries
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.1.1.18.1
+          key: .1.3.6.1.4.1.2.6.211.3.1.1.18.1
+          history: 1w
+          trends: 20d
+          description: 'Total number of drive fetch retries by this library'
+          tags:
+            - tag: component
+              value: library
+        - uuid: 7b3476cbd6724223865a35dce27eaa57
+          name: libraryDrvStowRetries
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.1.1.19.1
+          key: .1.3.6.1.4.1.2.6.211.3.1.1.19.1
+          history: 1w
+          trends: 20d
+          description: 'Total number of drive stow retries by this library'
+          tags:
+            - tag: component
+              value: library
+        - uuid: ba5294c1135542a59e4ff48846008a0d
+          name: libraryDoorState
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.1.1.20.1
+          key: .1.3.6.1.4.1.2.6.211.3.1.1.20.1
+          delay: 2m
+          history: 1w
+          trends: '0'
+          valuemap:
+            name: IBM3200libraryDoorState
+          preprocessing:
+            - type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: library
+        - uuid: b34ce47ee24247c98f2c2f18507bb1ff
+          name: driveProductId
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.2.1.8.1
+          key: .1.3.6.1.4.1.2.6.211.3.2.1.8.1
+          delay: 1h
+          value_type: LOG
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: drive
+        - uuid: 4dafc7687c634369920cdf24d9bac858
+          name: driveFwlevel
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.2.1.9.1
+          key: .1.3.6.1.4.1.2.6.211.3.2.1.9.1
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: drive
+        - uuid: 2f088e35606d4a01aab583ec4ac4524b
+          name: driveSerNum
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.2.1.10.1
+          key: .1.3.6.1.4.1.2.6.211.3.2.1.10.1
+          delay: 1h
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+          inventory_link: SERIALNO_A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: drive
+        - uuid: a318069e4d6e4585a744e32fc240d5d1
+          name: driveLibrarySN
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.2.1.11.1
+          key: .1.3.6.1.4.1.2.6.211.3.2.1.11.1
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: drive
+        - uuid: fc19e9f089644146be82e83fae05bcf7
+          name: driveTpHrs
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.2.1.12.1
+          key: .1.3.6.1.4.1.2.6.211.3.2.1.12.1
+          delay: 1h
+          history: 1w
+          trends: 20d
+          description: 'Total drive motion hours of this device'
+          tags:
+            - tag: component
+              value: drive
+        - uuid: dd68648c3b37482ca8666c0ed04a22d5
+          name: driveClean
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.2.1.13.1
+          key: .1.3.6.1.4.1.2.6.211.3.2.1.13.1
+          delay: 10m
+          history: 1w
+          trends: 20d
+          description: 'Cleaning State of the device. The interpretation of this value is vendor specific'
+          tags:
+            - tag: component
+              value: drive
+        - uuid: a12ad492e8bb4508b6c9bce53cf17b8d
+          name: driveLoads
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.2.6.211.3.2.1.14.1
+          key: .1.3.6.1.4.1.2.6.211.3.2.1.14.1
+          delay: 10m
+          history: 1w
+          trends: 20d
+          description: 'Total cartridge loads for the drive'
+          tags:
+            - tag: component
+              value: drive
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: ibm
+        - tag: target
+          value: tape
+        - tag: target
+          value: ts3200
+      valuemaps:
+        - uuid: a51f070f9e524fe9bce967261316a48d
+          name: IBM3200libraryDoorState
+          mappings:
+            - value: '1'
+              newvalue: Unknown
+            - value: '2'
+              newvalue: Open
+            - value: '3'
+              newvalue: Closed
+            - value: '4'
+              newvalue: Locked
+        - uuid: 997f353b22bd44a1850bad001b7eaef8
+          name: IBM3200status
+          mappings:
+            - value: '1'
+              newvalue: Other
+            - value: '2'
+              newvalue: Unknown
+            - value: '3'
+              newvalue: Ok
+            - value: '4'
+              newvalue: non-critical
+            - value: '5'
+              newvalue: Critical
+            - value: '6'
+              newvalue: non-Recoverable
+  triggers:
+    - uuid: 3590edcda37d455ebc81ef81613c2797
+      expression: 'last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.3.1.1.18.1)<>0 or last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.3.1.1.19.1)<>0'
+      name: 'Library drive fetch or stow retries detected'
+      priority: WARNING
+      tags:
+        - tag: scope
+          value: availability
+    - uuid: 877f78e26711470ba39cf260e54a92bf
+      expression: 'last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.3.1.1.16.1)<>0 or last(/IBM Tape TS3200 by SNMP/.1.3.6.1.4.1.2.6.211.3.1.1.17.1)<>0'
+      name: 'Library slot fetch or stow retries detected'
+      priority: WARNING
+      tags:
+        - tag: scope
+          value: availability

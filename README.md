@@ -32,13 +32,7 @@
 
 
 ## Other_hardware
-**ELEMY_ATS-1203** Шаблон для мониторинга по SNMP Elemy ATS - АВР автоматический ввод резерва. Тестировалось на прошивке h2_b2_m1.1.8.
-
-**EatonPowerware9390** Шаблон для мониторинга по SNMP ИБП Eaton Powerware 9390.
-
 **LGe_webos** Шаблон для мониторинга по SNMP "24/7 LG commercial display".
-
-**APC_ATS** Шаблон для мониторинга по SNMP APC Rack ATS (АВР-автоматический ввод резерва). Тестировалось на AP7721.
 
 **ZKTeco** Контроль состояния биометрических считывателей ZKTeco для версий Zabbix 4.4 и выше. Тестировалось на ZKTeco MA300.
 
@@ -52,6 +46,12 @@
 
 ## Power
 **DeltaSTS** Шаблон для мониторинга по SNMP cтатического переключателя ввода СТС Delta Electronics Delta Static Transfer Switch - Delta STS32A. Тестировалось на STS30002SR10035 v.01.12.15j.
+
+**ELEMY_ATS-1203** Шаблон для мониторинга по SNMP Elemy ATS - АВР автоматический ввод резерва. Тестировалось на прошивке h2_b2_m1.1.8.
+
+**EatonPowerware9390** Шаблон для мониторинга по SNMP ИБП Eaton Powerware 9390.
+
+**APC_ATS** Шаблон для мониторинга по SNMP APC Rack ATS (АВР-автоматический ввод резерва). Тестировалось на AP7721.
 
 
 
@@ -69,3 +69,5 @@
 
 
 
+## Storage
+**IBM Tape TS3200 by SNMP.yaml** - Шаблон мониторинга ленточной библиотеки IBM TS3200 для Zabbix версии 7.0
