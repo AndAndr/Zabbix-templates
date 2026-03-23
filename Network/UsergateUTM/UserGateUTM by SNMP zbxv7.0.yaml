@@ -1,12 +1,12 @@
 zabbix_export:
   version: '7.0'
   template_groups:
-    - uuid: 36bff6c29af64692839d077febfc7079
+    - uuid: 2bccf5ffb4a14c3e9c093a70e6f06300
       name: 'Templates/Network devices'
   templates:
     - uuid: 4d351e44e1af4bc1aa53e8329644e20e
-      template: 'UserGateUTM by SNMPv2'
-      name: 'UserGateUTM by SNMPv2'
+      template: 'UserGateUTM by SNMP'
+      name: 'UserGateUTM by SNMP'
       description: |
         https://github.com/AndAndr
         Шаблон для Usergate UTM с поддержкой трапов.
@@ -15,8 +15,6 @@ zabbix_export:
          Импортировать и прикрепить шаблон к хосту.
          Настроить устройство на отправку трапов, разрешить SNMP-запросы.
          Настроить отправку всех событий, кроме событий сработки правил МЭ.
-      templates:
-        - name: 'Generic SNMP'
       groups:
         - name: 'Templates/Network devices'
       items:
@@ -36,12 +34,85 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 74bef4569aab4a2aafe3a4af496af334
-              expression: 'min(/UserGateUTM by SNMPv2/cpuLoad,5m)>{$CPU_USED_MAX}'
+              expression: 'min(/UserGateUTM by SNMP/cpuLoad,5m)>{$CPU_USED_MAX}'
               recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'max(/UserGateUTM by SNMPv2/cpuLoad,5m)<{$CPU_USED_MAX}-5'
-              name: 'CPU load is too high!'
+              recovery_expression: 'max(/UserGateUTM by SNMP/cpuLoad,5m)<{$CPU_USED_MAX}-5'
+              name: 'Слишком высокая загрузка ЦП'
               priority: AVERAGE
               tags:
+                - tag: scope
+                  value: performance
+        - uuid: df06e030fe0a4f41860adfe21457914e
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 8584214889cb4d79966fc5bc72fc2d8d
+              expression: 'last(/UserGateUTM by SNMP/icmpping,#3)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/UserGateUTM by SNMP/icmpping,#3)=1'
+              name: 'Тест доступности по протоколу ICMP'
+              priority: HIGH
+              description: |
+                Last value: {ITEM.LASTVALUE1}.
+                Last three attempts returned timeout.  Please check device connectivity.
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 7fdaf23b117d40e6b7bb6750d9d8dfb6
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 33e5280e3137460482376abecd7d7382
+              expression: 'min(/UserGateUTM by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/UserGateUTM by SNMP/icmppingloss,5m)<100'
+              name: 'Высокая потеря пакетов ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/UserGateUTM by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/UserGateUTM by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: e321a8eb29344020896faaa3bf51396c
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 4e528ad535fe4ef98ca420067be86b75
+              expression: 'avg(/UserGateUTM by SNMP/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'Высокое время отклика ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Высокая потеря пакетов ICMP ping'
+                  expression: 'min(/UserGateUTM by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/UserGateUTM by SNMP/icmppingloss,5m)<100'
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/UserGateUTM by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/UserGateUTM by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
                 - tag: scope
                   value: performance
         - uuid: e44e42e005aa44de9e964dc2eb4c5308
@@ -65,8 +136,8 @@ zabbix_export:
               value: disk
           triggers:
             - uuid: 67b01d9ca19b448da64f8ca50f9133c7
-              expression: 'last(/UserGateUTM by SNMPv2/logDiskSpace)>{$LOG_USED_MAX}'
-              name: 'Check used space on log disk'
+              expression: 'last(/UserGateUTM by SNMP/logDiskSpace)>{$LOG_USED_MAX}'
+              name: 'Проверьте заполненное пространство на лог-диске'
               priority: WARNING
               tags:
                 - tag: scope
@@ -89,16 +160,28 @@ zabbix_export:
               value: memory
           triggers:
             - uuid: b86b145726fb4f1d9be4b5ab69e21c8d
-              expression: 'min(/UserGateUTM by SNMPv2/memoryUsed,5m)>{$MEM_LOAD_MAX}'
+              expression: 'min(/UserGateUTM by SNMP/memoryUsed,5m)>{$MEM_LOAD_MAX}'
               recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'max(/UserGateUTM by SNMPv2/memoryUsed,5m)<{$MEM_LOAD_MAX}-5'
-              name: 'Memory utilization  is too high!'
+              recovery_expression: 'max(/UserGateUTM by SNMP/memoryUsed,5m)<{$MEM_LOAD_MAX}-5'
+              name: 'Слишком высокое использование ОЗУ'
               priority: AVERAGE
               tags:
                 - tag: scope
                   value: capacity
                 - tag: scope
                   value: performance
+        - uuid: 3d5f474186ab4bd8bbf05b924dcc2559
+          name: 'SNMP traps (fallback)'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          value_type: LOG
+          trends: '0'
+          description: 'The item is used to collect all SNMP traps unmatched by other snmptrap items'
+          logtimefmt: 'hh:mm:sszyyyy/MM/dd'
+          tags:
+            - tag: component
+              value: network
         - uuid: 64f4298d37534461bc330930f807cafb
           name: trapAttackDetected
           type: SNMP_TRAP
@@ -113,10 +196,10 @@ zabbix_export:
               value: idps
           triggers:
             - uuid: 93964985487640e99a1c8dcf47484e04
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapAttackDetected|.*45741\.2\.10\.1\.3\.1],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: Notification about IDPS attack'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapAttackDetected|.*45741\.2\.10\.1\.3\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: уведомление об атаке IDPS'
               priority: INFO
-              description: 'Notification about IDPS attack'
+              description: 'Уведомление об атаке IDPS'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -139,10 +222,10 @@ zabbix_export:
               value: network
           triggers:
             - uuid: 448d30a764b04558844a23fe7d304bd2
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: Cable was plugged/unplugged'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapCableStatus|.*\.45741\.2\.10\.1\.4\.7],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: Кабель был подключен/отключен'
               priority: INFO
-              description: 'Cable was plugged/unplugged from interface'
+              description: 'Кабель был подключен/отключен от интерфейса'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -163,12 +246,12 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 23b7d003de9e4256a3ffe815750a3a4f
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapChecksumFailed|.*45741\.2\.10\.1\.4\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapChecksumFailed|.*45741\.2\.10\.1\.4\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: Files checksum failed'
+              name: 'SNMPTrap: Проверка контрольной суммы файлов неудачна'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: AVERAGE
-              description: 'Some files checksum failed'
+              description: 'Проверка контрольной суммы некоторых файлов неудачна'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -187,10 +270,10 @@ zabbix_export:
               value: system
           triggers:
             - uuid: bd9e86dbbace483ba0c1d01ee2b7ef20
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapCoreBootstrapEnd|.*45741\.2\.10\.1\.1\.3],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: Utm-core boot finished'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapCoreBootstrapEnd|.*45741\.2\.10\.1\.1\.3],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: Загрузка Utm-core завершена'
               priority: INFO
-              description: 'Notification about utm-core boot finished'
+              description: 'Уведомление о завершении загрузки Utm-core'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -209,12 +292,12 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 555bf01f1ee347dbb1d1e21a664be255
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapCoreCrush|.*45741\.2\.10\.1\.1\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapCoreCrush|.*45741\.2\.10\.1\.1\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: Core crushing'
+              name: 'SNMPTrap: Сбой ядра'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: HIGH
-              description: 'Notification about core crushing'
+              description: 'Уведомление о сбое в ядре'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -233,10 +316,10 @@ zabbix_export:
               value: system
           triggers:
             - uuid: ac2f3bd5e21c44429e288aba5b096d81
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapDefaultGatewayChanged|.*45741\.2\.10\.1\.1\.4],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: Default gateway IP changed'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapDefaultGatewayChanged|.*45741\.2\.10\.1\.1\.4],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: IP-адрес шлюза по умолчанию изменен'
               priority: INFO
-              description: 'Default gateway IP changed'
+              description: 'IP-адрес шлюза по умолчанию изменен'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -255,10 +338,10 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 169f438ba021440e98816de0a6c1c757
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapHighCPUUsage|.*45741\.2\.10\.1\.4\.2],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: High CPU usage notification'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapHighCPUUsage|.*45741\.2\.10\.1\.4\.2],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: уведомление о высокой загрузке ЦП'
               priority: INFO
-              description: 'High CPU usage notification'
+              description: 'Уведомление о высокой загрузке ЦП'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -279,10 +362,10 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 40d8ef3413fc436c970d4e45fa6b2348
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapHighSessionsCounter|.*45741\.2\.10\.1\.1\.5],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: Active sessions number are near the limit'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapHighSessionsCounter|.*45741\.2\.10\.1\.1\.5],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: Количество активных сеансов близко к предельному значению'
               priority: INFO
-              description: 'Active sessions number are near the limit'
+              description: 'Количество активных сеансов близко к предельному значению'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -303,10 +386,10 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 4a6fc9efb94f4e2783b27e0bb4cd63f7
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapHighUsersCounter|.*45741\.2\.10\.1\.1\.6],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: Active users number are near the limit'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapHighUsersCounter|.*45741\.2\.10\.1\.1\.6],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: Количество активных пользователей близко к предельному значению'
               priority: INFO
-              description: 'Active users number are near the limit'
+              description: 'Количество активных пользователей близко к предельному значению'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -329,12 +412,12 @@ zabbix_export:
               value: network
           triggers:
             - uuid: 364faa824eb544b79d5933e92cecc240
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapLDAPServerDown|.*45741\.2\.10\.1\.6\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapLDAPServerDown|.*45741\.2\.10\.1\.6\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: LDAP Server is not responding'
+              name: 'SNMPTrap: LDAP-сервер не отвечает'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: WARNING
-              description: 'LDAP Server is not responding'
+              description: 'LDAP-сервер не отвечает'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -353,12 +436,12 @@ zabbix_export:
               value: device
           triggers:
             - uuid: cb38a4dd59e04beea4fbfb0a469a7230
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapLowLogdiskSpace|.*45741\.2\.10\.1\.4\.4],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapLowLogdiskSpace|.*45741\.2\.10\.1\.4\.4],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: Low log disk space'
+              name: 'SNMPTrap: Недостаточно места на лог-диске'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: AVERAGE
-              description: 'Low log disk space notification'
+              description: 'Уведомление о недостатке свободного пространства на лог-диске'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -379,12 +462,12 @@ zabbix_export:
               value: device
           triggers:
             - uuid: adffd1272d2a4b6c8cfc6f4229d97191
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapLowMemory|.*45741\.2\.10\.1\.4\.3],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapLowMemory|.*45741\.2\.10\.1\.4\.3],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: Low memory'
+              name: 'SNMPTrap: Недостаточно ОЗУ'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: AVERAGE
-              description: 'Low memory notification'
+              description: 'Уведомление о недостатке оперативной памяти'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -405,12 +488,12 @@ zabbix_export:
               value: 'ha cluster'
           triggers:
             - uuid: 9bfbae0121ea409bad915546322a10c8
-              expression: 'find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","10.1.2.3")=1 or find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","trapMemberDown")=1'
+              expression: 'find(/UserGateUTM by SNMP/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","10.1.2.3")=1 or find(/UserGateUTM by SNMP/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","trapMemberDown")=1'
               recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","10.1.2.2")=1 or find(/UserGateUTM by SNMPv2/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","trapMemberUp")=1'
-              name: 'SNMPTrap: HA cluster node offline'
+              recovery_expression: 'find(/UserGateUTM by SNMP/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","10.1.2.2")=1 or find(/UserGateUTM by SNMP/snmptrap[.*trapMember.*|.*45741\.2\.10\.1\.2\.2|.*45741\.2\.10\.1\.2\.3],#1,"like","trapMemberUp")=1'
+              name: 'SNMPTrap: Узел кластера HA отключен'
               priority: WARNING
-              description: 'HA cluster node offline'
+              description: 'Узел кластера HA отключен'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -429,18 +512,16 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 7cf3c083cfa441948fda25ea922eda7a
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapPowerSupply|.*45741\.2\.10\.1\.4\.6],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapPowerSupply|.*45741\.2\.10\.1\.4\.6],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: Power supply unit switched off'
+              name: 'SNMPTrap: Блок питания отключен'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: AVERAGE
-              description: 'Power supply unit switched off'
+              description: 'Блок питания отключен'
               manual_close: 'YES'
               tags:
                 - tag: scope
                   value: availability
-                - tag: scope
-                  value: notice
         - uuid: ec09cc3d8a444e099b55f0cff52ea258
           name: trapRaidStatus
           type: SNMP_TRAP
@@ -455,12 +536,12 @@ zabbix_export:
               value: device
           triggers:
             - uuid: 54dc57f76b6340cb91e15195bbcb456b
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapRaidStatus|.*45741\.2\.10\.1\.4\.5],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapRaidStatus|.*45741\.2\.10\.1\.4\.5],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: Raid status is changed'
+              name: 'SNMPTrap: Изменено состояние RAID'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: AVERAGE
-              description: 'Raid status is changed'
+              description: 'Изменено состояние RAID'
               manual_close: 'YES'
               tags:
                 - tag: scope
@@ -481,18 +562,16 @@ zabbix_export:
               value: system
           triggers:
             - uuid: d946e3539c43466ab3807dba0e0e0cfa
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapStatDown|.*45741\.2\.10\.1\.1\.2],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapStatDown|.*45741\.2\.10\.1\.1\.2],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: Notification about statistics server shutting down'
+              name: 'SNMPTrap: Уведомление об отключении сервера статистики'
               opdata: 'Проверь, если ОК - закрой вручную.'
-              priority: AVERAGE
-              description: 'Notification about statistics server shutting down'
+              priority: WARNING
+              description: 'Уведомление об отключении сервера статистики'
               manual_close: 'YES'
               tags:
                 - tag: scope
                   value: availability
-                - tag: scope
-                  value: notice
         - uuid: 8999e8e99b7e4f1ea731461f27d48af6
           name: trapStatusChanged
           type: SNMP_TRAP
@@ -507,16 +586,16 @@ zabbix_export:
               value: 'ha cluster'
           triggers:
             - uuid: 855749cbdf5e4aef83a6820c638f7cf1
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapStatusChanged|.*45741\.2\.10\.1\.2\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapStatusChanged|.*45741\.2\.10\.1\.2\.1],{$TRAPPEDTRIGGER_TTL})=0'
               recovery_mode: NONE
-              name: 'SNMPTrap: HA cluster node status changed'
+              name: 'SNMPTrap: изменено состояние узла кластера HA'
               opdata: 'Проверь, если ОК - закрой вручную.'
               priority: AVERAGE
-              description: 'HA cluster node status changed notification'
+              description: 'Уведомление об изменении состояния узла кластера HA'
               manual_close: 'YES'
               tags:
                 - tag: scope
-                  value: notice
+                  value: availability
         - uuid: 3d285b34e5a946e8bcd7878a0718ec16
           name: trapTrafficDrop
           type: SNMP_TRAP
@@ -533,8 +612,8 @@ zabbix_export:
               value: traffic
           triggers:
             - uuid: 23ebd9b08a5444a7a0470e1fb7c1319b
-              expression: 'nodata(/UserGateUTM by SNMPv2/snmptrap[.*trapTrafficDrop|.*45741\.2\.10\.1\.5\.1],{$TRAPPEDTRIGGER_TTL})=0'
-              name: 'SNMPTrap: Firewall DENY rule triggered on'
+              expression: 'nodata(/UserGateUTM by SNMP/snmptrap[.*trapTrafficDrop|.*45741\.2\.10\.1\.5\.1],{$TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMPTrap: сработало правило DENY брандмауэра'
               priority: INFO
               description: 'Сработало запрещающее правило межсетевого экрана.'
               manual_close: 'YES'
@@ -543,6 +622,131 @@ zabbix_export:
                   value: notice
                 - tag: scope
                   value: security
+        - uuid: d7d42567050747dca2c63b75262c8a18
+          name: 'System contact details'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: 'system.contact[sysContact.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The textual identification of the contact person for this managed node, together with information on how to contact this person.  If no contact information is known, the value is the zero-length string.
+          inventory_link: CONTACT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 6f44d8c2271d478ca4866f58a54dbb65
+          name: 'System description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: 'system.descr[sysDescr.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            A textual description of the entity. This value should
+            include the full name and version identification of the system's hardware type, software operating-system, and
+            networking software.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: c7a10066532e49e2995707c6e4233317
+          name: 'System location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: 'system.location[sysLocation.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            Physical location of the node (e.g., `equipment room`, `3rd floor`). If not provided, the value is a zero-length string.
+          inventory_link: LOCATION
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 6251b012231840f0b42e40ee858dc70b
+          name: 'System name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: system.name
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            An administratively-assigned name for this managed node.By convention, this is the node's fully-qualified domain name.  If the name is unknown, the value is the zero-length string.
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 330d3986ad764d1ca6e0a3e7a402510e
+              expression: 'last(/UserGateUTM by SNMP/system.name,#1)<>last(/UserGateUTM by SNMP/system.name,#2) and length(last(/UserGateUTM by SNMP/system.name))>0'
+              name: 'Системное имя было изменено'
+              event_name: 'Системное имя было изменено (новое имя: {ITEM.VALUE})'
+              priority: INFO
+              description: 'Системное имя было изменено. Подтвердите, чтобы закрыть проблему вручную.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: 3ec14d6064d846a3b0a216b122169b99
+          name: Uptime
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: 'system.net.uptime[sysUpTime.0]'
+          trends: '0'
+          units: uptime
+          description: |
+            MIB: SNMPv2-MIB
+            Time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 6d107702e4a6491b903b06cdc3eefaf1
+          name: 'System object ID'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.2.0
+          key: 'system.objectid[sysObjectID.0]'
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The vendor's authoritative identification of the network management subsystem contained in the entity.  This value is allocated within the SMI enterprises subtree (1.3.6.1.4.1) and provides an easy and unambiguous means for determining`what kind of box' is being managed.  For example, if vendor`Flintstones, Inc.' was assigned the subtree1.3.6.1.4.1.4242, it could assign the identifier 1.3.6.1.4.1.4242.1.1 to its `Fred Router'.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
         - uuid: 08dac57b65b949a0ab416b71cfcd6963
           name: 'The number of active current users'
           type: SNMP_AGENT
@@ -576,10 +780,10 @@ zabbix_export:
               value: system
           triggers:
             - uuid: e50d4aae621e41c9a7d0b126a8d17333
-              expression: 'last(/UserGateUTM by SNMPv2/vCPU.percentage)>{$VCPU_USED_MAX}'
+              expression: 'last(/UserGateUTM by SNMP/vCPU.percentage)>{$VCPU_USED_MAX}'
               recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'avg(/UserGateUTM by SNMPv2/vCPU.percentage,10m)<{$VCPU_USED_MAX}-10'
-              name: 'vCPU load is too high!'
+              recovery_expression: 'avg(/UserGateUTM by SNMP/vCPU.percentage,10m)<{$VCPU_USED_MAX}-10'
+              name: 'Высокая загрузка виртуального ЦП'
               priority: AVERAGE
               tags:
                 - tag: scope
@@ -621,6 +825,32 @@ zabbix_export:
               value: cpu
             - tag: component
               value: system
+        - uuid: 76f61711083a41a7bca49870e8ed5361
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          delay: 5m
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 5a91902e8fc04a61af9c1aab3e236d22
+              expression: 'max(/UserGateUTM by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'Сбор данных SNMP отсутствует'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP недоступен для опроса. Проверьте подключение устройства и настройки SNMP.'
+              tags:
+                - tag: scope
+                  value: availability
       discovery_rules:
         - uuid: 7d245a77b7844773a55bcb0544daaf5e
           name: 'Network Interfaces discovery'
@@ -692,10 +922,15 @@ zabbix_export:
               trigger_prototypes:
                 - uuid: 5802f11f67624fd5ad160284b417b20e
                   expression: |
-                    change(/UserGateUTM by SNMPv2/ifInErrors[{#SNMPVALUE}])>0 and
-                    nodata(/UserGateUTM by SNMPv2/ifInErrors[{#SNMPVALUE}],1m)=0
+                    change(/UserGateUTM by SNMP/ifInErrors[{#SNMPVALUE}])>0 and
+                    nodata(/UserGateUTM by SNMP/ifInErrors[{#SNMPVALUE}],1m)=0
                   name: 'Errors on interface {#SNMPVALUE}'
                   priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: performance
             - uuid: ad2f60bc4fe2470bb96e81330a748522
               name: 'Operational status of interface {#SNMPVALUE}'
               type: SNMP_AGENT
@@ -714,9 +949,12 @@ zabbix_export:
                   value: interface
               trigger_prototypes:
                 - uuid: a8f9092ee2a24f54a4ac9b7865191355
-                  expression: '(last(/UserGateUTM by SNMPv2/ifOperStatus[{#SNMPVALUE}],#1)<>last(/UserGateUTM by SNMPv2/ifOperStatus[{#SNMPVALUE}],#2))>0 and nodata(/UserGateUTM by SNMPv2/ifOperStatus[{#SNMPVALUE}],1m)=0'
+                  expression: '(last(/UserGateUTM by SNMP/ifOperStatus[{#SNMPVALUE}],#1)<>last(/UserGateUTM by SNMP/ifOperStatus[{#SNMPVALUE}],#2))>0 and nodata(/UserGateUTM by SNMP/ifOperStatus[{#SNMPVALUE}],1m)=0'
                   name: 'Operational status was changed on interface {#SNMPVALUE}'
                   priority: INFO
+                  tags:
+                    - tag: scope
+                      value: notice
             - uuid: c8ddf3ad143343ed83770450f6bc0ef9
               name: 'Outbound errors on interface {#SNMPVALUE}'
               type: SNMP_AGENT
@@ -750,9 +988,12 @@ zabbix_export:
                   value: interface
           trigger_prototypes:
             - uuid: e7826d72df994f7383180ee6b1522540
-              expression: 'last(/UserGateUTM by SNMPv2/ifAdminStatus[{#SNMPVALUE}])=1 and last(/UserGateUTM by SNMPv2/ifOperStatus[{#SNMPVALUE}])=2'
+              expression: 'last(/UserGateUTM by SNMP/ifAdminStatus[{#SNMPVALUE}])=1 and last(/UserGateUTM by SNMP/ifOperStatus[{#SNMPVALUE}])=2'
               name: 'Operational status of interface {#SNMPVALUE} is DOWN!'
               priority: HIGH
+              tags:
+                - tag: scope
+                  value: availability
         - uuid: 35ea17c9db6a41a9830d6a5b4c256052
           name: 'Network Interfaces discovery HC'
           type: SNMP_AGENT
@@ -805,12 +1046,12 @@ zabbix_export:
               graph_items:
                 - color: 00CF00
                   item:
-                    host: 'UserGateUTM by SNMPv2'
+                    host: 'UserGateUTM by SNMP'
                     key: 'ifHCInOctets[{#SNMPVALUE}]'
                 - sortorder: '1'
                   color: 002A97
                   item:
-                    host: 'UserGateUTM by SNMPv2'
+                    host: 'UserGateUTM by SNMP'
                     key: 'ifHCOutOctets[{#SNMPVALUE}]'
       tags:
         - tag: class
@@ -823,6 +1064,12 @@ zabbix_export:
         - macro: '{$CPU_USED_MAX}'
           value: '70'
           description: '%'
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
         - macro: '{$LOG_USED_MAX}'
           value: '80'
           description: '%'
@@ -833,6 +1080,9 @@ zabbix_export:
           value: '^.*'
         - macro: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
           value: ^2$
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+          description: 'Time interval for the SNMP availability trigger.'
         - macro: '{$TRAPPEDTRIGGER_TTL}'
           value: 5m
           description: 'Время показа триггера.'
@@ -880,25 +1130,25 @@ zabbix_export:
       graph_items:
         - color: 0040FF
           item:
-            host: 'UserGateUTM by SNMPv2'
+            host: 'UserGateUTM by SNMP'
             key: cpuLoad
         - sortorder: '1'
           color: 80FF00
           item:
-            host: 'UserGateUTM by SNMPv2'
+            host: 'UserGateUTM by SNMP'
             key: memoryUsed
         - sortorder: '2'
           color: FF8000
           item:
-            host: 'UserGateUTM by SNMPv2'
+            host: 'UserGateUTM by SNMP'
             key: usersCounter
         - sortorder: '3'
           color: A54F10
           item:
-            host: 'UserGateUTM by SNMPv2'
+            host: 'UserGateUTM by SNMP'
             key: logDiskSpace
         - sortorder: '4'
           color: 81D4FA
           item:
-            host: 'UserGateUTM by SNMPv2'
+            host: 'UserGateUTM by SNMP'
             key: vCPU.percentage
