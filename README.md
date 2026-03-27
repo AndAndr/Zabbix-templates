@@ -53,6 +53,8 @@
 
 **APC_ATS** Шаблон для мониторинга по SNMP APC Rack ATS (АВР-автоматический ввод резерва). Тестировалось на AP7721.
 
+**CyberPower PDU by SNMP.yaml** - Шаблон мониторинга PDU CyberPower ePDU2. Тестировался на модели PDU83401.
+
 
 
 ## SAN

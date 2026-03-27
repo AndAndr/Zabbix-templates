@@ -1,0 +1,1648 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 3dcd5bbe90534f9e8eb5c2d53756af63
+      name: Templates/Power
+  templates:
+    - uuid: 12b9beec9fae4b7a94f1b84836055d35
+      template: 'CyberPower PDU by SNMP'
+      name: 'CyberPower PDU by SNMP'
+      description: |
+        https://github.com/AndAndr/Zabbix-templates
+        Шаблон мониторинга PDU CyberPower ePDU2.
+        Тестировался на модели PDU83401.
+        Конфигурация Daisy Chain в шаблоне не поддерживается.
+        Расположение сенсора климата захардкодил.
+      groups:
+        - name: Templates/Power
+      items:
+        - uuid: 9d12c4b6f808412b8f5d1d2eeefea926
+          name: DewPoint
+          type: CALCULATED
+          key: DewPoint
+          units: '`C'
+          params: '(237.7*(((17.27*last(//envir2Temperature))/(237.7+last(//envir2Temperature)))+log(last(//envir2Humidity)/100)))/(17.27-(((17.27*last(//envir2Temperature))/(237.7+last(//envir2Temperature)))+log(last(//envir2Humidity)/100)))'
+          description: 'Рекомендуемый диапазон точки росы в ЦОД: 5,5–15 `C'
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: f470e8920ee94681a823af51aec31369
+              expression: 'last(/CyberPower PDU by SNMP/DewPoint)>{$DEWPOINT.MAX}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/CyberPower PDU by SNMP/DewPoint)<"{$DEWPOINT.MAX}-1"'
+              name: 'Высокая температура точки росы'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'Рекомендуемый диапазон точки росы в ЦОД: 5,5–15 `C'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: health
+            - uuid: 8657f6369ab04be68c5967a3fb7f4cea
+              expression: 'last(/CyberPower PDU by SNMP/DewPoint)<{$DEWPOINT.MIN}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/CyberPower PDU by SNMP/DewPoint)>"{$DEWPOINT.MIN}+1"'
+              name: 'Низкая температура точки росы'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'Рекомендуемый диапазон точки росы в ЦОД: 5,5–15 `C'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: health
+        - uuid: 4908ec4fc2304d92b65ff2d2583205d3
+          name: envir2Humidity
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.8.3.2.1.3.1
+          key: envir2Humidity
+          value_type: FLOAT
+          units: '%'
+          description: Влажность
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: health
+        - uuid: 8316f12a4c614194b9f77ea8e582be1b
+          name: envir2Temperature
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.8.2.3.1.3.1
+          key: envir2Temperature
+          value_type: FLOAT
+          units: C`
+          description: Температура
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 6af47ecac0494bf2806170bc198c5c9a
+              expression: 'last(/CyberPower PDU by SNMP/envir2Temperature)>{$TEMPERATURE.MAX}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/CyberPower PDU by SNMP/envir2Temperature)<{$TEMPERATURE.MAX}-{$TEMPERATURE.HYSTERESIS}'
+              name: 'Высокая температура PDU'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: health
+            - uuid: 4ceaeb34ac544173abaa63f99574cd52
+              expression: 'last(/CyberPower PDU by SNMP/envir2Temperature)<{$TEMPERATURE.MIN}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/CyberPower PDU by SNMP/envir2Temperature)>{$TEMPERATURE.MIN}+{$TEMPERATURE.HYSTERESIS}'
+              name: 'Низкая температура PDU'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: health
+        - uuid: f2f1e5aef2e5493197bead0b790d45b4
+          name: ePDU2DeviceConfigPowerLowLoadThreshold
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.2.1.13.1
+          key: ePDU2DeviceConfigPowerLowLoadThreshold
+          delay: 10m
+          units: Вт
+          description: 'Определённая пользователем уставка низкой загрузки PDU в Ваттах.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: config
+        - uuid: 601af0acad5a48e2bffe098904854ba0
+          name: ePDU2DeviceConfigPowerNearOverloadThreshold
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.2.1.14.1
+          key: ePDU2DeviceConfigPowerNearOverloadThreshold
+          delay: 10m
+          units: Вт
+          description: 'Определённая пользователем уставка высокой загрузки PDU в Ваттах.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: config
+        - uuid: 7bc20c4981d148cb8b3157f11021d8d6
+          name: ePDU2DeviceConfigPowerOverloadThreshold
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.2.1.15.1
+          key: ePDU2DeviceConfigPowerOverloadThreshold
+          delay: 10m
+          units: Вт
+          description: 'Определённая пользователем уставка перегрузки PDU в Ваттах.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: config
+        - uuid: 29072063881f4e14a22e640a800e0347
+          name: ePDU2DeviceInfoMeteredOutlets
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.3.1.7.1
+          key: ePDU2DeviceInfoMeteredOutlets
+          delay: 10m
+          units: Розеток
+          description: 'Количество измеряемых розеток PDU.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: ad929ef8c753489fbc6a42ab051e2981
+          name: ePDU2DeviceInfoNumOutlets
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.3.1.5.1
+          key: ePDU2DeviceInfoNumOutlets
+          delay: 10m
+          units: Розеток
+          description: 'Количество розеток PDU.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: f1c596be099f40e98760863e5f84208c
+          name: ePDU2DeviceInfoSwitchedOutlets
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.3.1.6.1
+          key: ePDU2DeviceInfoSwitchedOutlets
+          delay: 10m
+          units: Розеток
+          description: 'Количество управляемых розеток PDU.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 209d8a2858124649bdcfe83a78b3ce04
+          name: ePDU2DeviceStatusApparentPower
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.15.1
+          key: ePDU2DeviceStatusApparentPower
+          units: ВА
+          description: 'Полная электрическая мощность нагрузки PDU (ВА).'
+          tags:
+            - tag: component
+              value: power
+        - uuid: 3ce2766d0ad54e26938030c5f1a469d0
+          name: ePDU2DeviceStatusLoadState
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.4.1
+          key: ePDU2DeviceStatusLoadState
+          description: |
+            1-noLoadAlarm (Норма)
+            2-underCurrentAlarm
+            3-nearOverCurrentAlarm
+            4-overCurrentAlarm
+          valuemap:
+            name: ePDU2DeviceStatusLoadState
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 0399ecb465474faf91df2309d2a57f38
+              expression: 'last(/CyberPower PDU by SNMP/ePDU2DeviceStatusLoadState)=3'
+              name: 'PDU близок к перегрузке по току'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: notice
+            - uuid: ab1a94a2413a4c30b21d29747b67ad9b
+              expression: 'last(/CyberPower PDU by SNMP/ePDU2DeviceStatusLoadState)=2'
+              name: 'PDU недостаточно нагружен по току'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 1e4d5127080048fcb30c2490e325a029
+              expression: 'last(/CyberPower PDU by SNMP/ePDU2DeviceStatusLoadState)=4'
+              name: 'PDU перегружен по току'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: notice
+        - uuid: 4e0a638f1fa24b1690ff6326c7ae3bfe
+          name: ePDU2DeviceStatusPowerFactor
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.16.1
+          key: ePDU2DeviceStatusPowerFactor
+          value_type: FLOAT
+          description: 'Коэффициент мощности нагрузки PDU.'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: power
+        - uuid: 0a16e2e977d64e6c9688d419bb25ec55
+          name: ePDU2DeviceStatusPowerLoad
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.18.1
+          key: ePDU2DeviceStatusPowerLoad
+          units: Вт
+          description: 'Потребляемая мощность нагрузки PDU (Вт).'
+          tags:
+            - tag: component
+              value: power
+        - uuid: e71bb0756b6648238f5d015e545dcf36
+          name: ePDU2DeviceStatusPowerPeakLoad
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.19.1
+          key: ePDU2DeviceStatusPowerPeakLoad
+          units: Вт
+          description: 'Пиковая потребляемая мощность нагрузки PDU (Вт).'
+          tags:
+            - tag: component
+              value: power
+        - uuid: 4b08534e175b49238d252951e032060e
+          name: ePDU2DeviceStatusPowerSupply1Status
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.13.1
+          key: ePDU2DeviceStatusPowerSupply1Status
+          description: 'Состояние БП1.'
+          valuemap:
+            name: Status
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 3a24ce3904e74512a6f7dc9d9bf572ca
+              expression: 'last(/CyberPower PDU by SNMP/ePDU2DeviceStatusPowerSupply1Status)<>1'
+              name: 'Проверь БП1 PDU'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: afb53964d8f2436f931b27ce82474be4
+          name: ePDU2DeviceStatusPowerSupply2Status
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.14.1
+          key: ePDU2DeviceStatusPowerSupply2Status
+          description: 'Состояние БП2.'
+          valuemap:
+            name: Status
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 284e69ec56f946768509b624538ca55a
+              expression: 'last(/CyberPower PDU by SNMP/ePDU2DeviceStatusPowerSupply2Status)<>1'
+              name: 'Проверь БП2 PDU'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 410e22ac644d48179b85d13978b83505
+          name: ePDU2DeviceStatusPowerSupplyAlarm
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.3.4.1.12.1
+          key: ePDU2DeviceStatusPowerSupplyAlarm
+          description: 'Состояние источника питания.'
+          valuemap:
+            name: Status
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: d126cfed7b204b9e892da85d5cba0d18
+              expression: 'last(/CyberPower PDU by SNMP/ePDU2DeviceStatusPowerSupplyAlarm)<>1'
+              name: 'Проверь источник питания PDU'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: de22700f25074da081564ef576a4f495
+          name: ePDU2IdentFirmwareRev
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.2.2.1.7.1
+          key: ePDU2IdentFirmwareRev
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          description: 'The Rack PDU firmware version.'
+          inventory_link: SOFTWARE
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: f1833711085146f7942450f82877e3e0
+          name: ePDU2IdentHardwareRev
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.2.2.1.6.1
+          key: ePDU2IdentHardwareRev
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          description: 'The Rack PDU hardware version.'
+          inventory_link: HARDWARE
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 03e03c433b834f9e898d93f977893753
+          name: ePDU2IdentLocation
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.2.2.1.4.1
+          key: ePDU2IdentLocation
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          inventory_link: LOCATION
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 8b66b23150354840bae4ec460efab095
+          name: ePDU2IdentModelName
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.2.2.1.9.1
+          key: ePDU2IdentModelName
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          description: 'The Rack PDU model number.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 21419ef9bc7a4dbbb06b0228f4dc2037
+          name: ePDU2IdentName
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.2.2.1.3.1
+          key: ePDU2IdentName
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 34f155ef3a3441aeae4cef00e56439f0
+          name: ePDU2IdentSerialNumber
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.3808.1.1.6.2.2.1.10.1
+          key: ePDU2IdentSerialNumber
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          description: 'The Rack PDU serial number.'
+          inventory_link: SERIALNO_A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 5c4bd18384154a12b150f42ffea1997b
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 884a0703a07049548ca032a48fa89daa
+              expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=1'
+              name: 'Тест доступности по протоколу ICMP'
+              priority: HIGH
+              description: 'Последнее значение: {ITEM.LASTVALUE1}. Последние три попытки вернули тайм-аут. Проверьте подключение устройства.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 9281dd08357a4b4a9d9df64aa0c5b424
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 0832a8b6e03647b09be2ff385b0e597d
+              expression: 'min(/CyberPower PDU by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/CyberPower PDU by SNMP/icmppingloss,5m)<100'
+              name: 'Высокая потеря пакетов ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: de0a51bc98c3441fac027d2117936cea
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 04063bb9118d4601ab3fce17cf78f62e
+              expression: 'avg(/CyberPower PDU by SNMP/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'Высокое время отклика ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Высокая потеря пакетов ICMP ping'
+                  expression: 'min(/CyberPower PDU by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/CyberPower PDU by SNMP/icmppingloss,5m)<100'
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 982e6f77e68e4c92a72d8d1907e26742
+          name: 'SNMP traps (fallback)'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          value_type: LOG
+          trends: '0'
+          description: 'The item is used to collect all SNMP traps unmatched by other snmptrap items'
+          logtimefmt: 'hh:mm:sszyyyy/MM/dd'
+          tags:
+            - tag: component
+              value: network
+        - uuid: d94b67bdab3b4fada407d2fbfc3ec2c8
+          name: sysContact
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.4.0
+          key: sysContact
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          description: 'A user-defined string identifying the person to contact of the Rack PDU.'
+          inventory_link: CONTACT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: da95b2773a3a4f9698d629163276cc21
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: ed65169d0e354b088974f4e8db4a4fc0
+              expression: 'max(/CyberPower PDU by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'Нет сбора данных SNMP'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP недоступен для опроса. Пожалуйста, проверьте подключение устройства и настройки SNMP.'
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/CyberPower PDU by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+      discovery_rules:
+        - uuid: b31d42dba86b4f96af44ebc765066542
+          name: 'ePDU2 outlet discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#OUTLETINDEX},.1.3.6.1.4.1.3808.1.1.6.6.1.2.1.1,{#OUTLETNAME},.1.3.6.1.4.1.3808.1.1.6.6.1.2.1.4]'
+          key: ePDU2Outlet
+          delay: 1h
+          description: 'Обнаружение розеток.'
+          item_prototypes:
+            - uuid: 383139469f89419b90342448ca58fa12
+              name: 'PDU розетка {#OUTLETINDEX}-{#OUTLETNAME} уставка низкой загрузки розетки (Вт)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.2.2.1.5.{#OUTLETINDEX}'
+              key: 'ePDU2OutletMeteredConfigLowLoadThreshold.[{#OUTLETINDEX}]'
+              delay: 10m
+              units: Вт
+              description: 'Розетка {#OUTLETINDEX}-{#OUTLETNAME} уставка низкой загрузки розетки (Вт).'
+              tags:
+                - tag: component
+                  value: config
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+            - uuid: d873443b0da5410688a7cced8bb5e8cd
+              name: 'PDU розетка {#OUTLETINDEX}-{#OUTLETNAME} уставка высокой загрузки розетки (Вт)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.2.2.1.6.{#OUTLETINDEX}'
+              key: 'ePDU2OutletMeteredConfigNearOverloadThreshold.[{#OUTLETINDEX}]'
+              delay: 10m
+              units: Вт
+              description: 'Розетка {#OUTLETINDEX}-{#OUTLETNAME} уставка высокой загрузки розетки (Вт).'
+              tags:
+                - tag: component
+                  value: config
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+            - uuid: 6eb6936dad40402394ffb2585dfdcb14
+              name: 'PDU розетка {#OUTLETINDEX}-{#OUTLETNAME} уставка перегрузки розетки (Вт)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.2.2.1.7.{#OUTLETINDEX}'
+              key: 'ePDU2OutletMeteredConfigOverloadThreshold.[{#OUTLETINDEX}]'
+              delay: 10m
+              units: Вт
+              description: 'Розетка {#OUTLETINDEX}-{#OUTLETNAME} уставка перегрузки розетки (Вт).'
+              tags:
+                - tag: component
+                  value: config
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+            - uuid: 1533a89ccbc249d09a8aa9658e1b2b37
+              name: 'PDU розетка {#OUTLETINDEX}-{#OUTLETNAME} мощность (Вт)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.2.4.1.7.{#OUTLETINDEX}'
+              key: 'ePDU2OutletMeteredStatusActivePower.[{#OUTLETINDEX}]'
+              value_type: FLOAT
+              units: Вт
+              description: 'Измеренная мощность нагрузки для розетки {#OUTLETINDEX}-{#OUTLETNAME} (Вт).'
+              tags:
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+            - uuid: 933e7118d66b4c43b95188ed27ea44b6
+              name: 'PDU розетка {#OUTLETINDEX}-{#OUTLETNAME} потребляемая мощность (кВт*ч)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.2.4.1.11.{#OUTLETINDEX}'
+              key: 'ePDU2OutletMeteredStatusEnergy.[{#OUTLETINDEX}]'
+              value_type: FLOAT
+              units: 'кВт*ч'
+              description: 'Потребяемая мощность нагрузки для розетки {#OUTLETINDEX}-{#OUTLETNAME} (кВт*ч).'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+            - uuid: 32088b5afb3648c7a7b890d8be4bf27e
+              name: 'PDU розетка {#OUTLETINDEX}-{#OUTLETNAME} ток'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.2.4.1.6.{#OUTLETINDEX}'
+              key: 'ePDU2OutletMeteredStatusLoad.[{#OUTLETINDEX}]'
+              value_type: FLOAT
+              units: А
+              description: 'Измеренный ток нагрузки для розетки {#OUTLETINDEX}-{#OUTLETNAME} (А).'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+            - uuid: b87a622a6eea40c096b9b33505da1c5c
+              name: 'PDU розетка {#OUTLETINDEX}-{#OUTLETNAME} пиковая мощность'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.2.4.1.8.{#OUTLETINDEX}'
+              key: 'ePDU2OutletMeteredStatusPeakPower.[{#OUTLETINDEX}]'
+              value_type: FLOAT
+              units: Вт
+              description: 'Измеренная пиковая мощность нагрузки (потребление) для розетки {#OUTLETINDEX}-{#OUTLETNAME} (Вт).'
+              tags:
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+            - uuid: 29f202df30314adc9759bbeb4f45eb6e
+              name: 'PDU Статус розетки {#OUTLETINDEX}-{#OUTLETNAME}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.6.1.4.1.5.{#OUTLETINDEX}'
+              key: 'ePDU2OutletSwitchedStatusState.[{#OUTLETINDEX}]'
+              description: 'Статус розетки {#OUTLETINDEX}-{#OUTLETNAME}.'
+              valuemap:
+                name: 'Outlet status state'
+              tags:
+                - tag: component
+                  value: outlet
+                - tag: component
+                  value: 'outlet "{#OUTLETINDEX}"-""{#OUTLETNAME}""'
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 74fc66f89f4d4e6ea8c2c1b81272f5c4
+                  expression: 'last(/CyberPower PDU by SNMP/ePDU2OutletSwitchedStatusState.[{#OUTLETINDEX}])=2 and last(/CyberPower PDU by SNMP/ePDU2OutletSwitchedStatusState.[{#OUTLETINDEX}],#1)<>last(/CyberPower PDU by SNMP/ePDU2OutletSwitchedStatusState.[{#OUTLETINDEX}],#2)'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/CyberPower PDU by SNMP/ePDU2OutletSwitchedStatusState.[{#OUTLETINDEX}])=1'
+                  name: 'PDU Розетка {#OUTLETINDEX}-{#OUTLETNAME} отключена'
+                  opdata: 'Состояние розетки: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: 'Возможно ручное закрытие проблемы.'
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: notice
+        - uuid: 915e855d1b69464485db778474f3aaf0
+          name: 'ePDU2 phase discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#PHASEINDEX},.1.3.6.1.4.1.3808.1.1.6.4.2.1.1]'
+          key: ePDU2Phase
+          delay: 1h
+          description: 'Обнаружение фаз.'
+          item_prototypes:
+            - uuid: dd2c51362a884d848dc87454beec1add
+              name: 'Фаза "{#PHASEINDEX}" уставка низкой загрузки фазы (Амперы)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.2.1.5.{#PHASEINDEX}'
+              key: 'ePDU2PhaseConfigLowLoadThreshold.[{#PHASEINDEX}]'
+              delay: 10m
+              units: А
+              description: 'Определённая пользователем уставка низкой загрузки фазы в амперах.'
+              tags:
+                - tag: component
+                  value: config
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+            - uuid: 40f8732154d4491abcb657977145184c
+              name: 'Фаза "{#PHASEINDEX}" уставка высокой загрузки фазы (Амперы)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.2.1.6.{#PHASEINDEX}'
+              key: 'ePDU2PhaseConfigNearOverloadThreshold.[{#PHASEINDEX}]'
+              delay: 10m
+              units: А
+              description: 'Определённая пользователем уставка высокой загрузки фазы в амперах.'
+              tags:
+                - tag: component
+                  value: config
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+            - uuid: 43392ed234b0449e876fb456fa404d86
+              name: 'Фаза "{#PHASEINDEX}" уставка перегрузки фазы (Амперы)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.2.1.7.{#PHASEINDEX}'
+              key: 'ePDU2PhaseConfigOverloadThreshold.[{#PHASEINDEX}]'
+              delay: 10m
+              units: А
+              description: 'Определённая пользователем уставка перегрузки фазы в амперах.'
+              tags:
+                - tag: component
+                  value: config
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+            - uuid: 823d54692b6548a8bd96c79e9f74a7b4
+              name: 'Фаза "{#PHASEINDEX}" полная мощность (ВА)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.4.1.8.{#PHASEINDEX}'
+              key: 'ePDU2PhaseStatusApparentPower.[{#PHASEINDEX}]'
+              value_type: FLOAT
+              units: ВА
+              description: 'Полная мощность на фазе "{#PHASEINDEX}".'
+              tags:
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+            - uuid: 7d4e257c1f7043439b770eb09aec4688
+              name: 'Фаза "{#PHASEINDEX}" ток'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.4.1.5.{#PHASEINDEX}'
+              key: 'ePDU2PhaseStatusLoad.[{#PHASEINDEX}]'
+              value_type: FLOAT
+              units: А
+              description: 'Ток на фазе "{#PHASEINDEX}".'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+            - uuid: 36096f8e3bc04e4e9701f215c0684e9a
+              name: 'Фаза "{#PHASEINDEX}" статус загрузки'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.4.1.4.{#PHASEINDEX}'
+              key: 'ePDU2PhaseStatusLoadState.[{#PHASEINDEX}]'
+              description: 'Статус загрузки фазы.'
+              valuemap:
+                name: 'Phase status load state'
+              tags:
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+              trigger_prototypes:
+                - uuid: 4630818f434f4783accbd94c8c11818c
+                  expression: 'last(/CyberPower PDU by SNMP/ePDU2PhaseStatusLoadState.[{#PHASEINDEX}])=3'
+                  name: 'PDU Фаза "{#PHASEINDEX}" высокая нагрузка'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: notice
+                - uuid: 43597e5ec507412781959d55f41ddf1a
+                  expression: 'last(/CyberPower PDU by SNMP/ePDU2PhaseStatusLoadState.[{#PHASEINDEX}])=2'
+                  name: 'PDU Фаза "{#PHASEINDEX}" низкая нагрузка'
+                  priority: INFO
+                  tags:
+                    - tag: scope
+                      value: notice
+                - uuid: 4355d19f6141415f8a25847352cdf5b4
+                  expression: 'last(/CyberPower PDU by SNMP/ePDU2PhaseStatusLoadState.[{#PHASEINDEX}])=4'
+                  name: 'PDU Фаза "{#PHASEINDEX}" перегрузка'
+                  priority: HIGH
+                  tags:
+                    - tag: scope
+                      value: availability
+                    - tag: scope
+                      value: notice
+            - uuid: 2cf79cb2767143fbba1ad27ea5e593c3
+              name: 'Фаза "{#PHASEINDEX}" мощность (Вт)'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.4.1.7.{#PHASEINDEX}'
+              key: 'ePDU2PhaseStatusPower.[{#PHASEINDEX}]'
+              value_type: FLOAT
+              units: Вт
+              description: 'Мощность на фазе "{#PHASEINDEX}".'
+              tags:
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+            - uuid: 6856b7d268a242ffa64bfe89f5fa986c
+              name: 'Фаза "{#PHASEINDEX}" коэффициент мощности'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.4.1.9.{#PHASEINDEX}'
+              key: 'ePDU2PhaseStatusPowerFactor.[{#PHASEINDEX}]'
+              value_type: FLOAT
+              description: 'Коэффициент мощности для фазы "{#PHASEINDEX}".'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+            - uuid: 62d55058ceda4dd5b281811ba5b0380e
+              name: 'Фаза "{#PHASEINDEX}" напряжение'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.3808.1.1.6.4.4.1.6.{#PHASEINDEX}'
+              key: 'ePDU2PhaseStatusVoltage.[{#PHASEINDEX}]'
+              value_type: FLOAT
+              units: В
+              description: 'Напряжение на фазе "{#PHASEINDEX}".'
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: component
+                  value: phase
+                - tag: component
+                  value: 'phase "{#PHASEINDEX}"'
+                - tag: component
+                  value: power
+          graph_prototypes:
+            - uuid: 8e08efe3f11b4c32954c7f30daad56c1
+              name: 'Ток фазы "{#PHASEINDEX}"'
+              ymin_type_1: FIXED
+              ymax_type_1: ITEM
+              ymax_item_1:
+                host: 'CyberPower PDU by SNMP'
+                key: 'ePDU2PhaseConfigNearOverloadThreshold.[{#PHASEINDEX}]'
+              graph_items:
+                - color: 4000FF
+                  calc_fnc: ALL
+                  item:
+                    host: 'CyberPower PDU by SNMP'
+                    key: 'ePDU2PhaseStatusLoad.[{#PHASEINDEX}]'
+      tags:
+        - tag: class
+          value: power
+        - tag: target
+          value: cyberpower
+        - tag: target
+          value: pdu
+      macros:
+        - macro: '{$DEWPOINT.MAX}'
+          value: '20'
+          description: 'Максимальная температура точки росы `C. Рекомендуемый диапазон точки росы в ЦОД: 5,5–15 `C'
+        - macro: '{$DEWPOINT.MIN}'
+          value: '2'
+          description: 'Минимальная температура точки росы `C. Рекомендуемый диапазон точки росы в ЦОД: 5,5–15 `C'
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+          description: 'The time interval for SNMP agent availability trigger expression.'
+        - macro: '{$TEMPERATURE.HYSTERESIS}'
+          value: '2'
+          description: 'Гистерезис температуры `C.'
+        - macro: '{$TEMPERATURE.MAX}'
+          value: '35'
+          description: 'Максимальная температура `C.'
+        - macro: '{$TEMPERATURE.MIN}'
+          value: '10'
+          description: 'Минимальная температура `C.'
+      dashboards:
+        - uuid: 53a2e2ef2f124f69a5e6c2cf32b6f8a3
+          name: PDU
+          auto_start: 'NO'
+          pages:
+            - widgets:
+                - type: tophosts
+                  name: 'Шасси PDU'
+                  width: '72'
+                  fields:
+                    - type: INTEGER
+                      name: columns.0.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.0.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.0.data
+                      value: '3'
+                    - type: INTEGER
+                      name: columns.0.decimal_places
+                      value: '2'
+                    - type: STRING
+                      name: columns.0.name
+                      value: Имя
+                    - type: STRING
+                      name: columns.0.text
+                      value: '{HOST.HOST}'
+                    - type: INTEGER
+                      name: columns.1.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.1.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.1.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.1.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.1.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.1.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.1.item
+                      value: ePDU2IdentModelName
+                    - type: STRING
+                      name: columns.1.name
+                      value: Модель
+                    - type: INTEGER
+                      name: columns.2.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.2.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.2.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.2.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.2.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.2.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.2.item
+                      value: ePDU2IdentHardwareRev
+                    - type: STRING
+                      name: columns.2.name
+                      value: HW
+                    - type: INTEGER
+                      name: columns.3.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.3.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.3.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.3.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.3.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.3.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.3.item
+                      value: ePDU2IdentFirmwareRev
+                    - type: STRING
+                      name: columns.3.name
+                      value: FW
+                    - type: INTEGER
+                      name: columns.4.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.4.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.4.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.4.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.4.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.4.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.4.item
+                      value: ePDU2IdentSerialNumber
+                    - type: STRING
+                      name: columns.4.name
+                      value: SN
+                    - type: INTEGER
+                      name: columns.5.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.5.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.5.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.5.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.5.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.5.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.5.item
+                      value: ePDU2DeviceInfoNumOutlets
+                    - type: STRING
+                      name: columns.5.name
+                      value: Розетки
+                    - type: INTEGER
+                      name: columns.6.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.6.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.6.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.6.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.6.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.6.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.6.item
+                      value: ePDU2IdentLocation
+                    - type: STRING
+                      name: columns.6.name
+                      value: Расположение
+                    - type: INTEGER
+                      name: columns.7.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.7.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.7.data
+                      value: '3'
+                    - type: INTEGER
+                      name: columns.7.decimal_places
+                      value: '2'
+                    - type: STRING
+                      name: columns.7.name
+                      value: Контакт
+                    - type: STRING
+                      name: columns.7.text
+                      value: '{INVENTORY.POC.PRIMARY.NAME}'
+                    - type: INTEGER
+                      name: columns.8.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.8.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.8.data
+                      value: '3'
+                    - type: INTEGER
+                      name: columns.8.decimal_places
+                      value: '2'
+                    - type: STRING
+                      name: columns.8.name
+                      value: Телефон
+                    - type: STRING
+                      name: columns.8.text
+                      value: '{INVENTORY.POC.PRIMARY.PHONE.A}'
+                    - type: INTEGER
+                      name: columns.9.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.9.base_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: columns.9.data
+                      value: '3'
+                    - type: INTEGER
+                      name: columns.9.decimal_places
+                      value: '2'
+                    - type: STRING
+                      name: columns.9.name
+                      value: Email
+                    - type: STRING
+                      name: columns.9.text
+                      value: '{INVENTORY.POC.PRIMARY.EMAIL}'
+                    - type: INTEGER
+                      name: columns.10.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.10.base_color
+                      value: D7CCC8
+                    - type: INTEGER
+                      name: columns.10.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.10.decimal_places
+                      value: '2'
+                    - type: INTEGER
+                      name: columns.10.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.10.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.10.item
+                      value: ePDU2DeviceConfigPowerLowLoadThreshold
+                    - type: STRING
+                      name: columns.10.name
+                      value: 'Нижняя уставка нагрузки'
+                    - type: INTEGER
+                      name: columns.11.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.11.base_color
+                      value: D7CCC8
+                    - type: INTEGER
+                      name: columns.11.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.11.decimal_places
+                      value: '2'
+                    - type: INTEGER
+                      name: columns.11.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.11.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.11.item
+                      value: ePDU2DeviceConfigPowerNearOverloadThreshold
+                    - type: STRING
+                      name: columns.11.name
+                      value: 'Верхняя уставка нагрузки'
+                    - type: INTEGER
+                      name: columns.12.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.12.base_color
+                      value: D7CCC8
+                    - type: INTEGER
+                      name: columns.12.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.12.decimal_places
+                      value: '2'
+                    - type: INTEGER
+                      name: columns.12.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.12.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.12.item
+                      value: ePDU2DeviceConfigPowerOverloadThreshold
+                    - type: STRING
+                      name: columns.12.name
+                      value: 'Уставка перегрузки'
+                    - type: INTEGER
+                      name: columns.13.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.13.base_color
+                      value: 80FF00
+                    - type: INTEGER
+                      name: columns.13.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.13.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.13.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.13.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.13.item
+                      value: ePDU2DeviceStatusLoadState
+                    - type: STRING
+                      name: columns.13.name
+                      value: 'Статус нагрузки'
+                    - type: INTEGER
+                      name: columns.14.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.14.base_color
+                      value: 80FF00
+                    - type: INTEGER
+                      name: columns.14.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.14.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.14.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.14.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.14.item
+                      value: ePDU2DeviceStatusPowerSupply1Status
+                    - type: STRING
+                      name: columns.14.name
+                      value: БП1
+                    - type: INTEGER
+                      name: columns.15.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.15.base_color
+                      value: 80FF00
+                    - type: INTEGER
+                      name: columns.15.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.15.decimal_places
+                      value: '0'
+                    - type: INTEGER
+                      name: columns.15.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.15.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.15.item
+                      value: ePDU2DeviceStatusPowerSupply2Status
+                    - type: STRING
+                      name: columns.15.name
+                      value: БП2
+                    - type: INTEGER
+                      name: columns.16.aggregate_function
+                      value: '0'
+                    - type: STRING
+                      name: columns.16.base_color
+                      value: 80FF00
+                    - type: INTEGER
+                      name: columns.16.data
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.16.decimal_places
+                      value: '2'
+                    - type: INTEGER
+                      name: columns.16.display
+                      value: '1'
+                    - type: INTEGER
+                      name: columns.16.history
+                      value: '1'
+                    - type: STRING
+                      name: columns.16.item
+                      value: ePDU2DeviceStatusPowerSupplyAlarm
+                    - type: STRING
+                      name: columns.16.name
+                      value: БП
+                    - type: STRING
+                      name: columnsthresholds.13.color.0
+                      value: FF0000
+                    - type: STRING
+                      name: columnsthresholds.13.color.1
+                      value: FF0000
+                    - type: STRING
+                      name: columnsthresholds.13.color.2
+                      value: FF0000
+                    - type: STRING
+                      name: columnsthresholds.13.threshold.0
+                      value: '2'
+                    - type: STRING
+                      name: columnsthresholds.13.threshold.1
+                      value: '3'
+                    - type: STRING
+                      name: columnsthresholds.13.threshold.2
+                      value: '4'
+                    - type: STRING
+                      name: columnsthresholds.14.color.0
+                      value: FF0000
+                    - type: STRING
+                      name: columnsthresholds.14.threshold.0
+                      value: '2'
+                    - type: STRING
+                      name: columnsthresholds.15.color.0
+                      value: FF0000
+                    - type: STRING
+                      name: columnsthresholds.15.threshold.0
+                      value: '2'
+                    - type: STRING
+                      name: columnsthresholds.16.color.0
+                      value: FF0000
+                    - type: STRING
+                      name: columnsthresholds.16.threshold.0
+                      value: '2'
+                    - type: STRING
+                      name: reference
+                      value: IWSKA
+                - type: svggraph
+                  name: 'Фазы ток (А)'
+                  'y': '2'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 4000FF
+                    - type: INTEGER
+                      name: ds.0.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'Фаза * ток'
+                    - type: INTEGER
+                      name: ds.0.width
+                      value: '3'
+                    - type: STRING
+                      name: reference
+                      value: JOXPY
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+                - type: svggraph
+                  name: 'Фазы мощность (Вт)'
+                  'y': '6'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 00FF00
+                    - type: INTEGER
+                      name: ds.0.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'Фаза*мощность (Вт)'
+                    - type: INTEGER
+                      name: ds.0.width
+                      value: '3'
+                    - type: STRING
+                      name: reference
+                      value: CXGGP
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+                - type: svggraph
+                  name: 'Фазы напряжение (В)'
+                  'y': '10'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: FF8000
+                    - type: INTEGER
+                      name: ds.0.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'Фаза*напряжение'
+                    - type: INTEGER
+                      name: ds.0.width
+                      value: '3'
+                    - type: STRING
+                      name: reference
+                      value: DKPVR
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+                - type: svggraph
+                  name: Климат
+                  'y': '14'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 4000FF
+                    - type: STRING
+                      name: ds.0.data_set_label
+                      value: Температура
+                    - type: INTEGER
+                      name: ds.0.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: envir2Temperature
+                    - type: INTEGER
+                      name: ds.0.width
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.1.axisy
+                      value: '1'
+                    - type: STRING
+                      name: ds.1.color
+                      value: 00FF00
+                    - type: STRING
+                      name: ds.1.data_set_label
+                      value: Влажность
+                    - type: INTEGER
+                      name: ds.1.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: envir2Humidity
+                    - type: INTEGER
+                      name: ds.1.width
+                      value: '3'
+                    - type: STRING
+                      name: ds.2.color
+                      value: FF0000
+                    - type: STRING
+                      name: ds.2.data_set_label
+                      value: 'Точка росы'
+                    - type: STRING
+                      name: ds.2.items.0
+                      value: DewPoint
+                    - type: INTEGER
+                      name: ds.2.transparency
+                      value: '8'
+                    - type: STRING
+                      name: lefty_max
+                      value: '35'
+                    - type: STRING
+                      name: lefty_min
+                      value: '0'
+                    - type: STRING
+                      name: reference
+                      value: PEDMD
+                    - type: STRING
+                      name: righty_max
+                      value: '80'
+                    - type: STRING
+                      name: righty_min
+                      value: '20'
+                    - type: INTEGER
+                      name: simple_triggers
+                      value: '1'
+                - type: svggraph
+                  name: 'Розетки ток (А)'
+                  x: '36'
+                  'y': '2'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 4000FF
+                    - type: INTEGER
+                      name: ds.0.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'PDU розетка*ток'
+                    - type: STRING
+                      name: reference
+                      value: RMIYZ
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+                - type: svggraph
+                  name: 'Розетки мощность (Вт)'
+                  x: '36'
+                  'y': '6'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 00FF00
+                    - type: INTEGER
+                      name: ds.0.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'PDU розетка*мощность (Вт)'
+                    - type: STRING
+                      name: reference
+                      value: HEAIK
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+                - type: honeycomb
+                  name: 'Статус розеток'
+                  x: '36'
+                  'y': '10'
+                  width: '36'
+                  height: '8'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 80FF00
+                    - type: STRING
+                      name: items.0
+                      value: 'PDU Статус розетки*'
+                    - type: STRING
+                      name: primary_label
+                      value: '{ITEM.DESCRIPTION}'
+                    - type: STRING
+                      name: reference
+                      value: OKSLK
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: FF0000
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '2'
+      valuemaps:
+        - uuid: 9429e13f566a42e182bedcb9ebdbf654
+          name: ePDU2DeviceStatusLoadState
+          mappings:
+            - value: '1'
+              newvalue: noLoadAlarm
+            - value: '2'
+              newvalue: underCurrentAlarm
+            - value: '3'
+              newvalue: nearOverCurrentAlarm
+            - value: '4'
+              newvalue: overCurrentAlarm
+        - uuid: 4ec63e54080749dcaf152f1aa1be7241
+          name: 'Outlet status state'
+          mappings:
+            - value: '1'
+              newvalue: outletStatusOn
+            - value: '2'
+              newvalue: outletStatusOff
+        - uuid: d6da22fe276d48149c7522bc19857e5f
+          name: 'Phase status load state'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: lowLoad
+            - value: '3'
+              newvalue: nearOverload
+            - value: '4'
+              newvalue: overload
+        - uuid: d23274534b3c4980bb9fa4d21a7ae0b2
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up
+        - uuid: 8ae7f22971cc4546a94dc885735e7acb
+          name: Status
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: alarm
