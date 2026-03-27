@@ -1,0 +1,434 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: e5a913eb4fba41a8bd18c5bfea937c38
+      name: Templates/Storage
+  templates:
+    - uuid: 2d43c7b46aaf4e78b6fb6da049e2b584
+      template: 'IBM Tape TS4300 by SNMP'
+      name: 'IBM Tape TS4300 by SNMP'
+      description: |
+        https://github.com/AndAndr/Zabbix-templates
+        Шаблон для ленточных библиотек IBM TS4300.
+      groups:
+        - name: Templates/Storage
+      items:
+        - uuid: 4e06cd3f78fd433a989019b17bfb3c5d
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: a072d49eabaf4a8fb5020971dd9e55e1
+              expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=1'
+              name: 'Тест доступности по протоколу ICMP'
+              priority: HIGH
+              description: 'Последнее значение: {ITEM.LASTVALUE1}. Последние три попытки вернули тайм-аут. Проверьте подключение устройства.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 67c93582178a4911a16dc93707d79933
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 23529baa262b4f2d988fdcc21692d2dc
+              expression: 'min(/IBM Tape TS4300 by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/IBM Tape TS4300 by SNMP/icmppingloss,5m)<100'
+              name: 'Высокая потеря пакетов ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 0ab203d2873f4fcaaa01132905b8c78f
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: c33ebc2758cc45cd9ebd0e5424e51faa
+              expression: 'avg(/IBM Tape TS4300 by SNMP/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'Высокое время отклика ICMP ping'
+              priority: WARNING
+              dependencies:
+                - name: 'Высокая потеря пакетов ICMP ping'
+                  expression: 'min(/IBM Tape TS4300 by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/IBM Tape TS4300 by SNMP/icmppingloss,5m)<100'
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: dcac3169f3bd459a964da6f8e46263cf
+          name: 'SNMP traps (fallback)'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          value_type: LOG
+          trends: '0'
+          description: 'The item is used to collect all SNMP traps unmatched by other snmptrap items'
+          logtimefmt: 'hh:mm:sszyyyy/MM/dd'
+          tags:
+            - tag: component
+              value: network
+        - uuid: ac61bdf7bfc04b1ca830496f9dda7adb
+          name: 'System Operational Status'
+          type: SNMP_AGENT
+          snmp_oid: 'get[.1.3.6.1.4.1.14851.3.1.10.2.0]'
+          key: System.OperationalStatus
+          valuemap:
+            name: OperStatus
+          triggers:
+            - uuid: 5b9e7e23c8494378a6c47b7ab0bf1858
+              expression: 'last(/IBM Tape TS4300 by SNMP/System.OperationalStatus)<>2'
+              name: 'Проверь состояние ленточной библиотеки'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: c587c90deb09482a87b626de058436b5
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          delay: 3m
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: e50a8452bf054f599a9cf76a1ceee15d
+              expression: 'max(/IBM Tape TS4300 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'Нет сбора данных SNMP'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP недоступен для опроса. Пожалуйста, проверьте подключение устройства и настройки SNMP.'
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=0'
+                  recovery_expression: 'last(/IBM Tape TS4300 by SNMP/icmpping,#3)=1'
+              tags:
+                - tag: scope
+                  value: availability
+      discovery_rules:
+        - uuid: 8b2b3ba407c44f0da96bac5690423fd6
+          name: 'FC port discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#FCPORTINDEX},1.3.6.1.4.1.14851.3.1.15.2.1.1,{#FCPORTNAME},1.3.6.1.4.1.14851.3.1.15.2.1.3]'
+          key: FCPort
+          delay: 1h
+          item_prototypes:
+            - uuid: 67fe3651667748afb093b5ddb6885bfb
+              name: 'FC port "{#FCPORTNAME}" operation status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.15.2.1.6.{#FCPORTINDEX}'
+              key: 'FCPortOperationalStatus.[{#FCPORTINDEX}]'
+              valuemap:
+                name: OperStatus
+              tags:
+                - tag: component
+                  value: 'fc port'
+              trigger_prototypes:
+                - uuid: d40b1ecc66404670b00d582e865c34bb
+                  expression: 'last(/IBM Tape TS4300 by SNMP/FCPortOperationalStatus.[{#FCPORTINDEX}])<>2'
+                  name: 'Проверь состояние контроллера FC "{#FCPORTNAME}"'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: availability
+        - uuid: 7fce7446abdd4f779ad7b7622eb97980
+          name: 'Logical library discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#LOGICALLIBRARYINDEX},1.3.6.1.4.1.14851.3.1.11.2.1.1,{#LOGICALLIBRARYNAME},1.3.6.1.4.1.14851.3.1.11.2.1.4]'
+          key: LogicalLibrary
+          delay: 1h
+          item_prototypes:
+            - uuid: 0c481617a18f4e72802548d80e91c966
+              name: 'Logical library "{#LOGICALLIBRARYNAME}" description'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.11.2.1.6.{#LOGICALLIBRARYINDEX}'
+              key: 'LogicalLibraryDescription.[{#LOGICALLIBRARYINDEX}]'
+              delay: 1h
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 12h
+              tags:
+                - tag: component
+                  value: 'логическая библиотека'
+            - uuid: 2ec2bf7e725542ce8a9bdc8b8822aec7
+              name: 'Logical library "{#LOGICALLIBRARYNAME}" operation status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.11.2.1.9.{#LOGICALLIBRARYINDEX}'
+              key: 'LogicalLibraryOperationalStatus.[{#LOGICALLIBRARYINDEX}]'
+              valuemap:
+                name: OperStatus
+              tags:
+                - tag: component
+                  value: 'логическая библиотека'
+              trigger_prototypes:
+                - uuid: bdaf82217963465abd5d2cea8783ebce
+                  expression: 'last(/IBM Tape TS4300 by SNMP/LogicalLibraryOperationalStatus.[{#LOGICALLIBRARYINDEX}])<>2'
+                  name: 'Проверь состояние логической библиотеки "{#LOGICALLIBRARYNAME}"'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: availability
+        - uuid: 4b15f66d167c4f25ade533342beeee1c
+          name: 'mediaAccessDevice discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#MEDIAACCESSDEVICEINDEX},1.3.6.1.4.1.14851.3.1.6.2.1.1,{#MEDIAACCESSDEVICENAME},1.3.6.1.4.1.14851.3.1.6.2.1.3]'
+          key: mediaAccessDevice
+          delay: 1h
+          item_prototypes:
+            - uuid: f82d4273bfed452d8058e3a36203a88e
+              name: 'mediaAccessDeviceNeedsCleaning {#MEDIAACCESSDEVICENAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.6.2.1.6.{#MEDIAACCESSDEVICEINDEX}'
+              key: 'mediaAccessDeviceNeedsCleaning.[{#MEDIAACCESSDEVICEINDEX}]'
+              description: 'Boolean indicating that the MediaAccessDevice needs cleaning. Whether manual or automatic cleaning is possible is indicated in the Capabilities array property.  Enumeration: ''unknown'': 0, ''false'': 2, ''true'': 1.'
+              valuemap:
+                name: 'mediaAccessDevice clean'
+              tags:
+                - tag: component
+                  value: привод
+              trigger_prototypes:
+                - uuid: 7f212a79f23042fb9abf6f7cf6014a41
+                  expression: 'last(/IBM Tape TS4300 by SNMP/mediaAccessDeviceNeedsCleaning.[{#MEDIAACCESSDEVICEINDEX}])=1'
+                  name: 'Требуется чистка привода "{#MEDIAACCESSDEVICENAME}"'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: e9819435842a4a0a91eec3cf94e5c9a7
+              name: 'mediaAccessDeviceOperationalStatus {#MEDIAACCESSDEVICENAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.6.2.1.11.{#MEDIAACCESSDEVICEINDEX}'
+              key: 'mediaAccessDeviceOperationalStatus.[{#MEDIAACCESSDEVICEINDEX}]'
+              valuemap:
+                name: OperStatus
+              tags:
+                - tag: component
+                  value: привод
+              trigger_prototypes:
+                - uuid: d1df4461bc1a479c8a1bc257c8307dbe
+                  expression: 'last(/IBM Tape TS4300 by SNMP/mediaAccessDeviceOperationalStatus.[{#MEDIAACCESSDEVICEINDEX}])<>2'
+                  name: 'Проверь состояние привода "{#MEDIAACCESSDEVICENAME}"'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: c3d989e2341c456dac750a276a7e0648
+              name: 'mediaAccessDeviceTotalPowerOnHours {#MEDIAACCESSDEVICENAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.6.2.1.10.{#MEDIAACCESSDEVICEINDEX}'
+              key: 'mediaAccessDeviceTotalPowerOnHours.[{#MEDIAACCESSDEVICEINDEX}]'
+              delay: 1h
+              units: h
+              valuemap:
+                name: OperStatus
+              tags:
+                - tag: component
+                  value: привод
+        - uuid: 9ce26c02ba0a43d49b6e6cc3d2c317c2
+          name: 'SCSI controller discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SCSICONTROLLERINDEX},1.3.6.1.4.1.14851.3.1.12.2.1.1,{#SCSICONTROLLERNAME},1.3.6.1.4.1.14851.3.1.12.2.1.3]'
+          key: SCSIController
+          delay: 1h
+          item_prototypes:
+            - uuid: dcacaa0d42a94e0fa4a21b82fd246cf9
+              name: 'SCSI  Controller "{#SCSICONTROLLERNAME}" description'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.12.2.1.5.{#SCSICONTROLLERINDEX}'
+              key: 'scsiProtocolControllerDescription.[{#SCSICONTROLLERINDEX}]'
+              delay: 1h
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 12h
+              tags:
+                - tag: component
+                  value: 'scsi controller'
+            - uuid: abb01e0fa98447cbb67b8a668230821c
+              name: 'SCSI  Controller "{#SCSICONTROLLERNAME}" operational status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.12.2.1.4.{#SCSICONTROLLERINDEX}'
+              key: 'scsiProtocolControllerOperationalStatus.[{#SCSICONTROLLERINDEX}]'
+              valuemap:
+                name: OperStatus
+              tags:
+                - tag: component
+                  value: 'scsi controller'
+              trigger_prototypes:
+                - uuid: 3a2987930a564f299e92eaae4a89443e
+                  expression: 'last(/IBM Tape TS4300 by SNMP/scsiProtocolControllerOperationalStatus.[{#SCSICONTROLLERINDEX}])<>2'
+                  name: 'Проверь состояние контроллера SCSI "{#SCSICONTROLLERNAME}"'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: availability
+        - uuid: a25b8dbdc8264b1dafd47dc8a8477e31
+          name: 'SubChassis discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SUBCHASSISINDEX},1.3.6.1.4.1.14851.3.1.4.10.1.1,{#SUBCHASSISNAME},1.3.6.1.4.1.14851.3.1.4.10.1.9]'
+          key: subChassisIndex
+          delay: 1h
+          item_prototypes:
+            - uuid: 91c27bf9851544d5b63fb456d22ac34c
+              name: 'subChassisOperationalStatus {#SUBCHASSISNAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14851.3.1.4.10.1.10.{#SUBCHASSISINDEX}'
+              key: 'subChassisOperationalStatus.[{#SUBCHASSISINDEX}]'
+              valuemap:
+                name: OperStatus
+              tags:
+                - tag: component
+                  value: subchassis
+              trigger_prototypes:
+                - uuid: 7c47eee1304645de9e4b76263f2122e0
+                  expression: 'last(/IBM Tape TS4300 by SNMP/subChassisOperationalStatus.[{#SUBCHASSISINDEX}])<>2'
+                  name: 'Проверь состояние ленточной библиотеки "{#SUBCHASSISNAME}"'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: availability
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: ibm
+        - tag: target
+          value: tape
+        - tag: target
+          value: ts4300
+      macros:
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+      valuemaps:
+        - uuid: 81722e6877614c67b66238dcba243996
+          name: IBM3200libraryDoorState
+          mappings:
+            - value: '1'
+              newvalue: Unknown
+            - value: '2'
+              newvalue: Open
+            - value: '3'
+              newvalue: Closed
+            - value: '4'
+              newvalue: Locked
+        - uuid: fbfbeb9bdf3e4f6a8f594530616659d4
+          name: IBM3200status
+          mappings:
+            - value: '1'
+              newvalue: Other
+            - value: '2'
+              newvalue: Unknown
+            - value: '3'
+              newvalue: Ok
+            - value: '4'
+              newvalue: non-critical
+            - value: '5'
+              newvalue: Critical
+            - value: '6'
+              newvalue: non-Recoverable
+        - uuid: 01cfb481fe554afebea9818376f04588
+          name: 'mediaAccessDevice clean'
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: 'true'
+            - value: '2'
+              newvalue: 'false'
+        - uuid: 0dbee1a281904405a8ddd7992aff6511
+          name: OperStatus
+          mappings:
+            - value: '0'
+              newvalue: unknown
+            - value: '1'
+              newvalue: other
+            - value: '2'
+              newvalue: ok
+            - value: '3'
+              newvalue: degraded
+            - value: '4'
+              newvalue: stressed
+            - value: '5'
+              newvalue: predictiveFailure
+            - value: '6'
+              newvalue: error
+            - value: '7'
+              newvalue: non-RecoverableError
+            - value: '8'
+              newvalue: starting
+            - value: '9'
+              newvalue: stopping
+            - value: '10'
+              newvalue: stopped
+            - value: '11'
+              newvalue: inService
+            - value: '12'
+              newvalue: noContact
+            - value: '13'
+              newvalue: lostCommunication
+            - value: '14'
+              newvalue: aborted
+            - value: '15'
+              newvalue: dormant
+            - value: '16'
+              newvalue: supportingEntityInError
+            - value: '17'
+              newvalue: completed
+            - value: '18'
+              newvalue: powerMode
+            - value: '19'
+              newvalue: dMTFReserved
+            - value: '32768'
+              newvalue: vendorReserved
+        - uuid: 47f6deac2e4b4175a1edd8252e954a13
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up
