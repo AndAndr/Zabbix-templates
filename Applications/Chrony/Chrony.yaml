@@ -38,7 +38,7 @@ zabbix_export:
               error_handler_params: nobest
           triggers:
             - uuid: 31e17bcf9fe84188bfff183424d93706
-              expression: 'find(/Chrony by Zabbix agent/system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*''],#3,"like","nobest")=1'
+              expression: 'find(/Chrony by Zabbix agent/system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*''],,"like","nobest")=1'
               recovery_mode: RECOVERY_EXPRESSION
               recovery_expression: 'find(/Chrony by Zabbix agent/system.run[{$CHRONY.CHRONYC.LOCATION} -nc sources | {$CHRONY.GREP.LOCATION} ''*''],,"like","nobest")=0'
               name: 'No "current best" is selected'
@@ -62,7 +62,6 @@ zabbix_export:
                 operator: NOT_MATCHES_REGEX
                 formulaid: B
           lifetime: 1d
-          enabled_lifetime_type: DISABLE_NEVER
           description: 'Обнаружение настроенных источников времени.'
           item_prototypes:
             - uuid: 5bb0f38b7f9a460283ad93541e570161
@@ -377,7 +376,7 @@ zabbix_export:
               delay: '0'
               history: 30d
               value_type: FLOAT
-              units: s
+              units: ms
               description: 'Общее количество задержек на сетевом пути к stratum-1, с которого компьютер в конечном итоге синхронизируется.'
               preprocessing:
                 - type: JSONPATH
