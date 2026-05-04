@@ -10,7 +10,7 @@
 
 `^(anacron.*|systemd-fsck.*|quotarpc.*|NetworkManager.*|cpupower-gui.*|e2scrub_reap.*|systemd-pstore.*|auditd.*|grub-common.*|avahi.*)`
 
-,заданному в макросе `{$SYSTEMD.NAME.SERVICE.NOT_MATCHES}` на уровне шаблона «Systemd SO by Zabbix agent 2».
+,заданному в макросе `{$SYSTEMD.NAME.SERVICE.NOT_MATCHES}` на уровне шаблона.
 
 Для задания более узкого количества контролируемых сервисов, можно использовать макрос (создаваемый на уровне хоста)
 
