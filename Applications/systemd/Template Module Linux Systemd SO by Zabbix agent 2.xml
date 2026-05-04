@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2026-05-04T13:44:38Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+        <group>
+            <name>Templates/Modules</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Module Linux Systemd SO by Zabbix agent 2</template>
+            <name>Template Module Linux Systemd SO by Zabbix agent 2</name>
+            <description>https://github.com/AndAndr/Zabbix-templates</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+                <group>
+                    <name>Templates/Modules</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Zabbix raw items</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Service units discovery</name>
+                    <key>systemd.unit.discovery[service]</key>
+                    <delay>30m</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#UNIT.UNITFILESTATE}</macro>
+                                <value>{$SYSTEMD.UNITFILESTATE.SERVICE.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>E</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#UNIT.UNITFILESTATE}</macro>
+                                <value>{$SYSTEMD.UNITFILESTATE.SERVICE.MATCHES}</value>
+                                <formulaid>F</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#UNIT.NAME}</macro>
+                                <value>{$SYSTEMD.NAME.SERVICE.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>C</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#UNIT.NAME}</macro>
+                                <value>{$SYSTEMD.NAME.SERVICE.MATCHES}</value>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#UNIT.ACTIVESTATE}</macro>
+                                <value>{$SYSTEMD.ACTIVESTATE.SERVICE.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#UNIT.ACTIVESTATE}</macro>
+                                <value>{$SYSTEMD.ACTIVESTATE.SERVICE.MATCHES}</value>
+                                <formulaid>B</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>7d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#UNIT.NAME}: Active state</name>
+                            <type>DEPENDENT</type>
+                            <key>systemd.service.active_state[&quot;{#UNIT.NAME}&quot;]</key>
+                            <delay>0</delay>
+                            <history>30d</history>
+                            <description>State value that reflects whether the unit is currently active or not. The following states are currently defined: &quot;active&quot;, &quot;reloading&quot;, &quot;inactive&quot;, &quot;failed&quot;, &quot;activating&quot;, and &quot;deactivating&quot;.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>service</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>Unit Active State</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.ActiveState.state</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>10m</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>systemd.unit.get[&quot;{#UNIT.NAME}&quot;]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;1</expression>
+                                    <name>{#UNIT.NAME}: Служба не запущена</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#UNIT.NAME}: Load state</name>
+                            <type>DEPENDENT</type>
+                            <key>systemd.service.load_state[&quot;{#UNIT.NAME}&quot;]</key>
+                            <delay>0</delay>
+                            <history>30d</history>
+                            <description>State value that reflects whether the configuration file of this unit has been loaded. The following states are currently defined: &quot;loaded&quot;, &quot;error&quot;, and &quot;masked&quot;.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>service</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>Unit Load State</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.LoadState.state</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>30m</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>systemd.unit.get[&quot;{#UNIT.NAME}&quot;]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#UNIT.NAME}: Unit file state</name>
+                            <type>DEPENDENT</type>
+                            <key>systemd.service.unitfile_state[&quot;{#UNIT.NAME}&quot;]</key>
+                            <delay>0</delay>
+                            <history>30d</history>
+                            <description>Encodes the install state of the unit file of FragmentPath. It currently knows the following states: &quot;enabled&quot;, &quot;enabled-runtime&quot;, &quot;linked&quot;, &quot;linked-runtime&quot;, &quot;masked&quot;, &quot;masked-runtime&quot;, &quot;static&quot;, &quot;disabled&quot;, and &quot;invalid&quot;.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>service</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>Unit File State</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.UnitFileState.state</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>30m</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>systemd.unit.get[&quot;{#UNIT.NAME}&quot;]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#UNIT.NAME}: Active time</name>
+                            <type>DEPENDENT</type>
+                            <key>systemd.service.uptime[&quot;{#UNIT.NAME}&quot;]</key>
+                            <delay>0</delay>
+                            <history>30d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <description>Number of seconds since unit entered the active state.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>service</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>Unit Active State</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <params>data = JSON.parse(value);
+if (data.ActiveEnterTimestamp &gt; data.ActiveExitTimestamp) {
+  return Math.floor(Date.now() / 1000) - Number(data.ActiveEnterTimestamp) / 1000000;
+}
+return null;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>systemd.unit.get[&quot;{#UNIT.NAME}&quot;]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;10m</expression>
+                                    <name>{#UNIT.NAME} был перезапущен</name>
+                                    <opdata>{#UNIT.NAME} был перезапущен (время непрерывной работы менее 10 мин)</opdata>
+                                    <priority>INFO</priority>
+                                    <description>Время непрерывной работы менее 10 мин</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#UNIT.NAME}: Get unit info</name>
+                            <key>systemd.unit.get[&quot;{#UNIT.NAME}&quot;]</key>
+                            <history>30d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Returns all properties of a systemd service unit.&#13;
+ Unit description: {#UNIT.DESCRIPTION}.</description>
+                            <applications>
+                                <application>
+                                    <name>Zabbix raw items</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$SYSTEMD.ACTIVESTATE.SERVICE.MATCHES}</macro>
+                    <value>active</value>
+                    <description>Filter of systemd service units by active state</description>
+                </macro>
+                <macro>
+                    <macro>{$SYSTEMD.ACTIVESTATE.SERVICE.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                    <description>Filter of systemd service units by active state</description>
+                </macro>
+                <macro>
+                    <macro>{$SYSTEMD.NAME.SERVICE.MATCHES}</macro>
+                    <value>.*</value>
+                    <description>Filter of systemd service units by name</description>
+                </macro>
+                <macro>
+                    <macro>{$SYSTEMD.NAME.SERVICE.NOT_MATCHES}</macro>
+                    <value>^(anacron.*|systemd-fsck.*|quotarpc.*|NetworkManager.*|cpupower-gui.*|e2scrub_reap.*|systemd-pstore.*|auditd.*|grub-common.*|avahi.*|syslog.*|cups.*)</value>
+                    <description>Filter of systemd service units by name</description>
+                </macro>
+                <macro>
+                    <macro>{$SYSTEMD.UNITFILESTATE.SERVICE.MATCHES}</macro>
+                    <value>enabled</value>
+                    <description>Filter of systemd service units by unit file state</description>
+                </macro>
+                <macro>
+                    <macro>{$SYSTEMD.UNITFILESTATE.SERVICE.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                    <description>Filter of systemd service units by unit file state</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>Unit Active State</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>active</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>reloading</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>inactive</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>failed</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>activating</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>deactivating</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>Unit File State</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>enabled</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>enabled-runtime</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>linked</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>linked-runtime</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>masked</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>masked-runtime</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>static</newvalue>
+                </mapping>
+                <mapping>
+                    <value>8</value>
+                    <newvalue>disabled</newvalue>
+                </mapping>
+                <mapping>
+                    <value>9</value>
+                    <newvalue>invalid</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>Unit Load State</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>loaded</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>error</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>masked</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
