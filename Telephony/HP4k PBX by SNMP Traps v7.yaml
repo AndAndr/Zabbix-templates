@@ -1,0 +1,167 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 1d12408342854fd5a4436dd6d5d1bd4a
+      name: Templates/Telephony
+  templates:
+    - uuid: c20c93e14b5c46cf9b1e8054a7848edd
+      template: 'HP4k PBX by SNMP Traps'
+      name: 'HP4k PBX by SNMP Traps'
+      description: |
+        https://github.com/AndAndr
+        Мониторинг аварий АТС Siemens-Unify HiCom/HiPath/OpenScape при помощи обработки трапов SNMP.
+      groups:
+        - name: Templates/Telephony
+      items:
+        - uuid: 344d6842a600462692b8b5169f0ce634
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          trends: 20d
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: b0f6d453295f40938200ecae08e875ec
+              expression: 'max(/HP4k PBX by SNMP Traps/icmpping,#3)=0'
+              name: 'Тест доступности по протоколу ICMP'
+              priority: HIGH
+              description: 'Last three attempts returned timeout.  Please check device connectivity.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 46ed3c7753e94e4993f42e2b058fac6c
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          trends: 20d
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: d1c85484a63b4027ba2a9c40198f3a5a
+              expression: 'min(/HP4k PBX by SNMP Traps/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/HP4k PBX by SNMP Traps/icmppingloss,5m)<100'
+              name: 'Высокая потеря пакетов ICMP ping'
+              opdata: 'Loss: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'max(/HP4k PBX by SNMP Traps/icmpping,#3)=0'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 361dfece3a5141e2bb0d26fbaf628f53
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          trends: 20d
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: c7ddffdf8ffa49e6b7d857f868c4e5a7
+              expression: 'avg(/HP4k PBX by SNMP Traps/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'Высокое время отклика ICMP ping'
+              opdata: 'Value: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                - name: 'Высокая потеря пакетов ICMP ping'
+                  expression: 'min(/HP4k PBX by SNMP Traps/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/HP4k PBX by SNMP Traps/icmppingloss,5m)<100'
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'max(/HP4k PBX by SNMP Traps/icmpping,#3)=0'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 24615694fa7647e9b326964c3c46d358
+          name: 'hicom alarm'
+          type: SNMP_TRAP
+          key: 'snmptrap[SIEMENS-PN-MIB::hicomAlStatus|231.7.2.1.2.2.1.2]'
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var valueMap = {"1": "reset", "2": "set"};
+                  var alarmstatus = "";
+                  var alarmname = "";
+                  var result = "Error";
+                  alarmstatus = value.match(/SIEMENS-PN-MIB::hicomAlStatus.*value=INTEGER:\s(.*)|231\.7\.2\.1\.2\.2\.1\.2.*value=INTEGER:\s(.*)/i);
+                  alarmname = value.match(/SIEMENS-PN-MIB::hicomAlName.*value=STRING:\s"(.*)"|231\.7\.2\.1\.2\.2\.1\.9.*value=STRING:\s"(.*)"/i);
+                  if (alarmstatus == null || alarmname == null)
+                  {
+                    throw "Unable to parse SNMP trap";
+                  }
+                  if (alarmname[1] == null && alarmname[2] != null && alarmstatus[1] == null && alarmstatus[2] != null)
+                  {
+                    if (!isNaN(parseInt(alarmstatus[2])))
+                    {
+                      alarmstatus = valueMap[alarmstatus[2]];
+                    }
+                    result = 'AlarmName: ' + alarmname[2] + '; AlarmStatus: ' + alarmstatus;
+                    return(result);
+                  }
+                  
+                  if (alarmname[2] == null && alarmname[1] != null && alarmstatus[2] == null && alarmstatus[1] != null)
+                  {
+                    if (!isNaN(parseInt(alarmstatus[1])))
+                    {
+                      alarmstatus = valueMap[alarmstatus[1]];
+                    }
+                    result = 'AlarmName: ' + alarmname[1] + '; AlarmStatus: ' + alarmstatus;
+                    return(result);
+                  }
+                  
+          tags:
+            - tag: component
+              value: 'pbx alarms'
+          triggers:
+            - uuid: 15601a8aaf05451780f523b18a666f88
+              expression: 'find(/HP4k PBX by SNMP Traps/snmptrap[SIEMENS-PN-MIB::hicomAlStatus|231.7.2.1.2.2.1.2],1m,"regexp","AlarmStatus:\\sset")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/HP4k PBX by SNMP Traps/snmptrap[SIEMENS-PN-MIB::hicomAlStatus|231.7.2.1.2.2.1.2],1m,"regexp","AlarmStatus:\\sreset")=1'
+              correlation_mode: TAG_VALUE
+              correlation_tag: alarmname
+              name: 'SNMP trap: {{ITEM.VALUE}.regsub("AlarmName:\s(.*);","Авария \1")}'
+              opdata: '{ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                - tag: alarmname
+                  value: '{{ITEM.VALUE}.regsub("AlarmName:\s(.*);","\1")}'
+      tags:
+        - tag: class
+          value: pbx
+        - tag: target
+          value: openscape
+        - tag: target
+          value: unify
+      macros:
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+      valuemaps:
+        - uuid: 9508b27879874d14b8daf683dcde615a
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up

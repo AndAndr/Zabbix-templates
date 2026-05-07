@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2026-05-07T14:20:26Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>HP4k PBX by SNMP Traps</template>
+            <name>HP4k PBX by SNMP Traps</name>
+            <description>https://github.com/AndAndr&#13;
+&#13;
+Мониторинг аварий АТС Siemens-Unify HiCom/HiPath/OpenScape при помощи обработки трапов SNMP.</description>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>PBX Alarms</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>ICMP ping</name>
+                    <type>SIMPLE</type>
+                    <key>icmpping</key>
+                    <history>1w</history>
+                    <trends>20d</trends>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{max(#3)}=0</expression>
+                            <name>Unavailable by ICMP ping</name>
+                            <priority>WARNING</priority>
+                            <description>Last three attempts returned timeout.  Please check device connectivity.</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP loss</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingloss</key>
+                    <history>1w</history>
+                    <trends>20d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <triggers>
+                        <trigger>
+                            <expression>{min(5m)}&gt;{$ICMP_LOSS_WARN} and {min(5m)}&lt;100</expression>
+                            <name>High ICMP ping loss</name>
+                            <opdata>Loss: {ITEM.LASTVALUE1}</opdata>
+                            <priority>INFO</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{HP4k PBX by SNMP Traps:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP response time</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingsec</key>
+                    <history>1w</history>
+                    <trends>20d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>s</units>
+                    <triggers>
+                        <trigger>
+                            <expression>{avg(5m)}&gt;{$ICMP_RESPONSE_TIME_WARN}</expression>
+                            <name>High ICMP ping response time</name>
+                            <opdata>Value: {ITEM.LASTVALUE1}</opdata>
+                            <priority>INFO</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>High ICMP ping loss</name>
+                                    <expression>{HP4k PBX by SNMP Traps:icmppingloss.min(5m)}&gt;{$ICMP_LOSS_WARN} and {HP4k PBX by SNMP Traps:icmppingloss.min(5m)}&lt;100</expression>
+                                </dependency>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{HP4k PBX by SNMP Traps:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>hicom alarm</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[SIEMENS-PN-MIB::hicomAlStatus|231.7.2.1.2.2.1.2]</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>PBX Alarms</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var valueMap = {&quot;1&quot;: &quot;reset&quot;, &quot;2&quot;: &quot;set&quot;};
+var alarmstatus = &quot;&quot;;
+var alarmname = &quot;&quot;;
+var result = &quot;Error&quot;;
+alarmstatus = value.match(/SIEMENS-PN-MIB::hicomAlStatus.*value=INTEGER:\s(.*)|231\.7\.2\.1\.2\.2\.1\.2.*value=INTEGER:\s(.*)/i);
+alarmname = value.match(/SIEMENS-PN-MIB::hicomAlName.*value=STRING:\s&quot;(.*)&quot;|231\.7\.2\.1\.2\.2\.1\.9.*value=STRING:\s&quot;(.*)&quot;/i);
+if (alarmstatus == null || alarmname == null)
+{
+  throw &quot;Unable to parse SNMP trap&quot;;
+}
+if (alarmname[1] == null &amp;&amp; alarmname[2] != null &amp;&amp; alarmstatus[1] == null &amp;&amp; alarmstatus[2] != null)
+{
+  if (!isNaN(parseInt(alarmstatus[2])))
+  {
+    alarmstatus = valueMap[alarmstatus[2]];
+  }
+  result = 'AlarmName: ' + alarmname[2] + '; AlarmStatus: ' + alarmstatus;
+  return(result);
+}
+
+if (alarmname[2] == null &amp;&amp; alarmname[1] != null &amp;&amp; alarmstatus[2] == null &amp;&amp; alarmstatus[1] != null)
+{
+  if (!isNaN(parseInt(alarmstatus[1])))
+  {
+    alarmstatus = valueMap[alarmstatus[1]];
+  }
+  result = 'AlarmName: ' + alarmname[1] + '; AlarmStatus: ' + alarmstatus;
+  return(result);
+}
+</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{regexp(&quot;AlarmStatus:\sset&quot;,1m)}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{regexp(&quot;AlarmStatus:\sreset&quot;,1m)}=1</recovery_expression>
+                            <correlation_mode>TAG_VALUE</correlation_mode>
+                            <correlation_tag>alarmname</correlation_tag>
+                            <name>SNMP trap: {{ITEM.VALUE}.regsub(&quot;AlarmName:\s(.*);&quot;,&quot;Авария \1&quot;)}</name>
+                            <opdata>{ITEM.VALUE}</opdata>
+                            <priority>WARNING</priority>
+                            <type>MULTIPLE</type>
+                            <manual_close>YES</manual_close>
+                            <tags>
+                                <tag>
+                                    <tag>alarmname</tag>
+                                    <value>{{ITEM.VALUE}.regsub(&quot;AlarmName:\s(.*);&quot;,&quot;\1&quot;)}</value>
+                                </tag>
+                            </tags>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$ICMP_LOSS_WARN}</macro>
+                    <value>20</value>
+                </macro>
+                <macro>
+                    <macro>{$ICMP_RESPONSE_TIME_WARN}</macro>
+                    <value>0.15</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

@@ -78,3 +78,10 @@
 **IBM Tape TS3200 by SNMP.yaml** - Шаблон мониторинга ленточной библиотеки IBM TS3200 для Zabbix версии 7.0
 
 **IBM Tape TS4300 by SNMP.yaml** - Шаблон мониторинга ленточной библиотеки IBM TS4300 для Zabbix версии 7.0
+
+
+
+## Telephony
+**HP4k PBX by SNMP Traps v7.yaml** - Шаблон мониторинга аварий АТС Siemens-Unify HiCom/HiPath/OpenScape при помощи обработки трапов SNMP для Zabbix версии 7.0
+
+**HP4k PBX by SNMP Traps v4.xml** - Шаблон мониторинга аварий АТС Siemens-Unify HiCom/HiPath/OpenScape при помощи обработки трапов SNMP для Zabbix версии 4.0
