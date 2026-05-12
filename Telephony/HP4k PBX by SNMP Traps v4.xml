@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2026-05-07T14:20:26Z</date>
+    <date>2026-05-12T08:11:26Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -12,8 +12,7 @@
             <template>HP4k PBX by SNMP Traps</template>
             <name>HP4k PBX by SNMP Traps</name>
             <description>https://github.com/AndAndr&#13;
-&#13;
-Мониторинг аварий АТС Siemens-Unify HiCom/HiPath/OpenScape при помощи обработки трапов SNMP.</description>
+Мониторинг аварий АТС Siemens-Unify HiCom/HiPath/OpenScape при помощи обработки трапов SNMP. Необходима настройка требуемых алярмов со стороны АТС при помощи станционной админки.</description>
             <groups>
                 <group>
                     <name>Templates</name>
@@ -21,7 +20,13 @@
             </groups>
             <applications>
                 <application>
+                    <name>General</name>
+                </application>
+                <application>
                     <name>PBX Alarms</name>
+                </application>
+                <application>
+                    <name>Status</name>
                 </application>
             </applications>
             <items>
@@ -31,6 +36,11 @@
                     <key>icmpping</key>
                     <history>1w</history>
                     <trends>20d</trends>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
                     <valuemap>
                         <name>Service state</name>
                     </valuemap>
@@ -51,6 +61,11 @@
                     <trends>20d</trends>
                     <value_type>FLOAT</value_type>
                     <units>%</units>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
                     <triggers>
                         <trigger>
                             <expression>{min(5m)}&gt;{$ICMP_LOSS_WARN} and {min(5m)}&lt;100</expression>
@@ -74,6 +89,11 @@
                     <trends>20d</trends>
                     <value_type>FLOAT</value_type>
                     <units>s</units>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
                     <triggers>
                         <trigger>
                             <expression>{avg(5m)}&gt;{$ICMP_RESPONSE_TIME_WARN}</expression>
@@ -94,7 +114,23 @@
                     </triggers>
                 </item>
                 <item>
-                    <name>hicom alarm</name>
+                    <name>SNMP traps (fallback)</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap.fallback</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Item is used to collect all SNMP traps unmatched by other snmptrap items</description>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <logtimefmt>hh:mm:sszyyyy/MM/dd</logtimefmt>
+                </item>
+                <item>
+                    <name>HiCom alarm</name>
                     <type>SNMP_TRAP</type>
                     <key>snmptrap[SIEMENS-PN-MIB::hicomAlStatus|231.7.2.1.2.2.1.2]</key>
                     <delay>0</delay>
@@ -151,7 +187,6 @@ if (alarmname[2] == null &amp;&amp; alarmname[1] != null &amp;&amp; alarmstatus[
                             <name>SNMP trap: {{ITEM.VALUE}.regsub(&quot;AlarmName:\s(.*);&quot;,&quot;Авария \1&quot;)}</name>
                             <opdata>{ITEM.VALUE}</opdata>
                             <priority>WARNING</priority>
-                            <type>MULTIPLE</type>
                             <manual_close>YES</manual_close>
                             <tags>
                                 <tag>
@@ -159,6 +194,175 @@ if (alarmname[2] == null &amp;&amp; alarmname[1] != null &amp;&amp; alarmstatus[
                                     <value>{{ITEM.VALUE}.regsub(&quot;AlarmName:\s(.*);&quot;,&quot;\1&quot;)}</value>
                                 </tag>
                             </tags>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>System contact details</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.2.1.1.4.0</snmp_oid>
+                    <key>system.contact[sysContact.0]</key>
+                    <delay>1h</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <description>MIB: SNMPv2-MIB&#13;
+The textual identification of the contact person for this managed node, together with information on how to contact this person.  If no contact information is known, the value is the zero-length string.</description>
+                    <inventory_link>CONTACT</inventory_link>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>12h</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>System description</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.2.1.1.1.0</snmp_oid>
+                    <key>system.descr[sysDescr.0]</key>
+                    <delay>1h</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <description>MIB: SNMPv2-MIB&#13;
+A textual description of the entity. This value should&#13;
+include the full name and version identification of the system's hardware type, software operating-system, and&#13;
+networking software.</description>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>12h</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>System location</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.2.1.1.6.0</snmp_oid>
+                    <key>system.location[sysLocation.0]</key>
+                    <delay>1h</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <description>MIB: SNMPv2-MIB&#13;
+The physical location of this node (e.g., `telephone closet, 3rd floor').  If the location is unknown, the value is the zero-length string.</description>
+                    <inventory_link>LOCATION</inventory_link>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>12h</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>System name</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.2.1.1.5.0</snmp_oid>
+                    <key>system.name</key>
+                    <delay>1h</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <description>MIB: SNMPv2-MIB&#13;
+An administratively-assigned name for this managed node.By convention, this is the node's fully-qualified domain name.  If the name is unknown, the value is the zero-length string.</description>
+                    <inventory_link>NAME</inventory_link>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>12h</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>Uptime</name>
+                    <type>SNMPV1</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>1.3.6.1.2.1.1.3.0</snmp_oid>
+                    <key>system.uptime[sysUpTime.0]</key>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <units>uptime</units>
+                    <description>MIB: SNMPv2-MIB&#13;
+The time (in hundredths of a second) since the network management portion of the system was last re-initialized.</description>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>0.01</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;10m</expression>
+                            <name>{HOST.NAME} has been restarted (uptime &lt; 10m)</name>
+                            <priority>WARNING</priority>
+                            <description>Uptime is less than 10 minutes</description>
+                            <manual_close>YES</manual_close>
+                            <dependencies>
+                                <dependency>
+                                    <name>No SNMP data collection</name>
+                                    <expression>{HP4k PBX by SNMP Traps:zabbix[host,snmp,available].max({$SNMP.TIMEOUT})}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>SNMP agent availability</name>
+                    <type>INTERNAL</type>
+                    <key>zabbix[host,snmp,available]</key>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>zabbix.host.available</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{max({$SNMP.TIMEOUT})}=0</expression>
+                            <name>No SNMP data collection</name>
+                            <opdata>Current state: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <description>SNMP is not available for polling. Please check device connectivity and SNMP settings.</description>
+                            <dependencies>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{HP4k PBX by SNMP Traps:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
                         </trigger>
                     </triggers>
                 </item>
@@ -171,6 +375,10 @@ if (alarmname[2] == null &amp;&amp; alarmname[1] != null &amp;&amp; alarmstatus[
                 <macro>
                     <macro>{$ICMP_RESPONSE_TIME_WARN}</macro>
                     <value>0.15</value>
+                </macro>
+                <macro>
+                    <macro>{$SNMP.TIMEOUT}</macro>
+                    <value>5m</value>
                 </macro>
             </macros>
         </template>
@@ -186,6 +394,23 @@ if (alarmname[2] == null &amp;&amp; alarmname[1] != null &amp;&amp; alarmstatus[
                 <mapping>
                     <value>1</value>
                     <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>zabbix.host.available</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>not available</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>available</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>unknown</newvalue>
                 </mapping>
             </mappings>
         </value_map>
