@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2026-05-12T08:11:26Z</date>
+    <date>2026-07-23T10:41:28Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -179,14 +179,15 @@ if (alarmname[2] == null &amp;&amp; alarmname[1] != null &amp;&amp; alarmstatus[
                     </preprocessing>
                     <triggers>
                         <trigger>
-                            <expression>{regexp(&quot;AlarmStatus:\sset&quot;,1m)}=1</expression>
+                            <expression>{regexp(&quot;AlarmStatus:\sset&quot;)}=1</expression>
                             <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
-                            <recovery_expression>{regexp(&quot;AlarmStatus:\sreset&quot;,1m)}=1</recovery_expression>
+                            <recovery_expression>{regexp(&quot;AlarmStatus:\sreset&quot;)}=1</recovery_expression>
                             <correlation_mode>TAG_VALUE</correlation_mode>
                             <correlation_tag>alarmname</correlation_tag>
                             <name>SNMP trap: {{ITEM.VALUE}.regsub(&quot;AlarmName:\s(.*);&quot;,&quot;Авария \1&quot;)}</name>
                             <opdata>{ITEM.VALUE}</opdata>
                             <priority>WARNING</priority>
+                            <type>MULTIPLE</type>
                             <manual_close>YES</manual_close>
                             <tags>
                                 <tag>
