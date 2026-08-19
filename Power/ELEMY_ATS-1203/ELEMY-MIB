@@ -1,0 +1,149 @@
+ELEMY-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+    Integer32, Unsigned32, enterprises
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION
+        FROM SNMPv2-TC;
+-- END IMPORTS
+
+
+elemy MODULE-IDENTITY
+    LAST-UPDATED "202301230927Z"
+    ORGANIZATION "Elemy LLC"
+    CONTACT-INFO "Voronov Vadim"
+    DESCRIPTION  "Top-level of Elemy enterprise MIB tree."
+    REVISION "202301230927Z"
+    DESCRIPTION  ""
+    ::= {enterprises 58833}
+
+-- *****************************************************************************
+-- Shared Types
+-- *****************************************************************************
+
+Float16x10 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-1"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to int16 by multiplication 10"
+    SYNTAX       Integer32 (-32768..32767)
+
+Float16x100 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-2"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to int16 by multiplication 100"
+    SYNTAX       Integer32 (-32768..32767)
+
+Float16x1000 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-3"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to int16 by multiplication 1000"
+    SYNTAX       Integer32 (-32768..32767)
+
+Float32x10 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-1"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to int32 by multiplication 10"
+    SYNTAX       Integer32 (-2147483648..2147483647)
+
+Float32x100 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-2"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to int32 by multiplication 100"
+    SYNTAX       Integer32 (-2147483648..2147483647)
+
+Float32x1000 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-3"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to int32 by multiplication 1000"
+    SYNTAX       Integer32 (-2147483648..2147483647)
+
+UFloat16x10 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-1"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to uint16 by multiplication 10"
+    SYNTAX       Unsigned32 (0..65535)
+
+UFloat16x100 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-2"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to uint16 by multiplication 100"
+    SYNTAX       Unsigned32 (0..65535)
+
+UFloat16x1000 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-3"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to uint16 by multiplication
+        1000"
+    SYNTAX       Unsigned32 (0..65535)
+
+UFloat32x10 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-1"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to uint32 by multiplication 10"
+    SYNTAX       Unsigned32 (0..4294967295)
+
+UFloat32x100 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-2"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to uint32 by multiplication 100"
+    SYNTAX       Unsigned32 (0..4294967295)
+
+UFloat32x1000 ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d-3"
+    STATUS       current
+    DESCRIPTION  "Floating point value converted to uint32 by multiplication
+        1000"
+    SYNTAX       Unsigned32 (0..4294967295)
+
+YesNo ::= INTEGER {
+    no  (0),
+    yes (1)
+}
+
+OnOff ::= INTEGER {
+    off (0),
+    on  (1)
+}
+
+NoneOnOff ::= INTEGER {
+    none (0),
+    off  (1),
+    on   (2)
+}
+
+ContactType ::= INTEGER {
+    normalOpen  (0),
+    normalClose (1)
+}
+
+-- *****************************************************************************
+-- Objects
+-- *****************************************************************************
+
+elmHardware OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Devices manufactured by Elemy LLC"
+    ::= {elemy 1}
+
+elmCcu OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "CCU series devices"
+    ::= {elmHardware 1}
+
+elmAts OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "ATS series devices"
+    ::= {elmHardware 2}
+
+elmEt OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "ET series devices"
+    ::= {elmHardware 3}
+
+elmIpdu OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "IPDU series devices"
+    ::= {elmHardware 4}
+
+END

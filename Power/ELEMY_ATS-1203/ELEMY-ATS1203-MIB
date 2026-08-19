@@ -1,0 +1,331 @@
+ELEMY-ATS1203-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+    Unsigned32, Integer32
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION
+        FROM SNMPv2-TC
+    YesNo, UFloat16x100, Float16x1000, elmAts
+        FROM ELEMY-MIB;
+-- END IMPORTS
+
+
+elmAts1203 MODULE-IDENTITY
+    LAST-UPDATED "202301230927Z"
+    ORGANIZATION "Elemy LLC"
+    CONTACT-INFO "Voronov Vadim"
+    DESCRIPTION  "Device Model ATS-1203"
+    REVISION "202301230927Z"
+    DESCRIPTION  ""
+    ::= {elmAts 1}
+
+-- *****************************************************************************
+-- Shared Types
+-- *****************************************************************************
+
+CommStatus ::= INTEGER {
+    ok            (0),
+    noRefreshData (1),
+    noSignal      (2),
+    readError     (3)
+}
+
+SwitchMode ::= INTEGER {
+    switchOverZero    (0),
+    switchImmediately (1)
+}
+
+PowerInputPriority ::= INTEGER {
+    none  (0),
+    pwIn1 (1),
+    pwIn2 (2)
+}
+
+PowerLoadStatus ::= INTEGER {
+    normal   (0),
+    fullLoad (1),
+    overLoad (2)
+}
+
+PowerQsign ::= INTEGER {
+    unknown  (0),
+    positive (1),
+    negative (2)
+}
+
+-- *****************************************************************************
+-- Objects
+-- *****************************************************************************
+
+elmAtsStatus OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Device status"
+    ::= {elmAts1203 1}
+
+elmAtsCommStatus OBJECT-TYPE
+    SYNTAX       CommStatus
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Status of communication with core"
+    ::= {elmAtsStatus 1}
+
+elmAtsPowerSupplyAlarm OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Fault of one of the power supplies"
+    ::= {elmAtsStatus 2}
+
+
+elmAtsTraps OBJECT IDENTIFIER
+    ::= {elmAts1203 2}
+
+
+elmAtsDefTraps OBJECT IDENTIFIER
+    ::= {elmAtsTraps 1}
+
+elmAtsTrapCommStatus NOTIFICATION-TYPE
+    OBJECTS      {elmAtsCommStatus}
+    STATUS       current
+    DESCRIPTION  "Communication status is changed"
+    ::= {elmAtsDefTraps 1}
+
+elmAtsTrapPowerSupplyStatus NOTIFICATION-TYPE
+    OBJECTS      {elmAtsPowerSupplyAlarm}
+    STATUS       current
+    DESCRIPTION  "Power supply status is changed"
+    ::= {elmAtsDefTraps 2}
+
+elmAtsTrapPowerInputState NOTIFICATION-TYPE
+    OBJECTS      {elmAtsPowerInputIsNormal, elmAtsPowerInputIsActive, elmAtsPowerInputCurVoltage}
+    STATUS       current
+    DESCRIPTION  "Power input state is changed"
+    ::= {elmAtsDefTraps 3}
+
+elmAtsTrapPowerOutputState NOTIFICATION-TYPE
+    OBJECTS      {elmAtsPowerOutputHasVolt}
+    STATUS       current
+    DESCRIPTION  "Power output state is changed"
+    ::= {elmAtsDefTraps 4}
+
+elmAtsTrapPowerOutputLoadStatus NOTIFICATION-TYPE
+    OBJECTS      {elmAtsPowerOutputLoadStatus}
+    STATUS       current
+    DESCRIPTION  "Load statud is changed"
+    ::= {elmAtsDefTraps 5}
+
+
+elmAtsPowerInput OBJECT IDENTIFIER
+    ::= {elmAts1203 3}
+
+elmAtsPowerInputCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of power inputs"
+    ::= {elmAtsPowerInput 1}
+
+elmAtsPowerInputTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmAtsPowerInputEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table of power inputs"
+    ::= {elmAtsPowerInput 2}
+
+elmAtsPowerInputEntry OBJECT-TYPE
+    SYNTAX       ElmAtsPowerInputEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmAtsPowerInputIndex}
+    ::= {elmAtsPowerInputTable 1}
+
+ElmAtsPowerInputEntry ::= SEQUENCE {
+    elmAtsPowerInputIndex       Unsigned32,
+    elmAtsPowerInputTimeout     UFloat16x100,
+    uetAtsPowerInputMinVoltage  Unsigned32,
+    uetAtsPowerInputMaxVoltage  Unsigned32,
+    elmAtsPowerInputCurVoltage  Unsigned32,
+    elmAtsPowerInputIsNormal    YesNo,
+    elmAtsPowerInputIsActive    YesNo,
+    elmAtsPowerInputFault       YesNo
+}
+
+elmAtsPowerInputIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power input number"
+    ::= {elmAtsPowerInputEntry 1}
+
+elmAtsPowerInputTimeout OBJECT-TYPE
+    SYNTAX       UFloat16x100 (0..1000)
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Timeout after which the power input goes into the 'normal'
+        state if the voltage has been in the acceptable range all this time"
+    ::= {elmAtsPowerInputEntry 2}
+
+uetAtsPowerInputMinVoltage OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Minimum allowable input voltage"
+    ::= {elmAtsPowerInputEntry 3}
+
+uetAtsPowerInputMaxVoltage OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Maximum allowable input voltage"
+    ::= {elmAtsPowerInputEntry 4}
+
+elmAtsPowerInputCurVoltage OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power input voltage"
+    ::= {elmAtsPowerInputEntry 5}
+
+elmAtsPowerInputIsNormal OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Input voltage is OK"
+    ::= {elmAtsPowerInputEntry 6}
+
+elmAtsPowerInputIsActive OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power Input is active"
+    ::= {elmAtsPowerInputEntry 7}
+
+elmAtsPowerInputFault OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power input relay fault"
+    ::= {elmAtsPowerInputEntry 8}
+
+elmAtsPowerInputSwitchMode OBJECT-TYPE
+    SYNTAX       SwitchMode
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Switching mode between power inputs"
+    ::= {elmAtsPowerInput 3}
+
+elmAtsPowerInputPriority OBJECT-TYPE
+    SYNTAX       PowerInputPriority
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power input priority"
+    ::= {elmAtsPowerInput 4}
+
+
+elmAtsPowerOutput OBJECT IDENTIFIER
+    ::= {elmAts1203 4}
+
+elmAtsPowerOutputCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of power outputs"
+    ::= {elmAtsPowerOutput 1}
+
+elmAtsPowerOutputTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmAtsPowerOutputEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table of power outputs"
+    ::= {elmAtsPowerOutput 2}
+
+elmAtsPowerOutputEntry OBJECT-TYPE
+    SYNTAX       ElmAtsPowerOutputEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmAtsPowerOutputIndex}
+    ::= {elmAtsPowerOutputTable 1}
+
+ElmAtsPowerOutputEntry ::= SEQUENCE {
+    elmAtsPowerOutputIndex    Unsigned32,
+    elmAtsPowerOutputHasVolt  YesNo
+}
+
+elmAtsPowerOutputIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power output number"
+    ::= {elmAtsPowerOutputEntry 1}
+
+elmAtsPowerOutputHasVolt OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of voltage at the output"
+    ::= {elmAtsPowerOutputEntry 2}
+
+
+elmAtsPowerOutputMeasurement OBJECT IDENTIFIER
+    ::= {elmAtsPowerOutput 3}
+
+elmAtsPowerOutputI OBJECT-TYPE
+    SYNTAX       UFloat16x100
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Current value"
+    ::= {elmAtsPowerOutputMeasurement 1}
+
+elmAtsPowerOutputS OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Apparent power, VA"
+    ::= {elmAtsPowerOutputMeasurement 2}
+
+elmAtsPowerOutputP OBJECT-TYPE
+    SYNTAX       Integer32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Active power, W"
+    ::= {elmAtsPowerOutputMeasurement 3}
+
+elmAtsPowerOutputQ OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Reactive power, VAR"
+    ::= {elmAtsPowerOutputMeasurement 4}
+
+elmAtsPowerOutputQsign OBJECT-TYPE
+    SYNTAX       PowerQsign
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Sign of Reactive power"
+    ::= {elmAtsPowerOutputMeasurement 5}
+
+elmAtsPowerOutputCosF OBJECT-TYPE
+    SYNTAX       Float16x1000
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power factor"
+    ::= {elmAtsPowerOutputMeasurement 6}
+
+elmAtsPowerOutputLoadStatus OBJECT-TYPE
+    SYNTAX       PowerLoadStatus
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Load status"
+    ::= {elmAtsPowerOutputMeasurement 7}
+
+elmAtsPowerOutputHasVolts OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of output voltage on the common bus"
+    ::= {elmAtsPowerOutput 4}
+
+END
