@@ -106,8 +106,8 @@ zabbix_export:
                   var alarmstatus = "";
                   var alarmname = "";
                   var result = "Error";
-                  alarmstatus = value.match(/SIEMENS-PN-MIB::hicomAlStatus.*value=INTEGER:\s(.*)|231\.7\.2\.1\.2\.2\.1\.2.*value=INTEGER:\s(.*)/i);
-                  alarmname = value.match(/SIEMENS-PN-MIB::hicomAlName.*value=STRING:\s"(.*)"|231\.7\.2\.1\.2\.2\.1\.9.*value=STRING:\s"(.*)"/i);
+                  alarmstatus = value.match(/SIEMENS-PN-MIB::hicomAlStatus.*value=INTEGER:\s(.*)|231\.7\.2\.1\.2\.2\.1\.2\s=\s(.*)/i);
+                  alarmname = value.match(/SIEMENS-PN-MIB::hicomAlName.*value=STRING:\s"(.*)"|231\.7\.2\.1\.2\.2\.1\.9\s=\s"(.*)"/i);
                   if (alarmstatus == null || alarmname == null)
                   {
                     throw "Unable to parse SNMP trap";
@@ -131,7 +131,6 @@ zabbix_export:
                     result = 'AlarmName: ' + alarmname[1] + '; AlarmStatus: ' + alarmstatus;
                     return(result);
                   }
-                  
           tags:
             - tag: component
               value: 'pbx alarms'

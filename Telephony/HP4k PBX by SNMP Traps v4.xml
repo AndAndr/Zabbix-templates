@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2026-07-23T10:41:28Z</date>
+    <date>2026-08-31T07:47:16Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -149,8 +149,8 @@
 var alarmstatus = &quot;&quot;;
 var alarmname = &quot;&quot;;
 var result = &quot;Error&quot;;
-alarmstatus = value.match(/SIEMENS-PN-MIB::hicomAlStatus.*value=INTEGER:\s(.*)|231\.7\.2\.1\.2\.2\.1\.2.*value=INTEGER:\s(.*)/i);
-alarmname = value.match(/SIEMENS-PN-MIB::hicomAlName.*value=STRING:\s&quot;(.*)&quot;|231\.7\.2\.1\.2\.2\.1\.9.*value=STRING:\s&quot;(.*)&quot;/i);
+alarmstatus = value.match(/SIEMENS-PN-MIB::hicomAlStatus.*value=INTEGER:\s(.*)|231\.7\.2\.1\.2\.2\.1\.2\s=\s(.*)/i);
+alarmname = value.match(/SIEMENS-PN-MIB::hicomAlName.*value=STRING:\s&quot;(.*)&quot;|231\.7\.2\.1\.2\.2\.1\.9\s=\s&quot;(.*)&quot;/i);
 if (alarmstatus == null || alarmname == null)
 {
   throw &quot;Unable to parse SNMP trap&quot;;
