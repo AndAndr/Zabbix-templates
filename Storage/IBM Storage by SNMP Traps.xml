@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2026-10-16T11:55:17Z</date>
+    <groups>
+        <group>
+            <name>Templates/Storage</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>IBM Storage by SNMP Traps</template>
+            <name>IBM Storage by SNMP Traps</name>
+            <description>https://github.com/AndAndr/Zabbix-templates&#13;
+Шаблон мониторинга по протоколу SNMP (traps) СХД IBM Storwize и их клонов.</description>
+            <groups>
+                <group>
+                    <name>Templates/Storage</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Storage traps</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>ICMP ping</name>
+                    <type>SIMPLE</type>
+                    <key>icmpping</key>
+                    <history>30d</history>
+                    <trends>60d</trends>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{max(#3)}=0</expression>
+                            <name>Unavailable by ICMP ping</name>
+                            <priority>WARNING</priority>
+                            <description>Last three attempts returned timeout.  Please check device connectivity.</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP loss</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingloss</key>
+                    <history>30d</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <triggers>
+                        <trigger>
+                            <expression>{min(5m)}&gt;{$ICMP_LOSS_WARN} and {min(5m)}&lt;100</expression>
+                            <name>High ICMP ping loss</name>
+                            <opdata>Loss: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{IBM Storage by SNMP Traps:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP response time</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingsec</key>
+                    <history>30d</history>
+                    <trends>60d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>s</units>
+                    <triggers>
+                        <trigger>
+                            <expression>{avg(5m)}&gt;{$ICMP_RESPONSE_TIME_WARN}</expression>
+                            <name>High ICMP ping response time</name>
+                            <opdata>Value: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>High ICMP ping loss</name>
+                                    <expression>{IBM Storage by SNMP Traps:icmppingloss.min(5m)}&gt;{$ICMP_LOSS_WARN} and {IBM Storage by SNMP Traps:icmppingloss.min(5m)}&lt;100</expression>
+                                </dependency>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{IBM Storage by SNMP Traps:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Storage error</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[\.2\.6\.190\.1]</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>Трап уровня ошибок</description>
+                    <applications>
+                        <application>
+                            <name>Storage traps</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var errorid = &quot;&quot;;
+var errorcode = &quot;&quot;;
+var objecttype = &quot;&quot;;
+var objectid = &quot;&quot;;
+errorid = value.match(/(Error\sID.+)&quot;/i);
+errorcode = value.match(/(Error\sCode.+)&quot;/i);
+objecttype = value.match(/(Object\sType.+)&quot;/i);
+objectid = value.match(/(Object\sID.+)&quot;/i);
+if (errorid == null || errorcode == null || objecttype == null || objectid == null)
+{
+  throw &quot;Unable to parse SNMP trap&quot;;
+}
+return(errorid[1] + &quot;;&quot; + errorcode[1] + &quot;;&quot; + objecttype[1] + &quot;;&quot; + objectid[1]);
+</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{str(Error,1)}=1</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMP trap: &quot;{{ITEM.VALUE}.regsub(&quot;(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)&quot;,&quot;\1&quot;)}; ObjID: {{ITEM.VALUE}.regsub(&quot;(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)&quot;,&quot;\3 \4&quot;)}&quot;</name>
+                            <opdata>{{ITEM.VALUE}.regsub(&quot;(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)&quot;,&quot;\2&quot;)}</opdata>
+                            <priority>HIGH</priority>
+                            <description>Триггер закрывается вручную после решения проблемы на СХД. В случае ручного закрытия триггера без решения проблемы на СХД, триггер выстрелит вновь через ~сутки по факту повторной отправки трапа устройством.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Storage warning</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[\.2\.6\.190\.2]</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>Трап уровня предупреждений</description>
+                    <applications>
+                        <application>
+                            <name>Storage traps</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var errorid = &quot;&quot;;
+var errorcode = &quot;&quot;;
+var objecttype = &quot;&quot;;
+var objectid = &quot;&quot;;
+errorid = value.match(/(Error\sID.+)&quot;/i);
+errorcode = value.match(/(Error\sCode.+)&quot;/i);
+objecttype = value.match(/(Object\sType.+)&quot;/i);
+objectid = value.match(/(Object\sID.+)&quot;/i);
+if (errorid == null || errorcode == null || objecttype == null || objectid == null)
+{
+  throw &quot;Unable to parse SNMP trap&quot;;
+}
+return(errorid[1] + &quot;;&quot; + errorcode[1] + &quot;;&quot; + objecttype[1] + &quot;;&quot; + objectid[1]);
+
+
+</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{str(Error,1)}=1</expression>
+                            <recovery_mode>NONE</recovery_mode>
+                            <name>SNMP trap: &quot;{{ITEM.VALUE}.regsub(&quot;(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)&quot;,&quot;\1&quot;)}; ObjID: {{ITEM.VALUE}.regsub(&quot;(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)&quot;,&quot;\3 \4&quot;)}&quot;</name>
+                            <opdata>{{ITEM.VALUE}.regsub(&quot;(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)&quot;,&quot;\2&quot;)}</opdata>
+                            <priority>WARNING</priority>
+                            <description>Триггер закрывается вручную после решения проблемы на СХД. В случае ручного закрытия триггера без решения проблемы на СХД, триггер выстрелит вновь через ~сутки по факту повторной отправки трапа устройством.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Storage info</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[\.2\.6\.190\.3]</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>Трап уровня инфо</description>
+                    <applications>
+                        <application>
+                            <name>Storage traps</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var errorid = &quot;&quot;;
+errorid = value.match(/(Error\sID.+)&quot;/i);
+if (errorid == null)
+{
+  throw &quot;Unable to parse SNMP trap&quot;;
+}
+return(errorid[1]);
+
+</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{nodata({$INFO_TRAPPEDTRIGGER_TTL})}=0</expression>
+                            <name>SNMP trap: &quot;{ITEM.VALUE}&quot;</name>
+                            <opdata>Триггер закрывается автоматически через {$INFO_TRAPPEDTRIGGER_TTL}</opdata>
+                            <priority>WARNING</priority>
+                            <description>Info-heartbeat trigger.</description>
+                            <type>MULTIPLE</type>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$ICMP_LOSS_WARN}</macro>
+                    <value>20</value>
+                </macro>
+                <macro>
+                    <macro>{$ICMP_RESPONSE_TIME_WARN}</macro>
+                    <value>0.15</value>
+                </macro>
+                <macro>
+                    <macro>{$INFO_TRAPPEDTRIGGER_TTL}</macro>
+                    <value>2m</value>
+                    <description>Время показа информационного триггера</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

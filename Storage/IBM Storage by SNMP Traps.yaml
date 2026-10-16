@@ -1,0 +1,234 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: e5a913eb4fba41a8bd18c5bfea937c38
+      name: Templates/Storage
+  templates:
+    - uuid: d2bc2ae264b742d8a0900b0ea4122f54
+      template: 'IBM Storage by SNMP Traps'
+      name: 'IBM Storage by SNMP Traps'
+      description: |
+        https://github.com/AndAndr/Zabbix-templates
+        Шаблон мониторинга по протоколу SNMP (traps) СХД IBM Storwize и их клонов.
+      groups:
+        - name: Templates/Storage
+      items:
+        - uuid: b9779a905b92486d867655685c102162
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 30d
+          trends: 60d
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 07c017185e8b4d2c9d82bec27105221d
+              expression: 'max(/IBM Storage by SNMP Traps/icmpping,#3)=0'
+              name: 'Тест доступности по протоколу ICMP'
+              priority: WARNING
+              description: 'Last three attempts returned timeout.  Please check device connectivity.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 10f1737aec864638b6c1810dc4e43fef
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 30d
+          value_type: FLOAT
+          trends: 60d
+          units: '%'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: cdf3a00c04754c60bfaf90d2c6746e85
+              expression: 'min(/IBM Storage by SNMP Traps/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/IBM Storage by SNMP Traps/icmppingloss,5m)<100'
+              name: 'Высокая потеря пакетов ICMP ping'
+              opdata: 'Loss: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'max(/IBM Storage by SNMP Traps/icmpping,#3)=0'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 58798bb00dc0469da9fab8c47bde41be
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 30d
+          value_type: FLOAT
+          trends: 60d
+          units: s
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: fd1c9c47c0db454a9cf1296d122acf4c
+              expression: 'avg(/IBM Storage by SNMP Traps/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'Высокое время отклика ICMP ping'
+              opdata: 'Value: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                - name: 'Высокая потеря пакетов ICMP ping'
+                  expression: 'min(/IBM Storage by SNMP Traps/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/IBM Storage by SNMP Traps/icmppingloss,5m)<100'
+                - name: 'Тест доступности по протоколу ICMP'
+                  expression: 'max(/IBM Storage by SNMP Traps/icmpping,#3)=0'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: c84b047d944842e48082dae007cb5b00
+          name: 'Storage error'
+          type: SNMP_TRAP
+          key: 'snmptrap[\.2\.6\.190\.1]'
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          description: 'Трап уровня ошибок'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var errorid = "";
+                  var errorcode = "";
+                  var objecttype = "";
+                  var objectid = "";
+                  errorid = value.match(/(Error\sID.+)"/i);
+                  errorcode = value.match(/(Error\sCode.+)"/i);
+                  objecttype = value.match(/(Object\sType.+)"/i);
+                  objectid = value.match(/(Object\sID.+)"/i);
+                  if (errorid == null || errorcode == null || objecttype == null || objectid == null)
+                  {
+                    throw "Unable to parse SNMP trap";
+                  }
+                  return(errorid[1] + ";" + errorcode[1] + ";" + objecttype[1] + ";" + objectid[1]);
+                  
+          tags:
+            - tag: component
+              value: 'storage traps'
+          triggers:
+            - uuid: 6033635d4198445a9a4aae7dff28fac3
+              expression: 'find(/IBM Storage by SNMP Traps/snmptrap[\.2\.6\.190\.1],1s,"like","Error")=1'
+              recovery_mode: NONE
+              name: 'SNMP trap: "{{ITEM.VALUE}.regsub("(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)","\1")}; ObjID: {{ITEM.VALUE}.regsub("(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)","\3 \4")}"'
+              opdata: '{{ITEM.VALUE}.regsub("(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)","\2")}'
+              priority: HIGH
+              description: 'Триггер закрывается вручную после решения проблемы на СХД. В случае ручного закрытия триггера без решения проблемы на СХД, триггер выстрелит вновь через ~сутки по факту повторной отправки трапа устройством.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 418ec6ab74f9459f951bd7fe6c7e0c6a
+          name: 'Storage warning'
+          type: SNMP_TRAP
+          key: 'snmptrap[\.2\.6\.190\.2]'
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          description: 'Трап уровня предупреждений'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var errorid = "";
+                  var errorcode = "";
+                  var objecttype = "";
+                  var objectid = "";
+                  errorid = value.match(/(Error\sID.+)"/i);
+                  errorcode = value.match(/(Error\sCode.+)"/i);
+                  objecttype = value.match(/(Object\sType.+)"/i);
+                  objectid = value.match(/(Object\sID.+)"/i);
+                  if (errorid == null || errorcode == null || objecttype == null || objectid == null)
+                  {
+                    throw "Unable to parse SNMP trap";
+                  }
+                  return(errorid[1] + ";" + errorcode[1] + ";" + objecttype[1] + ";" + objectid[1]);
+                  
+                  
+                  
+          tags:
+            - tag: component
+              value: 'storage traps'
+          triggers:
+            - uuid: 3a8b2ba385504516aa58dc3388954dae
+              expression: 'find(/IBM Storage by SNMP Traps/snmptrap[\.2\.6\.190\.2],1s,"like","Error")=1'
+              recovery_mode: NONE
+              name: 'SNMP trap: "{{ITEM.VALUE}.regsub("(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)","\1")}; ObjID: {{ITEM.VALUE}.regsub("(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)","\3 \4")}"'
+              opdata: '{{ITEM.VALUE}.regsub("(.+);(.+);Object\sType\s=\s(.+);Object\sID\s=\s(.+)","\2")}'
+              priority: WARNING
+              description: 'Триггер закрывается вручную после решения проблемы на СХД. В случае ручного закрытия триггера без решения проблемы на СХД, триггер выстрелит вновь через ~сутки по факту повторной отправки трапа устройством.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: a713d5bb5c954fbf931d29c9db85e064
+          name: 'Storage info'
+          type: SNMP_TRAP
+          key: 'snmptrap[\.2\.6\.190\.3]'
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          description: 'Трап уровня инфо'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var errorid = "";
+                  errorid = value.match(/(Error\sID.+)"/i);
+                  if (errorid == null)
+                  {
+                    throw "Unable to parse SNMP trap";
+                  }
+                  return(errorid[1]);
+                  
+                  
+          tags:
+            - tag: component
+              value: 'storage traps'
+          triggers:
+            - uuid: fc48a5f9055942d4b511761456714b8a
+              expression: 'nodata(/IBM Storage by SNMP Traps/snmptrap[\.2\.6\.190\.3],{$INFO_TRAPPEDTRIGGER_TTL})=0'
+              name: 'SNMP trap: "{ITEM.VALUE}"'
+              opdata: 'Триггер закрывается автоматически через {$INFO_TRAPPEDTRIGGER_TTL}'
+              priority: WARNING
+              description: 'Info-heartbeat trigger.'
+              type: MULTIPLE
+              tags:
+                - tag: scope
+                  value: availability
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: ibm
+        - tag: target
+          value: storage
+        - tag: target
+          value: yadro
+      macros:
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        - macro: '{$INFO_TRAPPEDTRIGGER_TTL}'
+          value: 2m
+          description: 'Время показа информационного триггера'
+      valuemaps:
+        - uuid: a8dde00f2bcf463fbea5a98d8714bd50
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up
