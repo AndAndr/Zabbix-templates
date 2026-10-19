@@ -28,7 +28,7 @@ zabbix_export:
             - uuid: 07c017185e8b4d2c9d82bec27105221d
               expression: 'max(/IBM Storage by SNMP Traps/icmpping,#3)=0'
               name: 'Тест доступности по протоколу ICMP'
-              priority: WARNING
+              priority: HIGH
               description: 'Last three attempts returned timeout.  Please check device connectivity.'
               tags:
                 - tag: scope
@@ -201,9 +201,8 @@ zabbix_export:
               expression: 'nodata(/IBM Storage by SNMP Traps/snmptrap[\.2\.6\.190\.3],{$INFO_TRAPPEDTRIGGER_TTL})=0'
               name: 'SNMP trap: "{ITEM.VALUE}"'
               opdata: 'Триггер закрывается автоматически через {$INFO_TRAPPEDTRIGGER_TTL}'
-              priority: WARNING
+              priority: INFO
               description: 'Info-heartbeat trigger.'
-              type: MULTIPLE
               tags:
                 - tag: scope
                   value: availability

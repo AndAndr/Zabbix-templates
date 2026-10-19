@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2026-10-16T11:55:17Z</date>
+    <date>2026-10-19T05:24:24Z</date>
     <groups>
         <group>
             <name>Templates/Storage</name>
@@ -37,7 +37,7 @@
                         <trigger>
                             <expression>{max(#3)}=0</expression>
                             <name>Unavailable by ICMP ping</name>
-                            <priority>WARNING</priority>
+                            <priority>HIGH</priority>
                             <description>Last three attempts returned timeout.  Please check device connectivity.</description>
                         </trigger>
                     </triggers>
@@ -217,9 +217,8 @@ return(errorid[1]);
                             <expression>{nodata({$INFO_TRAPPEDTRIGGER_TTL})}=0</expression>
                             <name>SNMP trap: &quot;{ITEM.VALUE}&quot;</name>
                             <opdata>Триггер закрывается автоматически через {$INFO_TRAPPEDTRIGGER_TTL}</opdata>
-                            <priority>WARNING</priority>
+                            <priority>INFO</priority>
                             <description>Info-heartbeat trigger.</description>
-                            <type>MULTIPLE</type>
                         </trigger>
                     </triggers>
                 </item>
