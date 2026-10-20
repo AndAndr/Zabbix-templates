@@ -1,0 +1,392 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 7c2cb727f85b492d88cd56e17127c64d
+      name: Templates/SAN
+  templates:
+    - uuid: 4646f0f0531c4d8b883158f2a0a99c16
+      template: 'FC HBA stats Linux by Zabbix agent'
+      name: 'FC HBA stats Linux by Zabbix agent'
+      description: |
+        https://github.com/AndAndr/
+        qla2xxx
+      groups:
+        - name: Templates/SAN
+      discovery_rules:
+        - uuid: ff44f7bbae9c425f88e9b3f7a668f11c
+          name: 'FC discovery'
+          key: 'vfs.dir.get[/sys/class/fc_host,,,sym,,0,,,,,]'
+          delay: 30m
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#FCHOST}'
+                value: '{$FCHOST.MATCHES}'
+                formulaid: A
+              - macro: '{#FCHOST}'
+                value: '{$FCHOST.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          lifetime: 3d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Обнаружение портов Fibre Channel (FC) HBA.'
+          item_prototypes:
+            - uuid: e5f629e8ecde43d2a2e4c63993c57d1c
+              name: 'FC {#FCHOST} port state'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/port_state]'
+              description: |
+                linux/drivers/scsi/scsi_transport_fc.c
+                
+                0 ⇒ Online
+                1 ⇒ Unknown
+                2 ⇒ Not Present
+                3 ⇒ Offline
+                4 ⇒ Blocked
+                5 ⇒ Bypassed
+                6 ⇒ Diagnostics
+                7 ⇒ Linkdown
+                8 ⇒ Error
+                9 ⇒ Loopback
+                10 ⇒ Deleted
+                11 ⇒ Marginal
+              valuemap:
+                name: fc_port_state_names
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      switch (value) {
+                          case "Online":
+                              return 0;
+                          case "Unknown":
+                              return 1;
+                          case "Not Present":
+                              return 2;
+                          case "Offline":
+                              return 3;
+                          case "Blocked":
+                              return 4;
+                          case "Bypassed":
+                              return 5;
+                          case "Diagnostics":
+                              return 6;
+                          case "Linkdown":
+                              return 7;
+                          case "Error":
+                              return 8;
+                          case "Loopback":
+                              return 9;
+                          case "Deleted":
+                              return 10;
+                          case "Marginal":
+                              return 11;
+                          default:
+                              return 12;
+                      }
+                      
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: 3e3718a629934b38a0612a17c449930f
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/port_state])>0 and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/port_state],#2)=0'
+                  name: 'FC {#FCHOST} port state is not Online'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: e15764c0bf544353a32b7044ee60a9eb
+              name: 'FC {#FCHOST} speed'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/speed]'
+              delay: 10m
+              units: Gbit
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - ^\d+
+                    - \0
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 4h
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+            - uuid: 88c75b1467fe4cd182246a32191b51a2
+              name: 'FC {#FCHOST} dumped_frames'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/dumped_frames]'
+              delay: 2m
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: a49bc01ce8ff4c90af4ef7d160c37e1e
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/dumped_frames],#1)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/dumped_frames],#2) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/dumped_frames],#2)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/dumped_frames],#3) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/dumped_frames],#3)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/dumped_frames],#4)'
+                  name: 'FC {#FCHOST} dumped_frames detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 6098200c9e7f4ad1b44ecc9d0c5f9d00
+              name: 'FC {#FCHOST} error_frames'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/error_frames]'
+              delay: 2m
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: 98ab284d0ed3438f84b3a37c02003180
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/error_frames],#1)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/error_frames],#2) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/error_frames],#2)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/error_frames],#3) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/error_frames],#3)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/error_frames],#4)'
+                  name: 'FC {#FCHOST} error_frames detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 4c16ca2634c94635afd9160ee3a888d6
+              name: 'FC {#FCHOST} input'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/fcp_input_megabytes]'
+              units: bps
+              description: 'RX in bps'
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: MULTIPLIER
+                  parameters:
+                    - '8000000'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+            - uuid: d3deb06271084d45b3bf4503b6610d84
+              name: 'FC {#FCHOST} output'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/fcp_output_megabytes]'
+              units: bps
+              description: 'TX in bps'
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: MULTIPLIER
+                  parameters:
+                    - '8000000'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+            - uuid: f65de1fd3d6f45f9898390321de98e27
+              name: 'FC {#FCHOST} invalid_crc_count'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_crc_count]'
+              delay: 2m
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: 0d0ffacfdca141d38bb1e2e8256864df
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_crc_count],#1)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_crc_count],#2) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_crc_count],#2)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_crc_count],#3) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_crc_count],#3)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_crc_count],#4)'
+                  name: 'FC {#FCHOST} invalid_crc_count detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 38d74221df7c4485abbd4bb493a0760f
+              name: 'FC {#FCHOST} invalid_tx_word_count'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_tx_word_count]'
+              delay: 2m
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: 195af603cbf64c8891d7dca3a0353395
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_tx_word_count],#1)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_tx_word_count],#2) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_tx_word_count],#2)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_tx_word_count],#3) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_tx_word_count],#3)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/invalid_tx_word_count],#4)'
+                  name: 'FC {#FCHOST} invalid_tx_word_count detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 796d156c36f2413384540c1a60f5b15c
+              name: 'FC {#FCHOST} link_failure_count'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/link_failure_count]'
+              delay: 2m
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: 433a21703c334e35b59cb425037d24ad
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/link_failure_count],#1)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/link_failure_count],#2) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/link_failure_count],#2)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/link_failure_count],#3) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/link_failure_count],#3)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/link_failure_count],#4)'
+                  name: 'FC {#FCHOST} link_failure_count detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 76b275df109243a181c106e4f62e9dba
+              name: 'FC {#FCHOST} loss_of_signal_count'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_signal_count]'
+              delay: 2m
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: 568ceebb7cc846038be72bea0f77e7db
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_signal_count],#1)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_signal_count],#2) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_signal_count],#2)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_signal_count],#3) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_signal_count],#3)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_signal_count],#4)'
+                  name: 'FC {#FCHOST} loss_of_signal_count detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: ec057f3cc42d4d4cb92e284c062dc8ac
+              name: 'FC {#FCHOST} loss_of_sync_count'
+              key: 'vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_sync_count]'
+              delay: 2m
+              preprocessing:
+                - type: LTRIM
+                  parameters:
+                    - 0x
+                - type: HEX_TO_DECIMAL
+                  parameters:
+                    - ''
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: component
+                  value: 'fc hba'
+                - tag: fc_hba
+                  value: '{#FCHOST}'
+              trigger_prototypes:
+                - uuid: f2f781f3c0fc4954b32955b7492c0463
+                  expression: 'last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_sync_count],#1)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_sync_count],#2) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_sync_count],#2)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_sync_count],#3) and last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_sync_count],#3)>last(/FC HBA stats Linux by Zabbix agent/vfs.file.contents[/sys/class/fc_host/{#FCHOST}/statistics/loss_of_sync_count],#4)'
+                  name: 'FC {#FCHOST} loss_of_sync_count detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+          lld_macro_paths:
+            - lld_macro: '{#FCHOST}'
+              path: $.basename
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: fc
+        - tag: target
+          value: hba
+      macros:
+        - macro: '{$FCHOST.MATCHES}'
+          value: '^.*$'
+        - macro: '{$FCHOST.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+      valuemaps:
+        - uuid: 157c1688da4b46ca87fedd313994a20f
+          name: fc_port_state_names
+          mappings:
+            - value: '0'
+              newvalue: Online
+            - value: '1'
+              newvalue: Unknown
+            - value: '2'
+              newvalue: 'Not Present'
+            - value: '3'
+              newvalue: Offline
+            - value: '4'
+              newvalue: Blocked
+            - value: '5'
+              newvalue: Bypassed
+            - value: '6'
+              newvalue: Diagnostics
+            - value: '7'
+              newvalue: Linkdown
+            - value: '8'
+              newvalue: Error
+            - value: '9'
+              newvalue: Loopback
+            - value: '10'
+              newvalue: Deleted
+            - value: '11'
+              newvalue: Marginal
