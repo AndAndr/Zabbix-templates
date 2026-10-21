@@ -7,3 +7,5 @@
 **IBM Storage by SNMP Traps.xml** - Шаблон мониторинга (SNMP-трапы) СХД IBM-Lenovo-Yadro Storwize и пр. для Zabbix версии 4.0
 
 **IBM Storage by SNMP Traps.yaml** - Шаблон мониторинга (SNMP-трапы) СХД IBM-Lenovo-Yadro Storwize и пр. для Zabbix версии 7.0
+
+Шаблон для СХД тестировался на Lenovo V3700 V2, Yadro СХ1-32
