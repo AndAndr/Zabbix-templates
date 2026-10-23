@@ -1,0 +1,81 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    - uuid: afdb087b5b654043936d0df313efb766
+      template: 'TCP port status by simple check'
+      name: 'TCP port status by simple check'
+      description: |
+        https://github.com/AndAndr/Zabbix-templates
+        
+        Проверка доступности порта TCP методом простых проверок. Элементы данных и триггеры обнаруживаются автоматически, исходя из значения макроса {$TCP_PORTS}. Синтаксис указания портов в макросе - любой, разделитель - любой, текст игнорируется. Порты ниже 20 и выше 65535 также игнорируются. Уникальность значений портов обеспечивается автоматически. Максимальная длина значения макроса равна 2048 символов.
+      groups:
+        - name: Templates/Applications
+      discovery_rules:
+        - uuid: 345763d551134509a0d47c14111b2b5f
+          name: 'TCP Port discovery'
+          type: SCRIPT
+          key: tcp.port
+          delay: 10m
+          params: |
+            var lld = [];
+            var value = "{$TCP_PORTS}";
+            if (value === null || value === undefined || value.length < 2)
+            {
+              throw "Check macro syntax!";
+            }
+            var count=0;
+            var portsArray = value.match(/\d+/g).reduce(function(a,b){if(a.indexOf(b) < 0)a.push(b);return a;},[]).join("\n").replace(/ /g,"").split("\n"
+            );
+            var ports_num = portsArray.length;
+            for (i = 0; i < ports_num; i++) {
+              if (portsArray[i] >= 10 && portsArray[i] < 65535) {
+                count++;
+                var row = {};
+                row["{#PORT}"] = portsArray[i]
+                lld.push(row);
+              }
+            }
+            if (count < 1) {
+              throw "Check macro syntax!";
+            }
+            return JSON.stringify(lld);
+          description: 'Обнаружение портов, исходя из значения макроса {$TCP_PORTS}.'
+          item_prototypes:
+            - uuid: 6d94fa629d4646f2aedc6e269e954452
+              name: 'tcp_port:{#PORT} status'
+              type: SIMPLE
+              key: 'net.tcp.service[tcp,,{#PORT}]'
+              valuemap:
+                name: 'TCP Port'
+              timeout: 3s
+              tags:
+                - tag: component
+                  value: network
+                - tag: component
+                  value: 'tcp port'
+                - tag: tcp_port
+                  value: '{#PORT}'
+              trigger_prototypes:
+                - uuid: 5f10135fd2b446438010ae0ff29cb673
+                  expression: 'last(/TCP port status by simple check/net.tcp.service[tcp,,{#PORT}],#1)=0 and last(/TCP port status by simple check/net.tcp.service[tcp,,{#PORT}],#2)=0'
+                  name: 'Порт TCP:{#PORT} недоступен'
+                  priority: HIGH
+                  tags:
+                    - tag: scope
+                      value: availability
+          timeout: 3s
+      macros:
+        - macro: '{$TCP_PORTS}'
+          value: '80 443'
+          description: 'Синтаксис указания портов - любой.'
+      valuemaps:
+        - uuid: 704edd8a84a14aa7a845d6d9671c4154
+          name: 'TCP Port'
+          mappings:
+            - value: '0'
+              newvalue: Закрыт
+            - value: '1'
+              newvalue: Доступен
