@@ -10,7 +10,7 @@ zabbix_export:
       description: |
         https://github.com/AndAndr/Zabbix-templates
         
-        Проверка доступности порта TCP методом простых проверок. Элементы данных и триггеры обнаруживаются автоматически, исходя из значения макроса {$TCP_PORTS}. Синтаксис указания портов в макросе - любой, разделитель - любой, текст игнорируется. Порты ниже 20 и выше 65535 также игнорируются. Уникальность значений портов обеспечивается автоматически. Максимальная длина значения макроса равна 2048 символов.
+        Проверка доступности порта TCP методом простых проверок. Элементы данных и триггеры обнаруживаются автоматически, исходя из значения макроса {$TCP_PORTS}. Синтаксис указания портов в макросе - любой, разделитель - любой, текст игнорируется. Порты ниже 20 и выше 65535 также игнорируются. Уникальность значений портов обеспечивается автоматически. В целях безопасности, максимальное количество корректно заданных портов искусственно ограничено величиной, равной 20. Максимальная длина значения макроса равна 2048 символов.
       groups:
         - name: Templates/Applications
       discovery_rules:
@@ -30,8 +30,11 @@ zabbix_export:
             var portsArray = value.match(/\d+/g).reduce(function(a,b){if(a.indexOf(b) < 0)a.push(b);return a;},[]).join("\n").replace(/ /g,"").split("\n"
             );
             var ports_num = portsArray.length;
+            if (ports_num > 20) {
+              throw "There are too many ports specified!";
+            }
             for (i = 0; i < ports_num; i++) {
-              if (portsArray[i] >= 10 && portsArray[i] < 65535) {
+              if (portsArray[i] >= 20 && portsArray[i] < 65535) {
                 count++;
                 var row = {};
                 row["{#PORT}"] = portsArray[i]
@@ -55,8 +58,8 @@ zabbix_export:
                 - tag: component
                   value: network
                 - tag: component
-                  value: 'tcp port'
-                - tag: tcp_port
+                  value: tcp-port
+                - tag: tcp-port
                   value: '{#PORT}'
               trigger_prototypes:
                 - uuid: 5f10135fd2b446438010ae0ff29cb673
@@ -69,7 +72,7 @@ zabbix_export:
           timeout: 3s
       macros:
         - macro: '{$TCP_PORTS}'
-          value: '80 443'
+          value: '80,443 123 122 234 1111'
           description: 'Синтаксис указания портов - любой.'
       valuemaps:
         - uuid: 704edd8a84a14aa7a845d6d9671c4154
