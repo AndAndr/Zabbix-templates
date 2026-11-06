@@ -1,0 +1,361 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    - uuid: e10e1396a554445db3723e3a18a2bc94
+      template: 'Windows processes by Zabbix agent'
+      name: 'Windows processes by Zabbix agent'
+      description: |
+        https://github.com/AndAndr/Zabbix-templates
+        
+        Шаблон мониторинга процессов Windows: контроль максимального и минимального количества работающих процессов + получение метрик производительности в контексте процесса.
+        
+        На уровне шаблона созданы 4 макроса:
+        {$PROC.MAX.COUNT}=Значение не задано
+        Максимальное количество работающих процессов (целое число). На уровне шаблона значение не задано и, соответственно, максимальное количество работающих процессов не контролируется. При необходимости контроля необходимо переопределение этого макроса на уровне хоста в контексте процесса!
+        
+        {$PROC.MIN.COUNT}=1
+        Минимальное количество работающих процессов (целое число).
+        
+        {$PROC.NAME.MATCHES}=Значение не задано
+        Регулярное выражение для описания имён процессов, которые необходимо обнаруживать правилами низкоуровневого обнаружения. На уровне шаблона значение не задано в целях безопасности.
+        
+        {$PROC.NAME.NOT_MATCHES}=Значение не задано
+        Регулярное выражение для описания имён процессов, которые НЕ ТРЕБУЕТСЯ обнаруживать правилами низкоуровневого обнаружения. На уровне шаблона значение не задано в целях безопасности.
+        
+        При присоединении шаблона к хосту Windows правила обнаружения процессов работать не будут, т.к. значение макроса {$PROC.NAME.MATCHES} не задано.
+        Для активизации процесса обнаружения интересующих процессов (например: cmd.exe, MS Outlook, zabbix-agent, Яндекс-браузер) необходимо на этом хосте создать макрос
+        {$PROC.NAME.MATCHES}, равный по значению регулярному выражению, описывающему имена процессов указанных в примере приложений.
+        Например:{$PROC.NAME.MATCHES}=^cmd.+|OUTLOK.+|zabbix.+|browser.+$
+        (Для успешного обнаружения процессов необходимо, чтобы они были запущены.)
+        В такой конфигурации: триггер контроля минимального количества запущенных экземпляров процесса будет срабатывать при условии уменьшения их количества до нуля (макрос {$PROC.MIN.COUNT}=1);
+        триггер контроля максимального количества запущенных экземпляров процесса срабатывать не будет (макрос {$PROC.MAX.COUNT}=Значение не задано)
+        В случае необходимости изменения логики работы триггеров контроля минимального и максимального количества экземпляров запущенного процесса, необходимо
+        создать на хосте два контекстных макроса, где контекстом будет являться имя процесса (пример с cmd.exe):
+        {$PROC.MAX.COUNT:"cmd.exe"}=6
+        {$PROC.MIN.COUNT:"cmd.exe"}=3
+        т.е. в такой конфигурации триггер контроля количества запущенных экземпляров процесса cmd.exe будет срабатывать в случае выхода значения количества запущенных экземпляров процесса cmd.exe
+        за границы интервала (3-6) процессов.
+        В шаблоне выключено отключение более необнаруживаемых процессов. Удаление более необнаруживаемых процессов произойдёт через 7 дней.
+      groups:
+        - name: Templates/Applications
+      items:
+        - uuid: f3b514d20ea843c7b2e2752120aaadf3
+          name: 'Get process summary'
+          key: 'proc.get[,,,summary]'
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'The summary of data metrics for all processes.'
+          tags:
+            - tag: component
+              value: raw
+      discovery_rules:
+        - uuid: 134a7a0eb7044591b7bc8e180f849774
+          name: 'Processes discovery'
+          type: DEPENDENT
+          key: custom.proc.discovery
+          delay: '0'
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#NAME}'
+                value: '{$PROC.NAME.MATCHES}'
+                formulaid: A
+              - macro: '{#NAME}'
+                value: '{$PROC.NAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Обнаружение процессов Windows.'
+          item_prototypes:
+            - uuid: 9bed13b3a08f4cd19d1cb348519b3f2c
+              name: 'Process [{#NAME}]: CPU time system mode'
+              type: DEPENDENT
+              key: 'custom.proc.cpu.time.system[{#NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: ms
+              description: 'Время ЦП (мс), потраченное процессом {#NAME} в режиме ядра.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.cputime_system
+                  error_handler: DISCARD_VALUE
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: cpu
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: 6af607ff92474269a907061911c899e7
+              name: 'Process [{#NAME}]: CPU time user mode'
+              type: DEPENDENT
+              key: 'custom.proc.cpu.time.user[{#NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: ms
+              description: 'Время ЦП (мс), потраченное процессом {#NAME} в пользовательском режиме.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.cputime_user
+                  error_handler: DISCARD_VALUE
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: cpu
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: 22faca0439ba4a5a8599b03de0b0989d
+              name: 'Process [{#NAME}]: Get data'
+              type: DEPENDENT
+              key: 'custom.proc.get[{#NAME}]'
+              delay: '0'
+              history: '0'
+              value_type: TEXT
+              trends: '0'
+              description: 'Summary metrics collected during the process {#NAME}.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.[?(@["name"]=="{#NAME}")].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: 'Failed to retrieve process {#NAME} data'
+              master_item:
+                key: 'proc.get[,,,summary]'
+              tags:
+                - tag: component
+                  value: raw
+            - uuid: 90570d34c0e44cf5a836a5de53809f5f
+              name: 'Process [{#NAME}]: io other bytes'
+              type: DEPENDENT
+              key: 'custom.proc.io.other.b[{#NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              description: 'I/O объём данных (в байтах), переданный процессом {#NAME} в операциях ввода-вывода, которые не относятся к чтению (ReadTransferCount) или записи (WriteTransferCount). Например, запросы к каналу, коммуникацию с канальной заглушкой, некоторые операции с отображением в память.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.io_other_b
+                  error_handler: DISCARD_VALUE
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: disk
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: 64254dedb20445c48e58a819673e72b6
+              name: 'Process [{#NAME}]: io read bytes'
+              type: DEPENDENT
+              key: 'custom.proc.io.read.b[{#NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              description: 'I/O прочитано байт процессом {#NAME}.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.io_read_b
+                  error_handler: DISCARD_VALUE
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: disk
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: 7bf9f1b5b25e4b41ba0f75d3131c5aa6
+              name: 'Process [{#NAME}]: io write bytes'
+              type: DEPENDENT
+              key: 'custom.proc.io.write.b[{#NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              description: 'I/O записано байт процессом {#NAME}.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.io_write_b
+                  error_handler: DISCARD_VALUE
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: disk
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: e94b2e6c5ecb43dd97d7a96f5b5ae14f
+              name: 'Process [{#NAME}]: Number of running processes'
+              type: DEPENDENT
+              key: 'custom.proc.num[{#NAME}]'
+              delay: '0'
+              description: 'Количество работающих процессов {#NAME}.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.processes
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: process
+                - tag: component
+                  value: system
+                - tag: process
+                  value: '{#NAME}'
+              trigger_prototypes:
+                - uuid: c1d8d25e6325484aa463995684615de2
+                  expression: 'last(/Windows processes by Zabbix agent/custom.proc.num[{#NAME}])>{$PROC.MAX.COUNT:"{#NAME}"} and {$PROC.MAX.COUNT:"{#NAME}"}>1'
+                  name: 'Процесс [{#NAME}]: Количество запущенных процессов больше {$PROC.MAX.COUNT:"{#NAME}"}'
+                  priority: HIGH
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+                - uuid: 4d4fd8c65bf24e7181bfeae2e2ac9461
+                  expression: 'last(/Windows processes by Zabbix agent/custom.proc.num[{#NAME}])<{$PROC.MIN.COUNT:"{#NAME}"}'
+                  name: 'Процесс [{#NAME}]: Количество запущенных процессов меньше {$PROC.MIN.COUNT:"{#NAME}"}'
+                  priority: HIGH
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: ef1bfd03363b470e87e44b9eb315e4d3
+              name: 'Process [{#NAME}]: Number of page faults per sec'
+              type: DEPENDENT
+              key: 'custom.proc.page[{#NAME}]'
+              delay: '0'
+              units: '!pf/s'
+              description: 'Page faults (отказы страниц) в секунду. Количество попыток процеса {#NAME} обратиться к участку памяти, которого сейчас нет в оперативной памяти за единицу времени. Система вынуждена подгружать нужные данные из файла подкачки (page file) или с диска в оперативную память, что заметно замедляет работу компьютера.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.page_faults
+                  error_handler: DISCARD_VALUE
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: memory
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: 2ada5cf6ea004740a3f82fa6f79e6a05
+              name: 'Process [{#NAME}]: Number of threads'
+              type: DEPENDENT
+              key: 'custom.proc.thread[{#NAME}]'
+              delay: '0'
+              units: '!Threads'
+              description: 'Количество активных потоков, работающих внутри процесса {#NAME}.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.threads
+                  error_handler: DISCARD_VALUE
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: process
+                - tag: component
+                  value: system
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: f04a0a5ceb4f432db2e97d8eb7a24e9c
+              name: 'Process [{#NAME}]: Memory usage (vmsize)'
+              type: DEPENDENT
+              key: 'custom.proc.vmsize[{#NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              description: 'VMSize (Virtual Memory Size) - это объём виртуального адресного пространства, выделенного процессу {#NAME}. Проще говоря, это то, сколько «виртуальной» памяти процесс считает для себя доступной, даже если физически (в оперативной памяти или на диске) часть этого объёма сейчас не используется.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.vmsize
+                  error_handler: DISCARD_VALUE
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000'
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: memory
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+            - uuid: eae41974c4864310a05bc2e380ca030f
+              name: 'Process [{#NAME}]: Memory usage (wkset)'
+              type: DEPENDENT
+              key: 'custom.proc.wkset[{#NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              description: 'Рабочий набор (working set) процесса {#NAME} - это набор страниц из виртуального адресного пространства этого процесса, которые в данный момент резидентны, то есть находятся в оперативной памяти.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.wkset
+                  error_handler: DISCARD_VALUE
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000'
+              master_item:
+                key: 'custom.proc.get[{#NAME}]'
+              tags:
+                - tag: component
+                  value: memory
+                - tag: component
+                  value: process
+                - tag: process
+                  value: '{#NAME}'
+          master_item:
+            key: 'proc.get[,,,summary]'
+          lld_macro_paths:
+            - lld_macro: '{#NAME}'
+              path: $.name
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: process
+        - tag: target
+          value: windows
+      macros:
+        - macro: '{$PROC.MAX.COUNT}'
+          value: '<CHANGE VALUE>'
+          description: 'Максимальное количество работающих процессов (целое число). На уровне шаблона значение не задано и, соответственно, максимальное количество работающих процессов не контролируется. При необходимости контроля необходимо переопределение этого макроса на уровне хоста в контексте процесса!'
+        - macro: '{$PROC.MIN.COUNT}'
+          value: '1'
+          description: 'Минимальное количество работающих процессов (целое число).'
+        - macro: '{$PROC.NAME.MATCHES}'
+          value: '<CHANGE VALUE>'
+          description: 'Регулярное выражение для описания имён процессов, которые необходимо обнаруживать правилами низкоуровневого обнаружения. На уровне шаблона значение не задано в целях безопасности.'
+        - macro: '{$PROC.NAME.NOT_MATCHES}'
+          value: '<CHANGE VALUE>'
+          description: 'Регулярное выражение для описания имён процессов, которые НЕ ТРЕБУЕТСЯ обнаруживать правилами низкоуровневого обнаружения. На уровне шаблона значение не задано в целях безопасности.'
